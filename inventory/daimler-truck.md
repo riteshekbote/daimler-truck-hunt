@@ -19,3 +19,7 @@ www.daimlertruck.com
 
 **Takeover-review flags (1):** (DNS-level, most resolve = claimed/live, verify ownership)
 - `www.daimlertruck.com` :: CNAME-TO-AWS CloudFront :: CNAME->dyrgcrxsrxorm.cloudfront.net, resolves to ['54.240.162.113', '54.240.162.16', '54.240.162.47', '54.240.162.66'], verify ownership
+
+## DEEP SERVICE SCAN 2026-09-02 (read-only connect+banner)
+**Host:** `www.daimlertruck.com` | **Ports:** [80, 443]
+**Web surface only:** [80, 443]
