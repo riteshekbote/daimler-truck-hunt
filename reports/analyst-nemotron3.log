@@ -1,0 +1,134 @@
+===== ANALYST nemotron3 2026-09-03 17:17:27 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/
+total 100
+drwxr-xr-x 12 runner runner 4096 Sep  3 17:12 .
+drwxr-xr-x  3 runner runner 4096 Sep  3 17:12 ..
+drwxr-xr-x  7 runner runner 4096 Sep  3 17:12 .git
+drwxr-xr-x  3 runner runner 4096 Sep  3 17:12 .github
+-rw-r--r--  1 runner runner 1715 Sep  3 17:12 README.md
+-rw-r--r--  1 runner runner   43 Sep  3 17:12 analyst-out.txt
+-rw-r--r--  1 runner runner 7506 Sep  3 17:12 analyst-prompt.txt
+-rw-r--r--  1 runner runner 3737 Sep  3 17:12 ctx.txt
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 inventory
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 knowledge
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 leads
+-rw-r--r--  1 runner runner  145 Sep  3 17:12 probe-results.md
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 recon-notes
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 reports
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 reposcan-raw
+-rw-r--r--  1 runner runner 3182 Sep  3 17:12 scope.yml
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 scripts
+-rw-r--r--  1 runner runner   32 Sep  3 17:12 state_bigpickle.json
+-rw-r--r--  1 runner runner   32 Sep  3 17:12 state_laguna.json
+-rw-r--r--  1 runner runner   32 Sep  3 17:12 state_ling3.json
+-rw-r--r--  1 runner runner   32 Sep  3 17:12 state_longcat.json
+-rw-r--r--  1 runner runner   33 Sep  3 17:12 state_mimo.json
+-rw-r--r--  1 runner runner   32 Sep  3 17:12 state_nemotron3.json
+drwxr-xr-x  2 runner runner 4096 Sep  3 17:12 triage
+[0m
+[0m→ [0mRead scope.yml
+[0m→ [0mRead inventory/daimler-truck.md
+[0m→ [0mRead analyst-out.txt
+[0m→ [0mRead probe-results.md
+[0m✱ [0mGlob "**/*"[90m in knowledge · 1 match[0m
+[0m✱ [0mGlob "**/*"[90m in leads · 2 matches[0m
+[0m→ [0mRead knowledge/index.md
+[0m→ [0mRead leads/reposcan-daimler-truck.md
+[0m→ [0mRead leads/lead-mimo.md
+Now I have full context. Let me execute the 8-step analysis.
+
+---
+
+### STEP 1 — DELTA
+
+**[NEW]** 6 `capacitor-admin.*` subdomains (unprobed, admin-sounding) across as/dev/eu/na/tst environments
+**[NEW]** 6 `developer.*` subdomains (HTTP 200) across as/dev/eu/na/tst environments — likely API developer portals
+**[NEW]** 7 `authz.*` subdomains (all HTTP 404) — authz service endpoints, may reveal routes on other paths
+**[CHANGED]** `www.daimlertruck.com` confirmed CloudFront CNAME (`dyrgcrxsrxorm.cloudfront.net`) — takeover surface to verify
+**[NEW]** Wildcard cleanup: 10,083 → 23 dedicated hosts (98.9% noise filtered) — high-confidence attack surface
+
+---
+
+### STEP 2 — PRIORITIZE
+
+| Asset | attack_surface | business_value | tech_exposure | gate_ease | cloud_surface | freshness | **Priority** |
+|-------|---------------|----------------|---------------|-----------|---------------|-----------|-------------|
+| `developer.as.api.daimlertruck.com` | 9 | 8 | 9 (GraphQL/OAuth likely) | 10 (public) | 8 | 10 | **9.05** |
+| `capacitor-admin.as.api.daimlertruck.com` | 8 | 9 | 8 (admin panel) | 10 (unprobed) | 7 | 10 | **8.65** |
+| `developer.eu.api.daimlertruck.com` | 9 | 8 | 9 | 10 | 8 | 10 | **9.05** |
+| `developer.na.api.daimlertruck.com` | 9 | 8 | 9 | 10 | 8 | 10 | **9.05** |
+| `capacitor-admin.eu.api.daimlertruck.com` | 8 | 9 | 8 | 10 | 7 | 10 | **8.65** |
+| `authz.as.api.daimlertruck.com` | 6 | 7 | 7 (OAuth/introspection) | 10 | 6 | 10 | **7.55** |
+| `www.daimlertruck.com` | 5 | 6 | 5 (CloudFront) | 10 | 9 | 8 | **6.95** |
+
+**[PRIO]** developer.as.api.daimlertruck.com,9.05,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=10
+**[PRIO]** capacitor-admin.as.api.daimlertruck.com,8.65,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=10,cloud_surface=7,freshness=10
+**[PRIO]** developer.eu.api.daimlertruck.com,9.05,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=10,cloud_surface=8,freshness=10
+
+---
+
+### STEP 3 — HYPOTHESES
+
+[HYP] Developer Portal GraphQL Introspection & Mutation Exposure
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: HTTP 200 on root path suggests active developer portal; such portals commonly expose GraphQL playground, introspection, or API docs with mutation access
+evidence_needed: GraphQL endpoint responding to introspection query; mutations accepting unauthenticated requests
+verify_steps: GET / → check for GraphQL playground/Apollo/GraphiQL UI; POST /graphql with introspection query `{__schema{types{name fields{name}}}}`; POST /graphql with test mutation if schema exposed
+impact: Full API schema enumeration → unauthorized mutations (data tampering, BOLA) → Critical/High
+testability: PASSIVE
+
+[HYP] Capacitor Admin Panel Authentication Bypass / Default Credentials
+class: AUTH
+asset: capacitor-admin.as.api.daimlertruck.com
+confidence: 65
+reasoning: Admin subdomain pattern across 6 environments (as/dev/eu/na/tst); unprobed HTTP status; capacitor suggests Ionic/Capacitor admin dashboard — often left with weak defaults
+evidence_needed: Login page accessible; default/weak credentials work; auth bypass via SQLi/JWT flaw/IDOR
+verify_steps: GET / → identify login form / tech stack; GET /api/health or /actuator/health for debug endpoints; POST /login with common defaults (admin/admin, admin/password); check for JWT in localStorage/sessionStorage via source view
+impact: Full admin access → tenant data, config, user mgmt → Critical
+testability: PASSIVE
+
+[HYP] AuthZ Service OAuth/OIDC Misconfiguration (redirect_uri, PKCE, state)
+class: OATH
+asset: authz.as.api.daimlertruck.com
+confidence: 55
+reasoning: 7 authz.* subdomains (all 404 on /) suggest centralized auth service; OAuth/OIDC endpoints typically live at /.well-known/oauth-authorization-server, /authorize, /token, /introspect, /revoke
+evidence_needed: Open redirect on /authorize; PKCE not enforced; state parameter not validated; token endpoint leaks client secrets
+verify_steps: GET /.well-known/oauth-authorization-server; GET /.well-known/openid-configuration; GET /authorize?client_id=test&redirect_uri=https://evil.com&response_type=code&scope=openid; POST /token with various grant_types
+impact: Account takeover via code theft; token leakage → High/Critical
+testability: PASSIVE
+
+---
+
+### STEP 4 — SELF-CRITIQUE
+
+[PARKED] Capacitor Admin Panel Authentication Bypass / Default Credentials: confidence 65 but verify_steps require POST /login (mutating) — violates passive-first rule for live assets; needs scoped auth-helped test
+[PARKED] AuthZ Service OAuth/OIDC Misconfiguration: confidence 55 < 60 threshold; 404 on root path means endpoints may not exist; speculative without evidence
+[FINAL] Developer Portal GraphQL Introspection & Mutation Exposure — **survives**: passive GET/POST to public GraphQL endpoint is read-only introspection; no mutation execution needed for proof; highest priority asset with concrete verify steps
+
+---
+
+### STEP 5 — NEXT ACTION
+
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ → capture response body, headers, tech stack; then POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` to test introspection
+
+---
+
+### STEP 6 — LEARNING
+
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+[LEARN] ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+[LEARN] ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+[LEARN] ACCEPTED OAuth misconfig @ authz.*: high-value if endpoints exist, passive discovery first
+
+---
+
+### STEP 7 — RISK
+
+[RISK] daimler-truck: 78 — 6 live developer portals (HTTP 200) likely expose GraphQL/API docs; 6 unprobed admin panels across environments; authz service surface; CloudFront takeover flag on www; broad scope covering all subsidiaries increases blast radius
