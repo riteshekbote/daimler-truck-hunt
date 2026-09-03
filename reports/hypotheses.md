@@ -39,3 +39,21 @@
 - LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
 - LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
 - LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+
+## RANKED HYPOTHESES 2026-09-03 22:31:26 UTC
+- [72] developer.as.api.daimlertruck.com: developer-portal-exposed-swagger (from art/lead_bigpickle.txt)
+- [70] developer.as.api.daimlertruck.com: Developer Portal GraphQL Introspection Behind Auth — Post-Auth Schema Enumeration & Mutation Exposure (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://developer.as.api.daimlertruck.com/ followed by GET https://developer.as.api.daimlertruck.com/swagger.json, GET https://developer.as.api.daiml
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://developer.as.api.daimlertruck.com/ → capture full Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri, state parameter); the
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed.
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess.
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` —

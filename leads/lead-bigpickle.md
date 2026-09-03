@@ -77,3 +77,33 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
 [LEARN] REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
 [RISK] Daimler Truck: 35/100. Program scope is broad ("all infrastructure, digital services, brands and subsidiaries") which reduces ambiguity risk. Main risk is accidentally touching customer data during IDOR/authorization testing - requires careful scoping of test accounts.
+## 2026-09-03 22:29:01 UTC [target] (model bigpickle)
+[PRIO] developer.as.api.daimlertruck.com,8.2,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
+[PRIO] developer.na.api.daimlertruck.com,8.0,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
+[PRIO] developer.eu.api.daimlertruck.com,8.0,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
+[HYP] developer-portal-exposed-swagger
+class: MISCONFIG
+asset: developer.as.api.daimlertruck.com
+confidence: 72
+reasoning: HTTP 200 on developer portal; developer portals commonly expose /swagger, /docs, /openapi.json by default; program scope includes API logic flaws
+evidence_needed: Swagger/OpenAPI spec with internal endpoints or admin-only operations
+verify_steps: GET https://developer.as.api.daimlertruck.com/, GET https://developer.as.api.daimlertruck.com/swagger.json, GET https://developer.as.api.daimlertruck.com/api-docs, GET https://developer.as.api.daimlertruck.com/openapi.json, GET https://developer.as.api.daimlertruck.com/docs
+impact: Full API schema disclosure including internal endpoints; Severity: medium
+testability: PASSIVE
+[HYP] developer-portal-graphql-introspection
+class: MISCONFIG
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: HTTP 200 on developer portal; GraphQL endpoints commonly expose introspection by default; confirmed endpoint exists at /graphql; program scope includes API logic flaws
+evidence_needed: GraphQL schema with internal types, mutations, or admin-only fields
+verify_steps: GET https://developer.as.api.daimlertruck.com/graphql, POST https://developer.as.api.daimlertruck.com/graphql with {"query":"{__schema{types{name,fields{name}}}}"}
+impact: Full schema disclosure → targeted attacks on internal mutations/queries; Severity: medium
+testability: PASSIVE
+[FINAL] developer-portal-graphql-introspection: PASS. 75 confidence, passive verification, high value, confirmed endpoint exists.
+[FINAL] developer-portal-exposed-swagger: PASS. 72 confidence, pure passive verification, strong signal from HTTP 200 responses.
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ followed by GET https://developer.as.api.daimlertruck.com/swagger.json, GET https://developer.as.api.daimlertruck.com/api-docs, GET https://developer.as.api.daimlertruck.com/openapi.json, GET https://developer.as.api.daimlertruck.com/docs (sequential, 1 req/sec, passive GET only) to confirm Swagger/OpenAPI exposure.
+[LEARN] ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+[LEARN] ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals.
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed.
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess.
+[RISK] Daimler Truck: 35/100. Program scope is broad ("all infrastructure, digital services, brands and subsidiaries") which reduces ambiguity risk. Main risk is accidentally touching customer data during IDOR/authorization testing — requires careful scoping of test accounts.

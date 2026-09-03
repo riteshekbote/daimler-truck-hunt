@@ -24,3 +24,14 @@ https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
 https://developer.eu.api.daimlertruck.com/api/catalog -> 200 len=196649
 https://developer.eu.api.daimlertruck.com/graphql -> 200 len=196649
 https://capacitor-admin.as.api.daimlertruck.com/ -> ERR <urlopen error [Errno 104] Connection reset by pee
+
+## 2026-09-03 22:31:43 UTC
+https://developer.as.api.daimlertruck.com/ -> 200 len=196649
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.eu.api.daimlertruck.com/api/catalog -> 200 len=196649
+https://developer.eu.api.daimlertruck.com/graphql -> 200 len=196649
+https://www.daimlertruck.com/ -> HTTP 403
+https://developer.as.api.daimlertruck.com/swagger.json -> 200 len=196649
+https://developer.as.api.daimlertruck.com/api-docs -> 200 len=196649
+https://developer.as.api.daimlertruck.com/openapi.json -> 200 len=196649
+https://developer.as.api.daimlertruck.com/docs -> 200 len=196649
