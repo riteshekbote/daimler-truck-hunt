@@ -62,3 +62,9 @@ www.daimlertruck.com
 ## 2026-09-03 13:25:19 UTC
 
 ## 2026-09-03 17:17:27 UTC
+
+## 2026-09-03 20:13:47 UTC
+- CHANGED developer.*.api.daimlertruck.com (6 hosts): All 6 confirmed HTTP 200 with identical Next.js "TruckAPI | API Hub" portal; Azure AD B2C auth; all API endpoints (/graphql, /api/*, /swagger*, /openapi*, /
+- CHANGED capacitor-admin.*.api.daimlertruck.com (6 hosts): All 6 return 000 (connection failed) — likely not deployed or firewalled
+- CHANGED authz.*.api.daimlertruck.com (7 hosts): All 7 return HTTP 404 on root; OAuth/OIDC well-known endpoints (.well-known/oauth-authorization-server, .well-known/openid-configuration) return 404 — no OAuth 
+- NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` — suggests separate deployments with potentia
