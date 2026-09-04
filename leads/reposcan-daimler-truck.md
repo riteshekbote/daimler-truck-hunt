@@ -51,3 +51,41 @@ TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 ## REPOSCAN 2026-09-04 19:55:05 UTC
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 22:17:48 UTC
+class: SECRET
+asset: SRC-rag_api/docker-compose.yaml:5-7, SRC-rag_api/db-compose.yaml:7-9,
+confidence: 85
+reasoning: |
+impact: HIGH — database compromise leads to exfiltration of RAG-indexed
+verify_steps: |
+class: MISCONFIG
+asset: SRC-LibreChat/docker-compose.yml:63, SRC-LibreChat/deploy-compose.yml:80,
+confidence: 90
+reasoning: |
+impact: HIGH — unauthenticated access to MongoDB containing user data,
+verify_steps: |
+class: MISCONFIG
+asset: SRC-rag_api/main.py:76-79
+confidence: 80
+reasoning: |
+impact: MEDIUM — enables cross-origin data exfiltration from RAG endpoints
+verify_steps: |
+class: MISCONFIG
+asset: SRC-rag_api/app/middleware.py:18-22
+confidence: 85
+reasoning: |
+impact: HIGH — unauthenticated access to all RAG API endpoints including
+verify_steps: |
+class: OTHER
+asset: SRC-rag_api/main.py:93, SRC-rag_api/app/routes/pgvector_routes.py:1-70
+confidence: 75
+reasoning: |
+impact: MEDIUM — full database schema enumeration and data dump if debug
+verify_steps: |
+class: MISCONFIG
+asset: SRC-openai-aca-lb/src/appsettings.json:8
+confidence: 60
+reasoning: |
+impact: LOW — host-header injection possible if behind a reverse proxy;
+verify_steps: |
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
