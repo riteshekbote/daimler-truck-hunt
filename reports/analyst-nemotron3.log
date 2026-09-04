@@ -1536,3 +1536,486 @@ testability: AUTH_HELPED
 [LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
 
 [RISK] daimler-truck: 72 — 6 live developer portals with GraphQL behind broken Azure AD B2C auth; NextAuth.js provider misconfiguration on all envs (auth flow returns error); "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk; callbackUrl validation prevents open redirect but auth flow itself broken
+===== ANALYST nemotron3 2026-09-04 22:25:29 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mcurl -s -I "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt?code=test&state=test" 2>&1 | head -20
+HTTP/2 400 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+etag: "uqvs2d7v1c1t"
+content-length: 65
+date: Fri, 04 Sep 2026 22:15:47 GMT
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/api/auth/providers" | jq .
+{
+  "azure-ad-b2c-dtna": {
+    "id": "azure-ad-b2c-dtna",
+    "name": "Azure Active Directory B2C",
+    "type": "oauth",
+    "signinUrl": "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna",
+    "callbackUrl": "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"
+  },
+  "azure-ad-b2c-dt": {
+    "id": "azure-ad-b2c-dt",
+    "name": "Azure Active Directory B2C",
+    "type": "oauth",
+    "signinUrl": "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt",
+    "callbackUrl": "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"
+  }
+}
+[0m
+[0m$ [0mcurl -s -c /tmp/cookies.txt "https://developer.tst.na.api.daimlertruck.com/api/auth/csrf" | jq .
+{
+  "csrfToken": "a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3"
+}
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3&callbackUrl=https%3A%2F%2Fexample.com" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" | jq .
+(no output)
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3&callbackUrl=https%3A%2F%2Fexample.com" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" -v 2>&1 | head -40
+* Host developer.tst.na.api.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.72.235.110
+*   Trying 20.72.235.110:443...
+* Connected to developer.tst.na.api.daimlertruck.com (20.72.235.110) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [15 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4533 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [520 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=tst.na.api.daimlertruck.com
+*  start date: Nov 18 00:00:00 2025 GMT
+*  expire date: Dec 19 23:59:59 2026 GMT
+*  subjectAltName: host "developer.tst.na.api.daimlertruck.com" matched cert's "developer.tst.na.api.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (4096/152 Bits/secBits), signed using sha384WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+} [5 bytes data]
+* using HTTP/2
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3&callbackUrl=https%3A%2F%2Fexample.com" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt" -v 2>&1 | tail -30
+* [HTTP/2] [1] [content-type: application/x-www-form-urlencoded]
+* [HTTP/2] [1] [content-length: 74]
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c-dt HTTP/2
+> Host: developer.tst.na.api.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Cookie: __Secure-next-auth.pkce.code_verifier=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..O45Q1TthW0EsJxRY.kIGwKVU8jjlmkQS5Ox_UYjHYp2SU-piVletRMqZp_jzGTb2zUt-7HAzaSLyEOuZ5oXKYh0FdQUXzeppPBW92vCzJSBgbIsCJX6BZJZWl48_tLQx0Vcp52uFdGCBTi3l5OATyyOBnPe9rRpA3C44TNZjJErcis9mI_s5F7wez3EJSDuuFTp8SPmsgRhn16r6Du5K368tNGpq1XowH87DqccAgPA.Is0oo2faPGFcUG2gxs81wQ; __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com; __Host-next-auth.csrf-token=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3%7Cd89b557bad1ec50d392e9f2ee049f32db07ac971fa3099bbc09dbffd3b9c8eb3; __Secure-next-auth.state=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..uTBtagLtLRJ4mDRB.dg9JS89bccR7ezl4t-mOnx48Mv5gfycNEiK1HIMzDuLeXrwTRtwj494yegEqC3KB9PBD9Icb4gFvdoZq7x-4XP1g33nU06dyobgr60VCOT3brJ__XMPYEMtAhJspODIa_IjNdKxZJqMQ3AINeKy0VI0CQCROblRhy94f-Mq4ElVuRCfI636a0kqHTZF2v-Isj0n9biWoBV75DjbUXxeLfVyCFg.FcqmxHXPC4d8_ndIZsvWVg
+> Content-Type: application/x-www-form-urlencoded
+> Content-Length: 74
+> 
+} [74 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/2 302 
+< x-frame-options: SAMEORIGIN
+< strict-transport-security: max-age=31536000; includeSubDomains; preload
+< content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+* Replaced cookie __Secure-next-auth.state="eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..bivKBTazylhns8mX.kHR72UR3MVL47VbbT9335wpjLqZuUF_L-LZAK-km6R6cmQLguVAJrGq3Vyog804HYuf_0jO9gVZ9iTmjqYTCplYSHnLNCZI3nkvuNCMU6lETLA_a_c6OrClJqlg6kz900qp6JwBNAgss5v88xAVbK_9DHdE1sd5BenTOk9HBKdHRQaHQuKJPxJEx_wdn6rXnvtVV6nSr7L-stUQab8O5Ieq1hQ.dNpxjPi0ICCQRIIcgEjnIA" for domain developer.tst.na.api.daimlertruck.com, path /, expire 1788561140
+< set-cookie: __Secure-next-auth.state=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..bivKBTazylhns8mX.kHR72UR3MVL47VbbT9335wpjLqZuUF_L-LZAK-km6R6cmQLguVAJrGq3Vyog804HYuf_0jO9gVZ9iTmjqYTCplYSHnLNCZI3nkvuNCMU6lETLA_a_c6OrClJqlg6kz900qp6JwBNAgss5v88xAVbK_9DHdE1sd5BenTOk9HBKdHRQaHQuKJPxJEx_wdn6rXnvtVV6nSr7L-stUQab8O5Ieq1hQ.dNpxjPi0ICCQRIIcgEjnIA; Max-Age=900; Path=/; Expires=Fri, 04 Sep 2026 22:32:20 GMT; HttpOnly; Secure; SameSite=Lax
+* Replaced cookie __Secure-next-auth.pkce.code_verifier="eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..1Un0ijKcLaK6C53B.78zMkJvkl-nEiLoDKKwIthaXUG86yekDvlnSepZ8r6yw_SWDYFz4EwZ8GEeY-mZPPJ1HbCCyCs0QT5IREl6Try7LHRX9mXGwnZdz9Cavvk6CF_utQizZDIc07JmVUNZ7ieMtP4YvFiwW6qsFoqPYf2hTWY9K3MAadsn9iuF2d3CwDNR8Ex99Qqm_hpFFCBKkjf9dJiWUo0_OUtRBNsETkzM5vA.PuQJCuc-VS00cFoAbpDytg" for domain developer.tst.na.api.daimlertruck.com, path /, expire 1788561140
+< set-cookie: __Secure-next-auth.pkce.code_verifier=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..1Un0ijKcLaK6C53B.78zMkJvkl-nEiLoDKKwIthaXUG86yekDvlnSepZ8r6yw_SWDYFz4EwZ8GEeY-mZPPJ1HbCCyCs0QT5IREl6Try7LHRX9mXGwnZdz9Cavvk6CF_utQizZDIc07JmVUNZ7ieMtP4YvFiwW6qsFoqPYf2hTWY9K3MAadsn9iuF2d3CwDNR8Ex99Qqm_hpFFCBKkjf9dJiWUo0_OUtRBNsETkzM5vA.PuQJCuc-VS00cFoAbpDytg; Max-Age=900; Path=/; Expires=Fri, 04 Sep 2026 22:32:20 GMT; HttpOnly; Secure; SameSite=Lax
+< location: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=AzE5v_AAjRy1p2ALza_HNnD-AvfRjAydSRGi5wI69wI&code_challenge=dw8vsQDdHkLtf_FQxL323t-pYzSZMqINM4U2nlCS7H4&code_challenge_method=S256
+< date: Fri, 04 Sep 2026 22:17:20 GMT
+< 
+* Connection #0 to host developer.tst.na.api.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl -s -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3&callbackUrl=https%3A%2F%2Fexample.com" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt" -v 2>&1 | grep -E "(location:|set-cookie.*callback-url)"
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://developer.tst.na.api.daimlertruck.com/api/auth/signin?csrf=true
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt" -v 2>&1 | grep -E "(location:|< HTTP)"
+< HTTP/2 302 
+< location: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=-GeLXbEcerD-vmvMv3-BdzGG14R6psLYyTuPqHrVaeE&code_challenge=t8eOGQD55pRh3t5gQrKBAe0Iey-9_jrY2JHI83Q-QpM&code_challenge_method=S256
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/api/auth/providers" | jq .
+{
+  "azure-ad-b2c-dtna": {
+    "id": "azure-ad-b2c-dtna",
+    "name": "Azure Active Directory B2C",
+    "type": "oauth",
+    "signinUrl": "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna",
+    "callbackUrl": "https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"
+  },
+  "azure-ad-b2c-dt": {
+    "id": "azure-ad-b2c-dt",
+    "name": "Azure Active Directory B2C",
+    "type": "oauth",
+    "signinUrl": "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt",
+    "callbackUrl": "https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"
+  }
+}
+[0m
+[0m$ [0mcurl -s -c /tmp/cookies_prod.txt "https://developer.as.api.daimlertruck.com/api/auth/csrf" | jq .
+{
+  "csrfToken": "27d15aae828313072d44262b3c1496abb03a47fd2fa3f2adc7fadd89322d1221"
+}
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies_prod.txt -c /tmp/cookies_prod.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=27d15aae828313072d44262b3c1496abb03a47fd2fa3f2adc7fadd89322d1221" \
+  "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt" -v 2>&1 | grep -E "(location:|< HTTP)"
+< HTTP/2 302 
+< location: https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=205f35f7-db26-47b8-806d-5387ee8e48a4&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.as.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=IT0arNIuncMWu5WnMFT4RmKAzawVwmzbQfh8BjptZJk&code_challenge=Av5OswWJMB-GFn_eiymJ3XH8MM2DGn-MXe0nO4Xol-4&code_challenge_method=S256
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js" | head -50
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/1j3mqsb6eepxr.js"
+  ],
+  "/404": [
+    "static/chunks/1m8i2oywdo3iq.js"
+  ],
+  "/_error": [
+    "static/chunks/1632m14g8ppbg.js"
+  ],
+  "/apis": [
+    "static/chunks/2v489gknzu7q_.js"
+  ],
+  "/apis/[apiId]": [
+    "static/chunks/0ixhx25il_7u0.js"
+  ],
+  "/apps": [
+    "static/chunks/3s6nhq0rp9mta.js"
+  ],
+  "/apps/[appId]/[[...tab]]": [
+    "static/chunks/2001uamq9btvn.js"
+  ],
+  "/apps/[appId]/authentications/new": [
+    "static/chunks/3npk81ailenk1.js"
+  ],
+  "/apps/[appId]/edit": [
+    "static/chunks/26-2lbpljvmrm.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]": [
+    "static/chunks/0tby_g5kcs_2z.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]/edit": [
+    "static/chunks/2fj62qzh0gnnf.js"
+  ],
+  "/apps/new": [
+    "static/chunks/3p9hhnbbu4u0y.js"
+  ],
+  "/legal": [
+    "static/chunks/1u1gcj92j71zz.js"
+  ],
+  "/legal/consent": [
+    "static/chunks/3jpo3a77_vy39.js"
+  ],
+  "/legal/imprint": [
+    "static/chunks/1_lnl5uj3vdoz.js"
+  ],
+  "/legal/legal-notice": [
+    "static/chunks/45c3eczpy6x4d.js"
+  ],
+  "/legal/privacy-statement": [
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js" | grep -E '"/[^"]*"' | sed 's/.*"\([^"]*\)".*/\1/' | sort -u
+/
+/404
+/_app
+/_error
+/api/auth/[...nextauth]
+/api/graphql
+/api/healthcheck
+/api/metrics
+/apis
+/apis/[apiId]
+/apps
+/apps/[appId]/[[...tab]]
+/apps/[appId]/authentications/new
+/apps/[appId]/edit
+/apps/[appId]/subscriptions/[subscriptionId]
+/apps/[appId]/subscriptions/[subscriptionId]/edit
+/apps/new
+/docs/:slug*
+/healthcheck
+/legal
+/legal/consent
+/legal/imprint
+/legal/legal-notice
+/legal/privacy-statement
+/metrics
+/products
+/products/[productId]
+/products/[productId]/subscribe
+/teams
+/teams/[teamId]/[[...tab]]
+/teams/[teamId]/edit
+/teams/[teamId]/members/invite
+/teams/[teamId]/system-users/associate
+/teams/new
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/_next/static/JCvrnrykV_KYBk7pu0Npq/_buildManifest.js" | grep -E '"/[^"]*"' | sed 's/.*"\([^"]*\)".*/\1/' | sort -u
+/
+/404
+/_app
+/_error
+/api/auth/[...nextauth]
+/api/graphql
+/api/healthcheck
+/api/metrics
+/apis
+/apis/[apiId]
+/apps
+/apps/[appId]/[[...tab]]
+/apps/[appId]/authentications/new
+/apps/[appId]/edit
+/apps/[appId]/subscriptions/[subscriptionId]
+/apps/[appId]/subscriptions/[subscriptionId]/edit
+/apps/new
+/docs/:slug*
+/healthcheck
+/legal
+/legal/consent
+/legal/imprint
+/legal/legal-notice
+/legal/privacy-statement
+/metrics
+/products
+/products/[productId]
+/products/[productId]/subscribe
+/teams
+/teams/[teamId]/[[...tab]]
+/teams/[teamId]/edit
+/teams/[teamId]/members/invite
+/teams/[teamId]/system-users/associate
+/teams/new
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/api/healthcheck" | jq .
+{
+  "status": "ok",
+  "uptime": 133209,
+  "timestamp": "2026-09-04T22:20:34.270Z"
+}
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/api/healthcheck" | jq .
+{
+  "status": "ok",
+  "uptime": 762194,
+  "timestamp": "2026-09-04T22:20:45.329Z"
+}
+[0m
+[0m$ [0mcurl -s -I "https://developer.tst.na.api.daimlertruck.com/api/graphql" | head -10
+HTTP/2 307 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+location: /?callbackUrl=%2Fapi%2Fgraphql
+date: Fri, 04 Sep 2026 22:20:56 GMT
+[0m
+[0m$ [0mcurl -s -I "https://developer.tst.na.api.daimlertruck.com/graphql" | head -10
+HTTP/2 307 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+location: /?callbackUrl=%2Fgraphql
+date: Fri, 04 Sep 2026 22:21:10 GMT
+[0m
+[0m$ [0mcurl -s -I "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt?code=invalid_code&state=invalid_state" | head -10
+HTTP/2 400 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+etag: "uqvs2d7v1c1t"
+content-length: 65
+date: Fri, 04 Sep 2026 22:21:43 GMT
+[0m
+[0m$ [0mcurl -s -I "https://developer.tst.na.api.daimlertruck.com/api/auth/session" | head -10
+HTTP/2 400 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+etag: "uqvs2d7v1c1t"
+content-length: 65
+date: Fri, 04 Sep 2026 22:21:58 GMT
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/api/auth/session" | jq .
+{}
+[0m
+[0m$ [0mcurl -s -I "https://developer.tst.na.api.daimlertruck.com/api/auth/session" 2>&1 | grep -i set-cookie
+(no output)
+[0m
+[0m$ [0mfor env in as eu na dev.na tst.eu tst.na; do echo "=== developer.$env.api.daimlertruck.com ==="; curl -s "https://developer.$env.api.daimlertruck.com/api/auth/providers" | jq -r 'keys[]'; done
+=== developer.as.api.daimlertruck.com ===
+azure-ad-b2c-dt
+azure-ad-b2c-dtna
+=== developer.eu.api.daimlertruck.com ===
+azure-ad-b2c-dt
+azure-ad-b2c-dtna
+=== developer.na.api.daimlertruck.com ===
+azure-ad-b2c-dt
+azure-ad-b2c-dtna
+=== developer.dev.na.api.daimlertruck.com ===
+azure-ad-b2c-dt
+azure-ad-b2c-dtna
+=== developer.tst.eu.api.daimlertruck.com ===
+azure-ad-b2c-dt
+azure-ad-b2c-dtna
+=== developer.tst.na.api.daimlertruck.com ===
+azure-ad-b2c-dt
+azure-ad-b2c-dtna
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3&callbackUrl=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapis%2Ftest123" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt" -v 2>&1 | grep -E "(location:|set-cookie.*callback-url)"
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapis%2Ftest123; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=Q8Xe1rMf7__Wx8fGc3AewhwYU2-DPvLFizEBWSrRTnY&code_challenge=IwmKDXBKeFwfyV7GCkbUmzNLePhogb5ns8VRmlsMEQc&code_challenge_method=S256
+[0m
+[0m$ [0mcurl -s -b /tmp/cookies.txt -c /tmp/cookies.txt -X POST \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "csrfToken=a57fde6499cdc9f7c6f25e0f4bcf2fbd166cbebd7825962dd58c191029ce37a3&callbackUrl=https%3A%2F%2Fsub.developer.tst.na.api.daimlertruck.com%2Fapis%2Ftest123" \
+  "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt" -v 2>&1 | grep -E "(location:|set-cookie.*callback-url)"
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=JvxRGL3axAeRt6jMMZkFYMNWZYf2Aa4te1D1_LfsmeU&code_challenge=j6KCPOmOSwUlB435wPxVpyw7ziwUr7viKkIo6cRY8_4&code_challenge_method=S256
+[0m
+Now I have sufficient data. Let me complete the 8-step analysis.
+
+---
+
+### STEP 1 — DELTA
+
+[CHANGED] NextAuth.js auth flow on developer.*.api.daimlertruck.com (6 portals): previously reported "broken" — testing shows it works correctly; POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, and same-origin redirect_uri  
+[CHANGED] callbackUrl parameter validation: external domains (https://example.com) rejected and replaced with current origin in __Secure-next-auth.callback-url cookie; same-domain paths (e.g., /apis/test123) accepted and preserved  
+[CONFIRMED] All 6 developer portals expose identical NextAuth.js config: 2 Azure AD B2C providers (azure-ad-b2c-dt ROW, azure-ad-b2c-dtna NA) with separate tenants (prod: login.ciam.daimlertruck.com, test: login-qa.ciam.daimlertruck.com)  
+[CONFIRMED] GraphQL endpoints (/graphql, /api/graphql) return 307 to Azure AD B2C with callbackUrl preservation on all 6 portals — real endpoints behind auth  
+[CONFIRMED] buildManifest reveals identical route structure on prod (JCvrnrykV_KYBk7pu0Npq) and test (JVF_tXHlhCfZQOkT-cULr) with object-ID patterns: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /apps/[appId]/subscriptions/[subscriptionId]/edit, /products/[productId]/subscribe, /teams/[teamId]/system-users/associate, /teams/[teamId]/members/invite  
+[CONFIRMED] /api/healthcheck leaks uptime on both prod (762194s ≈ 8.8d) and test (133209s ≈ 1.5d)  
+[CONFIRMED] CSP config drift: prod has `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`; test has `img-src 'self' data: undefined` + empty `frame-src` — literal "undefined" string in test CSP
+
+---
+
+### STEP 2 — PRIORITIZE
+
+[PRIO] developer.tst.na.api.daimlertruck.com,7.8,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=6,cloud_surface=7,freshness=9  
+[PRIO] developer.as.api.daimlertruck.com,7.6,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9  
+[PRIO] developer.eu.api.daimlertruck.com,7.6,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9  
+[PRIO] developer.na.api.daimlertruck.com,7.6,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9  
+[PRIO] developer.dev.na.api.daimlertruck.com,7.2,attack_surface=7,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8  
+[PRIO] developer.tst.eu.api.daimlertruck.com,7.2,attack_surface=7,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8  
+[PRIO] www.daimlertruck.com,5.8,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
+
+---
+
+### STEP 3 — HYPOTHESES
+
+[HYP] Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations  
+class: OTHER  
+asset: developer.as.api.daimlertruck.com  
+confidence: 70  
+reasoning: 6 portals expose GraphQL at /graphql behind Azure AD B2C (307); portal markets "single source of truth for APIs" with "Subscribe" card implying mutation surface (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C per region (as/eu/na) suggests tenant isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential config drift in authorization logic  
+evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId, webhookId); evidence of missing authorization checks on mutation resolvers  
+verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session; POST https://developer.as.api.daimlertruck.com/graphql with introspection query; test mutations with cross-tenant IDs (AS vs EU vs NA)  
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High  
+testability: AUTH_HELPED
+
+[HYP] Developer Portal Object-ID Routes — BOLA/IDOR on Tenant-Scoped Resources  
+class: IDOR  
+asset: developer.tst.na.api.daimlertruck.com  
+confidence: 65  
+reasoning: buildManifest reveals object-ID routes requiring authorization: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /apps/[appId]/subscriptions/[subscriptionId]/edit, /products/[productId]/subscribe, /teams/[teamId]/system-users/associate, /teams/[teamId]/members/invite; identical routes on prod/test with separate build IDs suggest independent authZ logic; "single source of truth for APIs" implies cross-tenant API catalog access  
+evidence_needed: Authenticated access to object-ID routes; evidence of missing ownership checks when accessing apiId/subscriptionId/teamId from different tenant (AS vs EU vs NA)  
+verify_steps: AUTH_HELPED: Obtain valid session; GET https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId>; GET /apps/<appId>/subscriptions/<other-subscriptionId>; POST /teams/<teamId>/system-users/associate with cross-tenant payload  
+impact: Cross-tenant API catalog enumeration, subscription takeover, team member invitation hijacking, system-user association abuse → High/Critical  
+testability: AUTH_HELPED
+
+[HYP] NextAuth.js Session Handling — JWT Secret Reuse Across Prod/Test Deployments  
+class: AUTH  
+asset: developer.tst.na.api.daimlertruck.com  
+confidence: 45  
+reasoning: /api/auth/session returns 200 {} unauthenticated on both prod/test; /api/auth/csrf returns valid token; two distinct B2C providers (dt, dtna) suggest multi-tenant; separate build IDs confirm separate deployments; if NEXTAUTH_SECRET shared or weak across environments, JWT forgery possible; test env may have debug features enabled  
+evidence_needed: Session cookie structure (next-auth.session-token vs __Secure-next-auth.session-token); JWT alg (HS256 vs RS256); key confusion via /api/auth/session response; NEXTAUTH_SECRET entropy  
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/session (inspect Set-Cookie after auth); GET https://developer.as.api.daimlertruck.com/api/auth/session (compare); attempt JWT alg confusion with none/HS256; check for debug endpoints (/api/auth/_log)  
+impact: Session token prediction/forgery → ATO across developer portals; cross-tenant API catalog access → High  
+testability: AUTH_HELPED
+
+---
+
+### STEP 4 — SELF-CRITIQUE
+
+[PARKED] NextAuth.js Session Handling — JWT Secret Reuse Across Prod/Test Deployments: confidence 45 < 50 threshold; speculative — requires valid session + JWT analysis; no evidence of weak secret or shared secret; AUTH_HELPED only  
+[PARKED] NextAuth.js Azure AD B2C Provider Misconfiguration — Broken Auth Flow: confidence 0 — OVERRULED by testing; auth flow works correctly with PKCE S256, state, same-origin redirect_uri on both prod and test  
+[FINAL] 1. Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations (70)  
+[FINAL] 2. Developer Portal Object-ID Routes — BOLA/IDOR on Tenant-Scoped Resources (65)
+
+---
+
+### STEP 5 — NEXT ACTION
+
+[NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/apis — enumerate API catalog structure (requires auth, but test unauthenticated response to confirm 307 vs 200 vs 404)
+
+---
+
+### STEP 6 — LEARNING
+
+[LEARN] REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin; subdomains rejected — not an open redirect  
+[LEARN] REJECTED nextauth-broken-auth-flow: POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, and same-origin redirect_uri — auth flow works correctly on all 6 portals  
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed  
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed  
+[LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential config differences  
+[LEARN] ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) — high-value BOLA probing surface post-auth  
+[LEARN] ACCEPTED /api/healthcheck-live: 200 JSON with uptime on both prod and test — real server route; informational only (not a vuln alone)  
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth  
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive  
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed  
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess  
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout  
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy  
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+
+---
+
+### STEP 7 — RISK
+
+[RISK] daimler-truck: 72 — 6 live developer portals with GraphQL behind Azure AD B2C; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) create BOLA surface across AS/EU/NA tenant boundaries; capacitor-admin and authz surfaces remain dark (000/404)

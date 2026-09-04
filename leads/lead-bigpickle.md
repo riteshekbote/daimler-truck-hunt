@@ -1325,3 +1325,4 @@ evidence_needed: token from one policy accepted for noam-scoped APIs after redir
 verify_steps: AUTH_HELPED: two B2C accounts (dt + dtna), exchange sessions, check cross-tenant data at /api/graphql
 impact: DT/DTNA business-unit boundary confusion → cross-BU API access; Severity: medium
 testability: AUTH_HELPED
+## 2026-09-04 22:14:38 UTC [target] (model bigpickle)

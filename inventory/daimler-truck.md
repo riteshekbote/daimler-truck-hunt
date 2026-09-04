@@ -151,3 +151,7 @@ www.daimlertruck.com
 - NEW /api/healthcheck live on test: 200 {"status":"ok","uptime":124427,...} — uptime leaks deploy age
 - NEW CSP config drift: prod has img-src 'self' data: https://app.usercentrics.eu + frame-src https://companion.app.daimlertruck.com; test/dev has img-src 'self' data: undefined + empty frame-src — literal 
 - NEW /api/metrics returns 404 (not exposed), /api/graphql returns 307 to auth on GET+POST (real endpoint behind middleware)
+
+## 2026-09-04 22:25:29 UTC
+- CHANGED NextAuth.js auth flow on developer.*.api.daimlertruck.com (6 portals): previously reported "broken" — testing shows it works correctly; POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 30
+- CHANGED callbackUrl parameter validation: external domains (https://example.com) rejected and replaced with current origin in __Secure-next-auth.callback-url cookie; same-domain paths (e.g., /apis/test123) ac

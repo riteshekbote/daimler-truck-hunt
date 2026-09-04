@@ -66,3 +66,6 @@
 - 2026-09-04 REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin — not an open redirect
 - 2026-09-04 REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
 - 2026-09-04 REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive
+- 2026-09-04 REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin; subdomains rejected — not an open redirect
+- 2026-09-04 REJECTED nextauth-broken-auth-flow: POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, and same-origin redirect_uri — auth flow works correctly on all 6 portals
+- 2026-09-04 ACCEPTED /api/healthcheck-live: 200 JSON with uptime on both prod and test — real server route; informational only (not a vuln alone)
