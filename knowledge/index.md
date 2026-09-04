@@ -54,3 +54,15 @@
 - 2026-09-04 ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
 - 2026-09-04 ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
 - 2026-09-04 ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+- 2026-09-04 ACCEPTED OAuth misconfig @ authz.*: high-value if endpoints exist, passive discovery first
+- 2026-09-04 ACCEPTED OAuth misconfig @ authz.*: high-value if endpoints exist, passive discovery first
+- 2026-09-04 REJECTED nextauth-callback-open-redirect-with-csrf: OAuth redirect_uri locked to same-origin /api/auth/callback/*, PKCE S256 + state enforced, external callbackUrl ignored (cookie reset to origin), external callback-url cookie overwritten — open redirect NOT present. Both prod and test.
+- 2026-09-04 REJECTED nextauth-session-jwt-analysis: /api/auth/session returns {} unauthenticated — no session data, no JWT exposure without valid B2C login; AUTH_HELPED only
+- 2026-09-04 REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test is proper environment segregation (prod uses login.ciam.daimlertruck.com, test uses login-qa.ciam.daimlertruck.com) — config drift is intentional, not a vuln
+- 2026-09-04 ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) — high-value BOLA probing surface post-auth
+- 2026-09-04 ACCEPTED /api/healthcheck-live: 200 JSON with uptime on test — real server route; informational only (not a vuln alone)
+- 2026-09-04 ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+- 2026-09-04 ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential config differences
+- 2026-09-04 REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin — not an open redirect
+- 2026-09-04 REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
+- 2026-09-04 REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive

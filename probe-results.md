@@ -94,3 +94,17 @@ https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
 https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://evil.com -> HTTP 400
 https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js -> 200 len=2999
 https://developer.as.api.daimlertruck.com/_next/static/JCvrnrykV_KYBk7pu0Npq/_buildManifest.js -> 200 len=2999
+
+## 2026-09-04 20:11:14 UTC
+https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt -> HTTP 400
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/api/auth/session -> HTTP 400
+https://developer.as.api.daimlertruck.com/api/auth/session -> HTTP 400
+https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt?code=test&state=test -> HTTP 400
+https://developer.as.api.daimlertruck.com/ -> 200 len=196649
+https://developer.as.api.daimlertruck.com/swagger.json -> 200 len=196649
+https://developer.as.api.daimlertruck.com/api-docs -> 200 len=196649
+https://developer.as.api.daimlertruck.com/openapi.json -> 200 len=196649
+https://developer.as.api.daimlertruck.com/docs -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/ -> 200 len=196341
+https://developer.tst.na.api.daimlertruck.com/graphql -> 200 len=196341

@@ -161,3 +161,155 @@
 - LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
 - LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
 - LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+
+## RANKED HYPOTHESES 2026-09-04 20:10:53 UTC
+- [75] developer.tst.na.api.daimlertruck.com: NextAuth.js Azure AD B2C Provider Misconfiguration — Broken Auth Flow (from art/lead_nemotron3.txt)
+- [72] developer.as.api.daimlertruck.com: developer-portal-exposed-swagger (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://developer.as.api.daimlertruck.com/ followed by /swagger.json, /api-docs, /openapi.json, /docs (sequential, 1 req/sec, passive GET only) to co
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt?code=test&state=test — verify callback endpoint behavior and whether 
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- LEARN: REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+- LEARN: ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+- LEARN: REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed.
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess.
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+- LEARN: ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+- LEARN: REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed.
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess.
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive.
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value
+- LEARN: NEW SPA catch-all pattern: developer.* portals return identical response length (196649 bytes) for all paths — Next.js SPA serving same shell for all routes. Re
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive.
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value
+- LEARN: NEW SPA catch-all pattern: developer.* portals return identical response length (196649 bytes) for all paths — Next.js SPA serving same shell for all routes. Re
+- LEARN: ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt exists on test env (400 without CSRF = expected); callbackUrl flow confirmed; POST-ba
+- LEARN: REJECTED test-env-graphql-introspection-unauth: /api/graphql on test returns 200 len=196341 (SPA catch-all) — same false positive as /graphql. No real GraphQL e
+- LEARN: NEW /api/auth/* routes confirmed alive on test env: /api/auth/csrf (400 GET), /api/auth/signin (400 GET), /api/auth/session (400 GET) — all require proper HTTP 
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all confirmed across all envs for /graphql and /api/graphql — both return identical response length a
+- LEARN: NEW buildManifest.js publicly accessible: 2999 bytes at expected Next.js path — informational, not a vulnerability
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+- LEARN: ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+- LEARN: ACCEPTED OAuth misconfig @ authz.*: high-value if endpoints exist, passive discovery first
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` —
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. 
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-h
+- LEARN: REJECTED developer-portal-test-weaker-auth: test environment /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (same as p
+- LEARN: ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
+- LEARN: ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confir
+- LEARN: ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. 
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt exists on test env (400 without CSRF = expected); callbackUrl flow confirmed; POST-ba
+- LEARN: REJECTED test-env-graphql-introspection-unauth: /api/graphql on test returns 200 len=196341 (SPA catch-all) — same false positive as /graphql. No real GraphQL e
+- LEARN: NEW /api/auth/* routes confirmed alive on test env: /api/auth/csrf (400 GET), /api/auth/signin (400 GET), /api/auth/session (400 GET) — all require proper HTTP 
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all confirmed across all envs for /graphql and /api/graphql — both return identical response length a
+- LEARN: NEW buildManifest.js publicly accessible: 2999 bytes at expected Next.js path — informational, not a vulnerability
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+- LEARN: ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+- LEARN: ACCEPTED OAuth misconfig @ authz.*: high-value if endpoints exist, passive discovery first
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` —
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require au
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. 
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-h
+- LEARN: REJECTED developer-portal-test-weaker-auth: test environment /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (same as p
+- LEARN: ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
+- LEARN: ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confir
+- LEARN: ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. 
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: REJECTED nextauth-callback-open-redirect-with-csrf: OAuth redirect_uri locked to same-origin /api/auth/callback/*, PKCE S256 + state enforced, external callback
+- LEARN: REJECTED nextauth-session-jwt-analysis: /api/auth/session returns {} unauthenticated — no session data, no JWT exposure without valid B2C login; AUTH_HELPED onl
+- LEARN: REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test is proper environment segregation (prod uses login.ciam.daimlertruck.com, tes
+- LEARN: ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-u
+- LEARN: ACCEPTED /api/healthcheck-live: 200 JSON with uptime on test — real server route; informational only (not a vuln alone)
+- LEARN: ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+- LEARN: ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer porta
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential c
+- LEARN: REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin — not 
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
