@@ -69,3 +69,17 @@ https://developer.tst.na.api.daimlertruck.com/health -> 200 len=196341
 https://developer.tst.na.api.daimlertruck.com/ -> 200 len=196341
 https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js -> 200 len=2999
 https://developer.as.api.daimlertruck.com/_next/static/chunks/*.map -> HTTP 404
+
+## 2026-09-04 14:09:52 UTC
+https://developer.as.api.daimlertruck.com/ -> 200 len=196649
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/graphql -> 200 len=196341
+https://developer.tst.na.api.daimlertruck.com/swagger.json -> 200 len=196341
+https://developer.tst.na.api.daimlertruck.com/api-docs -> 200 len=196341
+https://developer.tst.na.api.daimlertruck.com/health -> 200 len=196341
+https://developer.eu.api.daimlertruck.com/api/catalog -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/api/auth/csrf -> HTTP 400
+https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com -> HTTP 400
+https://developer.as.api.daimlertruck.com/api/auth/session -> HTTP 400
+https://developer.tst.na.api.daimlertruck.com/api/auth/session -> HTTP 400
+https://developer.tst.na.api.daimlertruck.com/api/graphql -> 200 len=196341

@@ -123,3 +123,19 @@
 - LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
 - LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
 - LEARN: NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-h
+
+## RANKED HYPOTHESES 2026-09-04 14:09:35 UTC
+- [75] developer.as.api.daimlertruck.com: Developer Portal GraphQL Introspection Behind Auth — Post-Auth Schema Enumeration & Mutation Exposure (from art/lead_nemotron3.txt)
+- [58] developer.tst.na.api.daimlertruck.com: nextauth-callback-open-redirect (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: POST https://developer.tst.na.api.daimlertruck.com/api/auth/csrf (capture CSRF token + cookie), then GET https://developer.tst.na.api.daimlertruck.com/ap
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://developer.tst.na.api.daimlertruck.com/graphql → verify if test environment returns 307 (auth required) or 200 (GraphQL accessible); then GET 
+- LEARN: ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. 
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-h

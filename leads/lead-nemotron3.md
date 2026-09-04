@@ -303,3 +303,57 @@ testability: PASSIVE
 [LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
 [LEARN] NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-helped path
 [RISK] daimler-truck: 78 — 6 live developer portals with GraphQL behind Azure AD B2C; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm config drift risk across prod/test; test environments may have weaker auth; capacitor-admin and authz surfaces currently dark but expand blast radius if exposed
+## 2026-09-04 14:08:45 UTC [target] (model nemotron3)
+[CHANGED] developer.as.api.daimlertruck.com: /graphql returns 307 to Azure AD B2C (not 200 SPA shell) — real GraphQL endpoint behind auth confirmed
+[CHANGED] developer.tst.na.api.daimlertruck.com: Content-length 196341 (vs 196649 prod), buildId `JVF_tXHlhCfZQOkT-cULr` — separate deployment with config drift confirmed
+[NEW] Azure AD B2C auth flow: callbackUrl preserves target path; sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"`
+[NEW] SPA catch-all: all 6 developer.* portals return identical 196649 bytes for all paths (prod) — Next.js shell
+[PRIO] developer.as.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.eu.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.na.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.tst.na.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.dev.na.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.tst.eu.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] www.daimlertruck.com,5.8,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
+[HYP] Developer Portal GraphQL Introspection Behind Auth — Post-Auth Schema Enumeration & Mutation Exposure
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: 6 developer portals expose GraphQL at /graphql behind Azure AD B2C auth; /graphql returns 307 to login with callbackUrl; portal markets itself as "single source of truth for APIs"; introspection query blocked pre-auth (returns login page); post-auth schema likely exposes internal mutations for API subscription/consumption management (createSubscription, updateApiKey, revokeKey, manageWebhooks)
+evidence_needed: Authenticated GraphQL introspection response showing types/mutations; mutation examples with tenant-scoped operations
+verify_steps: GET https://developer.as.api.daimlertruck.com/ → capture Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri, state); AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using valid session cookie/token from test account
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, BOLA across tenant APIs) → Critical/High
+testability: AUTH_HELPED
+[HYP] Developer Portal Test Environment Config Drift — Weaker Auth/Exposed Endpoints in Test Deployments
+class: MISCONFIG
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 62
+reasoning: Test/dev portals (dev.na,tst.eu,tst.na) use distinct buildId `JVF_tXHlhCfZQOkT-cULr` vs prod `JCvrnrykV_KYBk7pu0Npq` — separate deployments; test environments often have relaxed auth (disabled MFA, longer token expiry, debug endpoints enabled); CSP differs (prod: `img-src 'self' data: https://app.usercentrics.eu`; test: `img-src 'self' data: undefined`); different content-length (196341 vs 196649) confirms code divergence
+evidence_needed: Test portal allows GraphQL introspection without auth OR exposes /swagger.json, /api-docs, /openapi.json, /docs as real specs (not SPA shell); debug endpoints (/health, /metrics, /actuator) accessible
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/graphql (check for 307 vs 200); GET https://developer.tst.na.api.daimlertruck.com/swagger.json; GET https://developer.tst.na.api.daimlertruck.com/api-docs; GET https://developer.tst.na.api.daimlertruck.com/health
+impact: Unauthenticated API schema access in test → mutation discovery → potential prod impact if shared backend services → Medium/High
+testability: PASSIVE
+[HYP] Developer Portal Cross-Environment Token Reuse — Tenant Isolation Bypass Across Prod/Test Deployments
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 55
+reasoning: 3 prod environments (as,eu,na) share identical buildId `JCvrnrykV_KYBk7pu0Npq`; 3 test/dev environments share `JVF_tXHlhCfZQOkT-cULr`; separate deployments suggest potentially different Azure AD B2C tenant configs; Azure AD B2C may issue tokens valid across environments if same tenant/client_id; no evidence of environment-level token audience validation
+evidence_needed: Valid session token from developer.as.api.daimlertruck.com accepted by developer.eu.api.daimlertruck.com or developer.tst.na.api.daimlertruck.com; cross-tenant API catalog visibility
+verify_steps: AUTH_HELPED: Obtain valid session on developer.as.api.daimlertruck.com; reuse session cookie/Authorization header on GET https://developer.eu.api.daimlertruck.com/api/catalog and POST https://developer.tst.na.api.daimlertruck.com/graphql with introspection query
+impact: Cross-environment API catalog exposure → subscription hijacking, PII leakage across AS/EU/NA tenants, test-to-prod escalation → High
+testability: AUTH_HELPED
+[PARKED] Developer Portal Cross-Environment Token Reuse — Tenant Isolation Bypass Across Prod/Test Deployments: confidence 55 but speculative — requires valid Azure AD B2C session + cross-env token reuse; no evidence yet of shared tenant/client_id across environments; AUTH_HELPED only
+[FINAL] 1. Developer Portal GraphQL Introspection Behind Auth — Post-Auth Schema Enumeration & Mutation Exposure (75)
+[FINAL] 2. Developer Portal Test Environment Config Drift — Weaker Auth/Exposed Endpoints in Test Deployments (62)
+[NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/graphql → verify if test environment returns 307 (auth required) or 200 (GraphQL accessible); then GET https://developer.tst.na.api.daimlertruck.com/swagger.json and /api-docs to check for exposed specs
+[LEARN] ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals with 307 redirect to Azure AD B2C
+[LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value hypothesis
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. (OVERRULED: /graphql now returns 307, not 200)
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. False positive.
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+[LEARN] NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-helped path
+[RISK] daimler-truck: 78 — 6 live developer portals with GraphQL behind Azure AD B2C; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm config drift risk across prod/test; test environments may have weaker auth; capacitor-admin and authz surfaces currently dark but expand blast radius if exposed

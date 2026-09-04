@@ -252,3 +252,36 @@ testability: PASSIVE
 [LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value hypothesis.
 [LEARN] NEW SPA catch-all pattern: developer.* portals return identical response length (196649 bytes) for all paths — Next.js SPA serving same shell for all routes. Real API endpoints likely behind Azure AD B2C auth.
 [RISK] Daimler Truck: 35/100. Program scope broad but assets limited to developer portals and dead admin/authz subdomains. Main value is config drift between prod/test environments and finding real API endpoints behind auth. Low risk of customer data exposure given current attack surface.
+## 2026-09-04 14:08:26 UTC [target] (model bigpickle)
+[PRIO] developer.tst.na.api.daimlertruck.com,7.2,attack_surface=8,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
+[PRIO] developer.as.api.daimlertruck.com,7.0,attack_surface=8,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=6
+[PRIO] developer.eu.api.daimlertruck.com,7.0,attack_surface=8,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=6
+[HYP] nextauth-callback-open-redirect
+class: OATH
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 58
+reasoning: NextAuth.js callback endpoint confirmed at /api/auth/callback/azure-ad-b2c-dt and azure-ad-b2c-dtna; callbackUrl parameter is passed through the auth flow (confirmed in Azure AD B2C redirect pattern ?callbackUrl=%2Fgraphql); NextAuth.js is known vulnerable to open redirect when callbackUrl accepts arbitrary external URLs without validation
+evidence_needed: Server behavior when callbackUrl=https://evil.com is passed to /api/auth/signin endpoint; whether NextAuth.js validates callbackUrl against allowed redirects
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/csrf (capture CSRF token), then GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com (observe if redirect to external URL is accepted or blocked)
+impact: Open redirect could be chained with OAuth flow to steal authorization codes; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] nextauth-session-token-exposure
+class: AUTH
+asset: developer.as.api.daimlertruck.com
+confidence: 48
+reasoning: /api/auth/[...nextauth] endpoint confirmed (400 on test = exists); /api/auth/session accessible; NextAuth.js default session strategy uses JWT in cookie; if session cookie is accessible or predictable, session hijacking possible; two distinct Azure AD B2C providers suggest multi-tenant auth that could have cross-tenant issues
+evidence_needed: /api/auth/session response (empty or token?), session cookie structure, NextAuth.js version from response headers
+verify_steps: GET https://developer.as.api.daimlertruck.com/api/auth/session (check for session data/cookie), GET https://developer.tst.na.api.daimlertruck.com/api/auth/session (compare)
+impact: Session token leakage or prediction leads to ATO; Severity: high
+testability: PASSIVE
+[HYP] test-env-graphql-introspection-unauth
+class: MISCONFIG
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 45
+reasoning: /graphql on test returns 200 SPA shell but /api/graphql is a real Next.js API route; test environments historically have weaker auth; the build manifest confirms /api/graphql as a server route distinct from SPA catch-all; if test env has auth disabled or relaxed, introspection queries could work
+evidence_needed: POST /api/graphql with introspection query on test vs prod; response content-type and body differences
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/graphql with Content-Type: application/json and query { __schema { types { name } } }
+impact: GraphQL schema disclosure reveals all types, queries, mutations; Severity: high
+testability: AUTH_HELPED
+[NEXT] PROBE: POST https://developer.tst.na.api.daimlertruck.com/api/auth/csrf (capture CSRF token + cookie), then GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com (observe redirect behavior — does it accept external callbackUrl or validate against allowlist?) — sequential, 1 req/sec, passive GET only
+[RISK] Daimler Truck: 38/100. Attack surface limited to developer portals (6 live) + dead admin/authz subdomains. Auth is Azure AD B2C with NextAuth.js — two B2C tenants suggest proper multi-tenant isolation. Main value is probing NextAuth.js endpoints (open redirect, session handling) and GraphQL behind auth. Low probability of customer data exposure from current surface. Build manifest + healthcheck exposure are informational only. Config drift hypothesis collapsed — prod and test are structurally identical.

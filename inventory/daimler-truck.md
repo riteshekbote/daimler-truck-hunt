@@ -88,3 +88,9 @@ www.daimlertruck.com
 - CHANGED developer.as.api.daimlertruck.com: /graphql now returns 307 redirect to `/?callbackUrl=%2Fgraphql` (Azure AD B2C login) instead of 200 SPA shell — confirms real GraphQL endpoint exists behind auth
 - CHANGED developer.tst.na.api.daimlertruck.com: Content-length 196341 bytes (vs 196649 prod) with buildId `JVF_tXHlhCfZQOkT-cULr` — confirms separate deployment with config drift
 - NEW Azure AD B2C auth flow captured: Sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` redirects to B2C tenant; callbackUrl parameter preserves target path post-auth
+
+## 2026-09-04 14:09:35 UTC
+- CHANGED developer.as.api.daimlertruck.com: /graphql returns 307 to Azure AD B2C (not 200 SPA shell) — real GraphQL endpoint behind auth confirmed
+- CHANGED developer.tst.na.api.daimlertruck.com: Content-length 196341 (vs 196649 prod), buildId `JVF_tXHlhCfZQOkT-cULr` — separate deployment with config drift confirmed
+- NEW Azure AD B2C auth flow: callbackUrl preserves target path; sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"`
+- NEW SPA catch-all: all 6 developer.* portals return identical 196649 bytes for all paths (prod) — Next.js shell
