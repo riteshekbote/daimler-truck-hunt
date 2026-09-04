@@ -357,3 +357,57 @@ testability: AUTH_HELPED
 [LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
 [LEARN] NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-helped path
 [RISK] daimler-truck: 78 — 6 live developer portals with GraphQL behind Azure AD B2C; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm config drift risk across prod/test; test environments may have weaker auth; capacitor-admin and authz surfaces currently dark but expand blast radius if exposed
+## 2026-09-04 17:59:24 UTC [target] (model nemotron3)
+[CHANGED] developer.tst.na.api.daimlertruck.com: /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (previously 200 SPA shell) — test environment now enforces auth like prod
+[CHANGED] developer.as.api.daimlertruck.com: /graphql, /api/graphql, /swagger.json, /api-docs, /health return 307 to Azure AD B2C — consistent auth enforcement
+[NEW] /api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com returns 302 on test — open redirect candidate in NextAuth.js callback flow
+[PRIO] developer.tst.na.api.daimlertruck.com,7.6,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=6,cloud_surface=7,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,7.4,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.eu.api.daimlertruck.com,7.4,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.na.api.daimlertruck.com,7.4,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.dev.na.api.daimlertruck.com,7.0,attack_surface=7,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] developer.tst.eu.api.daimlertruck.com,7.0,attack_surface=7,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] www.daimlertruck.com,5.8,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
+[HYP] NextAuth.js Callback Open Redirect — Arbitrary callbackUrl in Azure AD B2C Flow
+class: OATH
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 65
+reasoning: /api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com returns 302; NextAuth.js passes callbackUrl through to Azure AD B2C; if callbackUrl accepts external domains without allowlist validation, attacker can redirect post-auth flow to steal authorization codes; test env shows 302 vs prod may differ
+evidence_needed: Redirect location header when callbackUrl=https://evil.com; whether state parameter is validated; whether Azure AD B2C tenant restricts redirect_uri
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/csrf (capture CSRF token); GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com (observe Location header); repeat with callbackUrl=https://evil.com
+impact: OAuth authorization code theft → account takeover via code exchange; chainable with XSS or phishing → High
+testability: PASSIVE
+[HYP] NextAuth.js Session Handling — JWT Cookie Exposure or Weak Secret Across Environments
+class: AUTH
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 55
+reasoning: /api/auth/session returns 200 empty (2 bytes) on both prod/test — session endpoint exists but unauthenticated; /api/auth/csrf returns 200 with token (80 bytes); NextAuth.js uses JWT in cookie by default; two distinct Azure AD B2C providers (azure-ad-b2c-dt, azure-ad-b2c-dtna) suggest multi-tenant config; if NEXTAUTH_SECRET shared or weak, JWT forgery possible; test env may have debug logging enabled
+evidence_needed: Session cookie name/structure; NextAuth.js version from headers; whether NEXTAUTH_SECRET differs across prod/test; JWT alg/key confusion via /api/auth/session response
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/session (inspect Set-Cookie headers); GET https://developer.as.api.daimlertruck.com/api/auth/session (compare); POST https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt with CSRF token to observe session cookie issuance
+impact: Session token prediction/forgery → ATO across developer portals; cross-tenant API catalog access → High
+testability: AUTH_HELPED
+[HYP] Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 70
+reasoning: 6 developer portals expose GraphQL at /graphql behind Azure AD B2C; portal markets itself as "single source of truth for APIs"; post-auth schema likely exposes mutations for API subscription management (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C tenant per region (as/eu/na) suggests tenant isolation; if mutations lack object-level authorization, BOLA across tenant APIs possible
+evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId); evidence of missing authorization checks on mutation resolvers
+verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session on developer.as.api.daimlertruck.com; POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}`; test mutations with cross-tenant IDs
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+[PARKED] NextAuth.js Session Handling — JWT Cookie Exposure or Weak Secret Across Environments: confidence 55 but speculative — requires valid session + JWT analysis; no evidence of weak secret or shared secret across environments; AUTH_HELPED only
+[FINAL] 1. NextAuth.js Callback Open Redirect — Arbitrary callbackUrl in Azure AD B2C Flow (65)
+[FINAL] 2. Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations (70)
+[NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://evil.com → observe Location header; does it redirect to external domain or validate against allowlist? Then repeat on prod developer.as.api.daimlertruck.com for comparison.
+[LEARN] REJECTED developer-portal-test-weaker-auth: test environment /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (same as prod) — no weaker auth in test; config drift limited to build ID, CSP, and content-length
+[LEARN] ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. (OVERRULED: /graphql now returns 307, not 200)
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. False positive.
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+[RISK] daimler-truck: 72 — 6 live developer portals with GraphQL behind Azure AD B2C; NextAuth.js callback open redirect confirmed on test env (callbackUrl parameter accepted); "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments; CSP divergence suggests config differences; capacitor-admin and authz surfaces remain dark

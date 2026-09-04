@@ -139,3 +139,25 @@
 - LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
 - LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
 - LEARN: NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-h
+
+## RANKED HYPOTHESES 2026-09-04 17:59:35 UTC
+- [65] developer.tst.na.api.daimlertruck.com: nextauth-callback-open-redirect-with-csrf (from art/lead_bigpickle.txt)
+- [65] developer.tst.na.api.daimlertruck.com: NextAuth.js Callback Open Redirect — Arbitrary callbackUrl in Azure AD B2C Flow (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: POST https://developer.tst.na.api.daimlertruck.com/api/auth/csrf (Content-Type: application/x-www-form-urlencoded) → capture csrfToken from JSON body + n
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://evil.com → observe Location header; does it redirec
+- LEARN: ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt exists on test env (400 without CSRF = expected); callbackUrl flow confirmed; POST-ba
+- LEARN: REJECTED test-env-graphql-introspection-unauth: /api/graphql on test returns 200 len=196341 (SPA catch-all) — same false positive as /graphql. No real GraphQL e
+- LEARN: NEW /api/auth/* routes confirmed alive on test env: /api/auth/csrf (400 GET), /api/auth/signin (400 GET), /api/auth/session (400 GET) — all require proper HTTP 
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all confirmed across all envs for /graphql and /api/graphql — both return identical response length a
+- LEARN: NEW buildManifest.js publicly accessible: 2999 bytes at expected Next.js path — informational, not a vulnerability
+- LEARN: REJECTED developer-portal-test-weaker-auth: test environment /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (same as p
+- LEARN: ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
+- LEARN: ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confir
+- LEARN: ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. 
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. F
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy

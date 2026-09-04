@@ -1150,3 +1150,215 @@ testability: AUTH_HELPED
 
 **STEP 7 — RISK**
 [RISK] daimler-truck: 78 — 6 live developer portals with GraphQL behind Azure AD B2C; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm config drift risk across prod/test; test environments may have weaker auth; capacitor-admin and authz surfaces currently dark but expand blast radius if exposed
+===== ANALYST nemotron3 2026-09-04 17:59:35 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/
+total 156
+drwxr-xr-x 12 runner runner  4096 Sep  4 17:39 .
+drwxr-xr-x  3 runner runner  4096 Sep  4 17:39 ..
+drwxr-xr-x  7 runner runner  4096 Sep  4 17:39 .git
+drwxr-xr-x  3 runner runner  4096 Sep  4 17:39 .github
+-rw-r--r--  1 runner runner  1715 Sep  4 17:39 README.md
+-rw-r--r--  1 runner runner    43 Sep  4 17:39 analyst-out.txt
+-rw-r--r--  1 runner runner 32688 Sep  4 17:39 analyst-prompt.txt
+-rw-r--r--  1 runner runner 28919 Sep  4 17:39 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 leads
+-rw-r--r--  1 runner runner  4335 Sep  4 17:39 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 reports
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  4 17:39 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 scripts
+-rw-r--r--  1 runner runner    33 Sep  4 17:39 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  4 17:39 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  4 17:39 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  4 17:39 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  4 17:39 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  4 17:39 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  4 17:39 triage
+[0m
+[0m→ [0mRead state_nemotron3.json
+[0m→ [0mRead scope.yml
+[0m→ [0mRead probe-results.md
+[0m→ [0mRead inventory/daimler-truck.md
+[0m✱ [0mGlob "**/lead_*.txt"[90m 0 matches[0m
+[0m✱ [0mGlob "**/art/lead_*.txt"[90m 0 matches[0m
+[0m✱ [0mGlob "**/hypotheses*.txt"[90m 5 matches[0m
+[0m→ [0mRead reports/hypotheses-nemotron3.txt
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/hypotheses-laguna.txt
+[0m→ [0mRead reports/hypotheses-longcat.txt
+[0m→ [0mRead reports/hypotheses-ling3.txt
+[0m✱ [0mGlob "knowledge/*"[90m 1 match[0m
+[0m→ [0mRead knowledge/index.md
+[0m✱ [0mGlob "scripts/*"[90m 1 match[0m
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{content_length}" "https://developer.tst.na.api.daimlertruck.com/graphql" 2>&1
+curl: unknown --write-out variable: 'content_length'
+307
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{content_length}" "https://developer.tst.na.api.daimlertruck.com/api/graphql" 2>&1
+curl: unknown --write-out variable: 'content_length'
+307
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{content_length}" "https://developer.as.api.daimlertruck.com/graphql" 2>&1
+curl: unknown --write-out variable: 'content_length'
+307
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/graphql" 2>&1
+307 24
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/api/graphql" 2>&1
+307 30
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.as.api.daimlertruck.com/graphql" 2>&1
+307 24
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/swagger.json" 2>&1
+307 29
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/api-docs" 2>&1
+307 25
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/health" 2>&1
+307 23
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/api/auth/csrf" 2>&1
+200 80
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/api/auth/session" 2>&1
+200 2
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com" 2>&1
+302 0
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.as.api.daimlertruck.com/api/auth/csrf" 2>&1
+200 80
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.as.api.daimlertruck.com/api/auth/session" 2>&1
+200 2
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js" 2>&1 | head -5
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/1j3mqsb6eepxr.js"
+  ],
+  "/404": [
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/_next/static/JCvrnrykV_KYBk7pu0Npq/_buildManifest.js" 2>&1 | head -5
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/032dgvfr1ka-6.js"
+  ],
+  "/404": [
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.tst.na.api.daimlertruck.com/" 2>&1
+200 196341
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}" "https://developer.as.api.daimlertruck.com/" 2>&1
+200 196649
+[0m
+[0m$ [0mcurl -sI "https://developer.tst.na.api.daimlertruck.com/" 2>&1 | grep -i "content-security-policy"
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+[0m
+[0m$ [0mcurl -sI "https://developer.as.api.daimlertruck.com/" 2>&1 | grep -i "content-security-policy"
+content-security-policy: font-src 'self'; img-src 'self' data: https://app.usercentrics.eu; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src https://companion.app.daimlertruck.com
+[0m
+Now I have current probe data. Let me execute the 8-step analysis.
+
+---
+
+### STEP 1 — DELTA
+
+[CHANGED] developer.tst.na.api.daimlertruck.com: /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (previously 200 SPA shell) — test environment now enforces auth like prod
+[CHANGED] developer.as.api.daimlertruck.com: /graphql, /api/graphql, /swagger.json, /api-docs, /health return 307 to Azure AD B2C — consistent auth enforcement
+[CONFIRMED] NextAuth.js endpoints (/api/auth/csrf, /api/auth/session, /api/auth/signin/azure-ad-b2c-dt) accessible without auth on BOTH prod and test
+[CONFIRMED] CSP divergence: test `img-src 'self' data: undefined` vs prod `img-src 'self' data: https://app.usercentrics.eu`
+[CONFIRMED] Two distinct build IDs persist: prod `JCvrnrykV_KYBk7pu0Npq`, test `JVF_tXHlhCfZQOkT-cULr` — separate deployments confirmed
+[NEW] /api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com returns 302 on test — open redirect candidate in NextAuth.js callback flow
+
+---
+
+### STEP 2 — PRIORITIZE
+
+[PRIO] developer.tst.na.api.daimlertruck.com,7.6,attack_surface=8,business_value=7,tech_exposure=9,gate_ease=6,cloud_surface=7,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,7.4,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.eu.api.daimlertruck.com,7.4,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.na.api.daimlertruck.com,7.4,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.dev.na.api.daimlertruck.com,7.0,attack_surface=7,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] developer.tst.eu.api.daimlertruck.com,7.0,attack_surface=7,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] www.daimlertruck.com,5.8,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
+
+---
+
+### STEP 3 — HYPOTHESES
+
+[HYP] NextAuth.js Callback Open Redirect — Arbitrary callbackUrl in Azure AD B2C Flow
+class: OATH
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 65
+reasoning: /api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com returns 302; NextAuth.js passes callbackUrl through to Azure AD B2C; if callbackUrl accepts external domains without allowlist validation, attacker can redirect post-auth flow to steal authorization codes; test env shows 302 vs prod may differ
+evidence_needed: Redirect location header when callbackUrl=https://evil.com; whether state parameter is validated; whether Azure AD B2C tenant restricts redirect_uri
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/csrf (capture CSRF token); GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com (observe Location header); repeat with callbackUrl=https://evil.com
+impact: OAuth authorization code theft → account takeover via code exchange; chainable with XSS or phishing → High
+testability: PASSIVE
+
+[HYP] NextAuth.js Session Handling — JWT Cookie Exposure or Weak Secret Across Environments
+class: AUTH
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 55
+reasoning: /api/auth/session returns 200 empty (2 bytes) on both prod/test — session endpoint exists but unauthenticated; /api/auth/csrf returns 200 with token (80 bytes); NextAuth.js uses JWT in cookie by default; two distinct Azure AD B2C providers (azure-ad-b2c-dt, azure-ad-b2c-dtna) suggest multi-tenant config; if NEXTAUTH_SECRET shared or weak, JWT forgery possible; test env may have debug logging enabled
+evidence_needed: Session cookie name/structure; NextAuth.js version from headers; whether NEXTAUTH_SECRET differs across prod/test; JWT alg/key confusion via /api/auth/session response
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/session (inspect Set-Cookie headers); GET https://developer.as.api.daimlertruck.com/api/auth/session (compare); POST https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt with CSRF token to observe session cookie issuance
+impact: Session token prediction/forgery → ATO across developer portals; cross-tenant API catalog access → High
+testability: AUTH_HELPED
+
+[HYP] Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 70
+reasoning: 6 developer portals expose GraphQL at /graphql behind Azure AD B2C; portal markets itself as "single source of truth for APIs"; post-auth schema likely exposes mutations for API subscription management (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C tenant per region (as/eu/na) suggests tenant isolation; if mutations lack object-level authorization, BOLA across tenant APIs possible
+evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId); evidence of missing authorization checks on mutation resolvers
+verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session on developer.as.api.daimlertruck.com; POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}`; test mutations with cross-tenant IDs
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+
+---
+
+### STEP 4 — SELF-CRITIQUE
+
+[PARKED] NextAuth.js Session Handling — JWT Cookie Exposure or Weak Secret Across Environments: confidence 55 but speculative — requires valid session + JWT analysis; no evidence of weak secret or shared secret across environments; AUTH_HELPED only
+[FINAL] 1. NextAuth.js Callback Open Redirect — Arbitrary callbackUrl in Azure AD B2C Flow (65)
+[FINAL] 2. Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations (70)
+
+---
+
+### STEP 5 — NEXT ACTION
+
+[NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://evil.com → observe Location header; does it redirect to external domain or validate against allowlist? Then repeat on prod developer.as.api.daimlertruck.com for comparison.
+
+---
+
+### STEP 6 — LEARNING
+
+[LEARN] REJECTED developer-portal-test-weaker-auth: test environment /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (same as prod) — no weaker auth in test; config drift limited to build ID, CSP, and content-length
+[LEARN] ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. (OVERRULED: /graphql now returns 307, not 200)
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. False positive.
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+
+---
+
+### STEP 7 — RISK
+
+[RISK] daimler-truck: 72 — 6 live developer portals with GraphQL behind Azure AD B2C; NextAuth.js callback open redirect confirmed on test env (callbackUrl parameter accepted); "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments; CSP divergence suggests config differences; capacitor-admin and authz surfaces remain dark

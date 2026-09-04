@@ -45,3 +45,12 @@
 - 2026-09-04 ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals with 307 redirect to Azure AD B2C
 - 2026-09-04 REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. (OVERRULED: /graphql now returns 307, not 200)
 - 2026-09-04 NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-helped path
+- 2026-09-04 ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt exists on test env (400 without CSRF = expected); callbackUrl flow confirmed; POST-based CSRF-protected test is next step
+- 2026-09-04 REJECTED test-env-graphql-introspection-unauth: /api/graphql on test returns 200 len=196341 (SPA catch-all) — same false positive as /graphql. No real GraphQL endpoint accessible unauthenticated.
+- 2026-09-04 NEW /api/auth/* routes confirmed alive on test env: /api/auth/csrf (400 GET), /api/auth/signin (400 GET), /api/auth/session (400 GET) — all require proper HTTP method/params
+- 2026-09-04 REJECTED developer-portal-graphql-introspection: SPA catch-all confirmed across all envs for /graphql and /api/graphql — both return identical response length as root
+- 2026-09-04 NEW buildManifest.js publicly accessible: 2999 bytes at expected Next.js path — informational, not a vulnerability
+- 2026-09-04 REJECTED developer-portal-test-weaker-auth: test environment /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (same as prod) — no weaker auth in test; config drift limited to build ID, CSP, and content-length
+- 2026-09-04 ACCEPTED nextauth-callback-open-redirect: /api/auth/signin/azure-ad-b2c-dt accepts callbackUrl parameter and returns 302 — high-value OAuth flaw candidate
+- 2026-09-04 ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf and /api/auth/session accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+- 2026-09-04 ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed

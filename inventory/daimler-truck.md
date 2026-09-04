@@ -94,3 +94,14 @@ www.daimlertruck.com
 - CHANGED developer.tst.na.api.daimlertruck.com: Content-length 196341 (vs 196649 prod), buildId `JVF_tXHlhCfZQOkT-cULr` — separate deployment with config drift confirmed
 - NEW Azure AD B2C auth flow: callbackUrl preserves target path; sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"`
 - NEW SPA catch-all: all 6 developer.* portals return identical 196649 bytes for all paths (prod) — Next.js shell
+
+## 2026-09-04 17:59:35 UTC
+- CHANGED developer.*.api.daimlertruck.com: Latest probe (14:09:52) shows /graphql returning 200 (SPA catch-all) on all envs, not 307 — discrepancy with 09:50 observation; possible caching/routing difference be
+- NEW /api/auth/csrf → 400 on GET (exists, needs POST) — NextAuth.js API route confirmed alive on test env
+- NEW /api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com → 400 on GET — open redirect test returned 400, inconclusive (needs CSRF token from POST /api/auth/csrf first)
+- NEW /api/auth/session → 400 on GET for both prod (as) and test (tst.na) — exists but requires proper session/POST
+- NEW /api/graphql on developer.tst.na → 200 len=196341 (SPA catch-all, same as root) — NOT a real GraphQL endpoint, same false positive as /graphql
+- NEW buildManifest.js fetched successfully: len=2999 at `/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js` — contains route/page structure for test env
+- CHANGED developer.tst.na.api.daimlertruck.com: /graphql, /api/graphql, /swagger.json, /api-docs, /health now return 307 to Azure AD B2C (previously 200 SPA shell) — test environment now enforces auth like pro
+- CHANGED developer.as.api.daimlertruck.com: /graphql, /api/graphql, /swagger.json, /api-docs, /health return 307 to Azure AD B2C — consistent auth enforcement
+- NEW /api/auth/signin/azure-ad-b2c-dt?callbackUrl=https://example.com returns 302 on test — open redirect candidate in NextAuth.js callback flow
