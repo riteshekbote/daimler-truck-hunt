@@ -1,4 +1,34 @@
-## 2026-09-03 22:29:01 UTC [target] (model bigpickle)
+## 2026-09-04 00:25:24 UTC [target] (model bigpickle)
+impact: Full schema disclosure → targeted attacks on internal mutations/queries; Severity: medium
+testability: PASSIVE
+[HYP] developer-portal-exposed-swagger
+class: MISCONFIG
+asset: developer.as.api.daimlertruck.com
+confidence: 72
+reasoning: HTTP 200 on developer portal; developer portals commonly expose /swagger, /docs, /openapi.json
+evidence_needed: Swagger/OpenAPI spec with internal endpoints or admin-only operations
+verify_steps: GET /, GET /swagger.json, GET /api-docs, GET /openapi.json, GET /docs
+impact: Full API schema disclosure including internal endpoints; Severity: medium
+testability: PASSIVE
+[HYP] capacitor-admin-unauthenticated
+class: MISCONFIG
+asset: capacitor-admin.eu.api.daimlertruck.com
+confidence: 58
+reasoning: "capacitor-admin" naming suggests internal admin panel; unprobed status means no HTTP response yet captured
+evidence_needed: Admin dashboard content, configuration endpoints, or user management without authentication
+verify_steps: GET /, GET /admin, GET /login, GET /api/config, GET /api/status
+impact: Administrative access to Capacitor-managed infrastructure; Severity: high
+testability: AUTH_HELPED
+[FINAL] developer-portal-graphql-introspection: PASS. 75 confidence, passive verification, high value.
+[FINAL] developer-portal-exposed-swagger: PASS. 72 confidence, pure passive verification.
+[FINAL] capacitor-admin-unauthenticated: PASS. 58 confidence, needs live probe to confirm.
+[PARKED] authz-endpoint-idor: Below confidence threshold (45), insufficient evidence.
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ followed by /graphql (POST with introspection query), /swagger.json, /api-docs, /openapi.json, /docs (sequential, 1 req/sec, passive GET/POST only)
+[LEARN] ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+[LEARN] ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+[LEARN] ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+[LEARN] REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+[RISK] Daimler Truck: 35/100. Program scope is broad ("all infrastructure, digital services, brands and subsidiaries") which reduces ambiguity risk. Main risk is accidentally touching customer data during IDOR/authorization testing - requires careful scoping of test accounts.
 [PRIO] developer.as.api.daimlertruck.com,8.2,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
 [PRIO] developer.na.api.daimlertruck.com,8.0,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
 [PRIO] developer.eu.api.daimlertruck.com,8.0,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7

@@ -15,3 +15,25 @@
 - 2026-09-03 REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed.
 - 2026-09-03 REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess.
 - 2026-09-03 NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` — suggests separate deployments with potentially different config
+- 2026-09-04 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- 2026-09-04 ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+- 2026-09-04 ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+- 2026-09-04 REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+- 2026-09-04 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- 2026-09-04 ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals.
+- 2026-09-04 REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed.
+- 2026-09-04 REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess.
+- 2026-09-04 ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals
+- 2026-09-04 REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- 2026-09-04 REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- 2026-09-04 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require auth
+- 2026-09-04 REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- 2026-09-04 REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- 2026-09-04 ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals
+- 2026-09-04 REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- 2026-09-04 REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- 2026-09-04 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 on developer portal correlates with exposed API documentation — but all docs/graphql require auth
+- 2026-09-04 REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- 2026-09-04 REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- 2026-09-04 REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- 2026-09-04 NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` — suggests separate deployments with potentially different config
