@@ -37,3 +37,8 @@
 - 2026-09-04 REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
 - 2026-09-04 REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
 - 2026-09-04 NEW Two distinct build IDs across developer portals: prod-like (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` — suggests separate deployments with potentially different config
+- 2026-09-04 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation — but all docs/graphql require auth
+- 2026-09-04 REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive.
+- 2026-09-04 REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. False positive.
+- 2026-09-04 ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value hypothesis.
+- 2026-09-04 NEW SPA catch-all pattern: developer.* portals return identical response length (196649 bytes) for all paths — Next.js SPA serving same shell for all routes. Real API endpoints likely behind Azure AD B2C auth.

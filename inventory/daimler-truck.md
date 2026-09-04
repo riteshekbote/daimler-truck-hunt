@@ -80,3 +80,6 @@ www.daimlertruck.com
 - NEW capacitor-admin.*.api.daimlertruck.com (6 hosts): all return connection reset (000/ERR) — confirmed firewalled/not deployed
 - NEW authz.*.api.daimlertruck.com (7 hosts): all return 404 on root and .well-known OAuth/OIDC endpoints — no OAuth surface
 - NEW Two distinct Next.js build IDs: prod (as,eu,na) = `JCvrnrykV_KYBk7pu0Npq`; test/dev (dev.na,tst.eu,tst.na) = `JVF_tXHlhCfZQOkT-cULr` — separate deployments, potential config drift
+
+## 2026-09-04 05:09:10 UTC
+- CHANGED developer.*.api.daimlertruck.com: probe confirms SPA catch-all — all paths (/graphql, /swagger.json, /api-docs, /openapi.json, /docs) return identical 196649 bytes as root. These are Next.js SPA route

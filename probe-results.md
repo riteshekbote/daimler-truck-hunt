@@ -46,3 +46,14 @@ https://developer.as.api.daimlertruck.com/swagger.json -> 200 len=196649
 https://developer.as.api.daimlertruck.com/api-docs -> 200 len=196649
 https://developer.as.api.daimlertruck.com/openapi.json -> 200 len=196649
 https://developer.as.api.daimlertruck.com/docs -> 200 len=196649
+
+## 2026-09-04 05:09:24 UTC
+https://developer.as.api.daimlertruck.com/ -> 200 len=196649
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.eu.api.daimlertruck.com/api/catalog -> 200 len=196649
+https://developer.eu.api.daimlertruck.com/graphql -> 200 len=196649
+https://www.daimlertruck.com/ -> HTTP 403
+https://developer.tst.na.api.daimlertruck.com/ -> 200 len=196341
+https://developer.tst.na.api.daimlertruck.com/graphql -> 200 len=196341
+https://developer.as.api.daimlertruck.com/_next/static/chunks/*.map -> HTTP 404
+https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js -> 200 len=2999
