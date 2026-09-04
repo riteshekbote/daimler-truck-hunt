@@ -1,5 +1,4 @@
-## 2026-09-04 05:06:13 UTC [target] (model bigpickle)
-[CHANGED] developer.*.api.daimlertruck.com: probe confirms SPA catch-all — all paths (/graphql, /swagger.json, /api-docs, /openapi.json, /docs) return identical 196649 bytes as root. These are Next.js SPA routes, NOT real API endpoints. Prior "GraphQL introspection" and "Swagger exposure" hypotheses are FALSE POSITIVES.
+## 2026-09-04 09:48:34 UTC [target] (model bigpickle)
 [PRIO] developer.tst.na.api.daimlertruck.com,7.8,attack_surface=8,tech_exposure=7,gate_ease=7,cloud_surface=5,freshness=6
 [PRIO] developer.na.api.daimlertruck.com,7.6,attack_surface=8,tech_exposure=7,gate_ease=6,cloud_surface=5,freshness=6
 [PRIO] developer.eu.api.daimlertruck.com,7.6,attack_surface=8,tech_exposure=7,gate_ease=6,cloud_surface=5,freshness=6
@@ -9,7 +8,7 @@ asset: developer.tst.na.api.daimlertruck.com
 confidence: 62
 reasoning: Test/dev portals use distinct build ID (JVF_tXHlhCfZQOkT-cULr) vs prod (JCvrnrykV_KYBk7pu0Npq); separate deployments may expose debug endpoints, different auth requirements, or API documentation not available on prod
 evidence_needed: Different response content on test/dev portals, exposed debug endpoints, or relaxed auth configuration
-verify_steps: GET https://developer.tst.na.api.daimlertruck.com/ (compare build ID, response content), GET https://developer.tst.na.api.daimlertruck.com/graphql (POST with introspection query), GET /api/config, GET /api/status
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/ (compare build ID, response content), GET https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js (inspect routes and API structure)
 impact: Config drift between environments could expose debug features or internal APIs; Severity: medium
 testability: PASSIVE
 [HYP] spa-true-graphql-behind-auth
@@ -30,9 +29,9 @@ evidence_needed: Accessible .map files, _next/static chunks with readable source
 verify_steps: GET https://developer.as.api.daimlertruck.com/_next/static/chunks/*.map, GET /_next/static/JCvrnrykV_KYBk7pu0Npq/_buildManifest.js
 impact: Source code disclosure reveals internal API structure and potential vulnerabilities; Severity: medium
 testability: PASSIVE
-[FINAL] test-dev-portal-config-drift: PASS. 62 confidence, distinct build IDs confirm separate deployments, passive verification possible.
-[FINAL] spa-true-graphql-behind-auth: PASS. 55 confidence, SPA catch-all confirmed, need to find real API routes.
-[FINAL] nextjs-source-map-exposure: PASS. 50 confidence, Next.js source map exposure is common, passive verification.
+[FINAL] test-dev-portal-config-drift: 62 confidence, distinct build IDs confirm separate deployments, passive verification possible.
+[FINAL] spa-true-graphql-behind-auth: 55 confidence, SPA catch-all confirmed, need to find real API routes.
+[FINAL] nextjs-source-map-exposure: 50 confidence, Next.js source map exposure is common, passive verification.
 [PARKED] developer-portal-graphql-introspection: FALSE POSITIVE — SPA catch-all returns 200 for /graphql, not a real GraphQL endpoint. Confidence dropped to 25.
 [PARKED] developer-portal-exposed-swagger: FALSE POSITIVE — SPA catch-all returns 200 for /swagger.json, not real Swagger spec. Confidence dropped to 25.
 [NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/ → capture full response, compare build ID and content with prod; then GET https://developer.tst.na.api.daimlertruck.com/_next/static/JVF_tXHlhCfZQOkT-cULr/_buildManifest.js to inspect routes and API structure (sequential, 1 req/sec, passive GET only)

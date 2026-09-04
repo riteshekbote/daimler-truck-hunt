@@ -42,3 +42,6 @@
 - 2026-09-04 REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs, /openapi.json, /docs — not real Swagger/OpenAPI specs. False positive.
 - 2026-09-04 ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod vs test/dev) suggest separate deployments with potentially different configurations — high value hypothesis.
 - 2026-09-04 NEW SPA catch-all pattern: developer.* portals return identical response length (196649 bytes) for all paths — Next.js SPA serving same shell for all routes. Real API endpoints likely behind Azure AD B2C auth.
+- 2026-09-04 ACCEPTED GraphQL introspection @ developer.*: high-value, in-scope (API logic flaw), but requires auth — passive discovery confirmed endpoint exists at /graphql on all 6 portals with 307 redirect to Azure AD B2C
+- 2026-09-04 REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths including /graphql — not a real GraphQL endpoint. False positive. (OVERRULED: /graphql now returns 307, not 200)
+- 2026-09-04 NEW Azure AD B2C auth flow: /graphql returns 307 to `/?callbackUrl=%2Fgraphql` with sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` — clear auth-helped path

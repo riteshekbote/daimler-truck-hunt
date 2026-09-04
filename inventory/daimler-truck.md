@@ -83,3 +83,8 @@ www.daimlertruck.com
 
 ## 2026-09-04 05:09:10 UTC
 - CHANGED developer.*.api.daimlertruck.com: probe confirms SPA catch-all — all paths (/graphql, /swagger.json, /api-docs, /openapi.json, /docs) return identical 196649 bytes as root. These are Next.js SPA route
+
+## 2026-09-04 09:50:35 UTC
+- CHANGED developer.as.api.daimlertruck.com: /graphql now returns 307 redirect to `/?callbackUrl=%2Fgraphql` (Azure AD B2C login) instead of 200 SPA shell — confirms real GraphQL endpoint exists behind auth
+- CHANGED developer.tst.na.api.daimlertruck.com: Content-length 196341 bytes (vs 196649 prod) with buildId `JVF_tXHlhCfZQOkT-cULr` — confirms separate deployment with config drift
+- NEW Azure AD B2C auth flow captured: Sign-in button `data-testid="sign-in-azure-ad-b2c-dt-button"` redirects to B2C tenant; callbackUrl parameter preserves target path post-auth
