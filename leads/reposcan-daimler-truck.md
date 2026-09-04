@@ -47,3 +47,5 @@ reasoning: `if debug_mode: app.include_router(router=pgvector_routes.router)` â€
 impact: Medium â€“ admin-level access to vector database management if debug mode accidentally enabled in production
 verify_steps: 1) Check if any production deployment has DEBUG_RAG_API=true. 2) Passively check if pgvector admin endpoints respond on the live RAG API.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 17:39:36 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
