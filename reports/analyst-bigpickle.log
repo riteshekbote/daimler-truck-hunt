@@ -4237,3 +4237,226 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] Daimler Truck: 42/100. No change from prior batch — the unauth surface is provably static (byte-identical probes). All real value concentrates on the post-auth GraphQL BOLA + cross-BU token-boundary tests, both blocked on the two scoped test B2C accounts. No new exploitable unauth defect; read-only/on-owned post-auth plans keep live-customer-data risk low while the program's exclusion of auth-bypass/mutating tests against customer data is respected.
+===== ANALYST bigpickle 2026-09-05 21:47:38 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la && git log --oneline -5 2>/dev/null
+total 204
+drwxr-xr-x 12 runner runner  4096 Sep  5 21:41 .
+drwxr-xr-x  3 runner runner  4096 Sep  5 21:41 ..
+drwxr-xr-x  7 runner runner  4096 Sep  5 21:41 .git
+drwxr-xr-x  3 runner runner  4096 Sep  5 21:41 .github
+-rw-r--r--  1 runner runner  1715 Sep  5 21:41 README.md
+-rw-r--r--  1 runner runner    32 Sep  5 21:41 analyst-out.txt
+-rw-r--r--  1 runner runner 53373 Sep  5 21:41 analyst-prompt.txt
+-rw-r--r--  1 runner runner 49604 Sep  5 21:41 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 leads
+-rw-r--r--  1 runner runner  8632 Sep  5 21:41 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 reports
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  5 21:41 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 scripts
+-rw-r--r--  1 runner runner    33 Sep  5 21:41 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  5 21:41 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  5 21:41 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  5 21:41 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  5 21:41 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  5 21:41 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  5 21:41 triage
+f432d2a triage 2026-09-05-20-48
+[0m
+[0m✱ [0mGlob "**/*.{yml,yaml,txt,md}"[90m 52 matches[0m
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead scope.yml
+[0m→ [0mRead triage/run-2026-09-05-20-48.md
+[0m→ [0mRead leads/lead-bigpickle.md[90m [offset=479][0m
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead leads/lead-bigpickle.md[90m [offset=859][0m
+[0m→ [0mRead probe-results.md
+Current state confirmed: post-auth only value on developer portals, unauth surface exhausted. One genuinely unprobed passive surface remains: the B2C OIDC metadata endpoints (public, read-only). Let me probe them to advance hypothesis #2 (b2c-cross-bu-token-boundary).
+[0m
+[0m$ [0mmkdir -p /tmp/opencode/b2c && cd /tmp/opencode/b2c
+UA="Mozilla/5.0 (X11; Linux x86_64)"
+req() { name="$1"; url="$2"; code=$(curl -s -o "/tmp/opencode/b2c/${name}.json" -w "%{http_code}" -A "$UA" --max-time 20 "$url"); echo "$name -> HTTP $code ($(wc -c < /tmp/opencode/b2c/${name}.json 2>/dev/null) bytes) [$url]"; sleep 1; }
+req tst_row_policy "https://login-qa.ciam.daimlertruck.com/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration"
+req tst_noam_policy "https://login-qa.ciam.daimlertruck.com/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration"
+req tst_row_tenant "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration"
+req prod_row_custom "https://login.ciam.daimlertruck.com/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration"
+req prod_noam_custom "https://login.ciam.daimlertruck.com/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration"
+tst_row_policy -> HTTP 404 (103 bytes) [https://login-qa.ciam.daimlertruck.com/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration]
+tst_noam_policy -> HTTP 404 (103 bytes) [https://login-qa.ciam.daimlertruck.com/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration]
+tst_row_tenant -> HTTP 200 (3242 bytes) [https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration]
+prod_row_custom -> HTTP 404 (103 bytes) [https://login.ciam.daimlertruck.com/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration]
+prod_noam_custom -> HTTP 404 (103 bytes) [https://login.ciam.daimlertruck.com/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration]
+[0m
+[0m→ [0mRead /tmp/opencode/b2c/tst_row_tenant.json
+[0m✱ [0mGrep "3db550f0|205f35f7|88f558f5"[90m in . · 71 matches[0m
+Test tenant OIDC metadata confirms a rich claims surface (org/entitlement claims). Now probing NOAM policy + common policy names, and hunting the prod tenant GUID in repo notes.
+[0m
+[0m$ [0mcd /tmp/opencode/b2c
+UA="Mozilla/5.0 (X11; Linux x86_64)"; TID="88f558f5-a216-470b-b34a-3164f5d6ec0f"
+req() { name="$1"; url="$2"; code=$(curl -s -o "/tmp/opencode/b2c/${name}.json" -w "%{http_code}" -A "$UA" --max-time 20 "$url"); echo "$name -> HTTP $code ($(wc -c < /tmp/opencode/b2c/${name}.json) bytes)"; sleep 1; }
+req tst_noam_tenant "https://login-qa.ciam.daimlertruck.com/${TID}/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration"
+req tst_native "https://login-qa.ciam.daimlertruck.com/${TID}/b2c_1a_signin_oidc_native/v2.0/.well-known/openid-configuration"
+req tst_signup "https://login-qa.ciam.daimlertruck.com/${TID}/b2c_1a_signup_signin/v2.0/.well-known/openid-configuration"
+req tst_pwdreset "https://login-qa.ciam.daimlertruck.com/${TID}/b2c_1a_password_reset/v2.0/.well-known/openid-configuration"
+req tst_profile "https://login-qa.ciam.daimlertruck.com/${TID}/b2c_1a_profile_editing/v2.0/.well-known/openid-configuration"
+req tst_jwks "https://login-qa.ciam.daimlertruck.com/${TID}/b2c_1a_signin_oidc_row/discovery/v2.0/keys"
+tst_noam_tenant -> HTTP 200 (3655 bytes)
+tst_native -> HTTP 404 (103 bytes)
+tst_signup -> HTTP 404 (103 bytes)
+tst_pwdreset -> HTTP 404 (103 bytes)
+tst_profile -> HTTP 404 (103 bytes)
+tst_jwks -> HTTP 200 (465 bytes)
+[0m
+[0m→ [0mRead /tmp/opencode/b2c/tst_noam_tenant.json
+[0m→ [0mRead /tmp/opencode/b2c/tst_jwks.json
+New claim-contract data is strong. Now confirming the same on the prod tenant to lock the cross-BU boundary facts on the live environment.
+[0m
+[0m$ [0mcd /tmp/opencode/b2c
+UA="Mozilla/5.0 (X11; Linux x86_64)"; TID="3db550f0-0c7f-439b-8e24-e32bf233615d"
+req() { name="$1"; url="$2"; code=$(curl -s -o "/tmp/opencode/b2c/${name}.json" -w "%{http_code}" -A "$UA" --max-time 20 "$url"); echo "$name -> HTTP $code ($(wc -c < /tmp/opencode/b2c/${name}.json) bytes)"; sleep 1; }
+req prod_row "https://login.ciam.daimlertruck.com/${TID}/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration"
+req prod_noam "https://login.ciam.daimlertruck.com/${TID}/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration"
+prod_row -> HTTP 200 (3224 bytes)
+prod_noam -> HTTP 200 (3637 bytes)
+[0m
+[0m$ [0mcd /tmp/opencode/b2c
+python3 - <<'EOF'
+import json
+for env, tid in [("prod","3db550f0-0c7f-439b-8e24-e32bf233615d"),("tst","88f558f5-a216-470b-b34a-3164f5d6ec0f")]:
+    for pol in ["row","noam"]:
+        d=json.load(open(f"{env}_{pol}.json"))
+        iss=d["issuer"].split("/")[-2]  # tenantid
+        claims=d["claims_supported"]
+        # distinct identity-model markers
+        row_markers=[c for c in claims if any(k in c.lower() for k in ["entitle","adupn","adsid","oid","costcenter","org"])]
+        noam_markers=[c for c in claims if any(k in c.lower() for k in ["ftl","primaryorg","dealer","userapproles","sm_user","userid","warranty","companycode","plant"])]
+        print(f"=== {env} {pol} (iss tenant {iss}) ===")
+        print("  shared iss/aud baseline, alg: ", d["id_token_signing_alg_values_supported"])
+        print("  ROW-model claims sample:", row_markers[:8])
+        print("  NOAM-model claims sample:", noam_markers[:8])
+EOF
+=== prod row (iss tenant v2.0) ===
+  shared iss/aud baseline, alg:  ['RS256']
+  ROW-model claims sample: ['oid', 'OIDCScopes', 'adSid', 'adUpn', 'costCenter', 'dealerHomeOrganization', 'dealerHomeOrganizationAlias', 'entitlements']
+  NOAM-model claims sample: ['dealerHomeOrganization', 'dealerHomeOrganizationAlias', 'plant1', 'plant2']
+=== prod noam (iss tenant v2.0) ===
+  shared iss/aud baseline, alg:  ['RS256']
+  ROW-model claims sample: ['isXOrg', 'OIDCScopes', 'PrimaryOrgCode', 'organizationUnit', 'globalCostCenter', 'cn_Org', 'createTimeStamp_Org', 'FTLOrgAlternateWarrantyCode']
+  NOAM-model claims sample: ['issuerUserId', 'UserAppRoles', 'UserID', 'SM_USER', 'PrimaryOrgCode', 'companyCode', 'Plant1', 'Plant2']
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: 'tst_row.json'
+[0m
+[0m$ [0mcd /tmp/opencode/b2c
+python3 - <<'EOF'
+import json
+for env, tid, files in [("prod","3db550f0-0c7f-439b-8e24-e32bf233615d",["prod_row.json","prod_noam.json"]),("tst","88f558f5-a216-470b-b34a-3164f5d6ec0f",["tst_row_tenant.json","tst_noam_tenant.json"])]:
+    print(f"###### {env} tenant {tid[-6:]} ######")
+    for f in files:
+        d=json.load(open(f))
+        iss=d["issuer"]
+        claims=set(d["claims_supported"])
+        row_markers={c for c in claims if any(k in c.lower() for k in ["entitlements","adupn","adsid","oid","ad_sid"])}
+        noam_markers={c for c in claims if any(k in c.lower() for k in ["ftlorg","primaryorgcode","sm_user","userid","userapproles","warrantycode"])}
+        pol="noam" if "noam" in f else "row"
+        print(f"  {pol}: issuer={iss}")
+        print(f"     ROW-only markers: {sorted(row_markers)[:6]}")
+        print(f"     NOAM-only markers: {sorted(noam_markers)[:6]}")
+        print(f"     total claims: {len(claims)}")
+EOF
+###### prod tenant 33615d ######
+  row: issuer=https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/v2.0/
+     ROW-only markers: ['OIDCScopes', 'adSid', 'adUpn', 'entitlements', 'nonScopedEntitlements', 'oid']
+     NOAM-only markers: []
+     total claims: 89
+  noam: issuer=https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/v2.0/
+     ROW-only markers: ['OIDCScopes']
+     NOAM-only markers: ['FTLOrgAlternateCBCode', 'FTLOrgAlternatePCAN', 'FTLOrgAlternateWarrantyCode', 'FTLOrgBrands_Org', 'FTLOrgCAN_Org', 'FTLOrgCertifications']
+     total claims: 102
+###### tst tenant d6ec0f ######
+  row: issuer=https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/
+     ROW-only markers: ['OIDCScopes', 'adSid', 'adUpn', 'entitlements', 'nonScopedEntitlements', 'oid']
+     NOAM-only markers: []
+     total claims: 89
+  noam: issuer=https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/
+     ROW-only markers: ['OIDCScopes']
+     NOAM-only markers: ['FTLOrgAlternateCBCode', 'FTLOrgAlternatePCAN', 'FTLOrgAlternateWarrantyCode', 'FTLOrgBrands_Org', 'FTLOrgCAN_Org', 'FTLOrgCertifications']
+     total claims: 102
+[0m
+[0m$ [0mcat >> /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md <<'EOF'
+## 2026-09-05 21:48:00 UTC [target] (model bigpickle)
+[NEW] B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/adSid/entitlements/scopedEntitlements/nonScopedEntitlements/homeOrganization/companies); NOAM (102 claims) = FTL dealer-org model (PrimaryOrgCode/UserAppRoles/SM_USER + FTLOrg* family: FTLOrgSapCode, FTLOrgDDCID, FTLOrgDCVCM, FTLOrgTSSOC, FTLOrgGSSNCompanyID/OutletID, FTLOrgBrands_Org, FTLOrgCertifications, FTLOrgChildren, FTLOrgVehOwners, FTLOrgIsITAR_Org, FTLOrgIsMexico_Org). Same issuer, same aud baseline, single RSA RS256 key per policy on same tenant jwks. BU boundary = acr + org-claim mapping only.
+[NEW] Both policies advertise implicit response_types (id_token, id_token token) BUT token_endpoint restricted to client_secret_basic/post (confidential client) — code-theft chains need the portal client secret; standalone open-redirect->ATO weak.
+[REJECTED] staging-token-prod-acceptance: staging client c387a5ab rejected in prod tenant (AADB2C90018), staging aud=dtagapim.stg.* vs prod dtagapim.* — B2C-layer env segregation robust.
+[HYP] apim-anonymous-op-exposure @ as.api.daimlertruck.com conf 52 — OperationNotFound is subscription-context error; anonymous-allowed ops would return different body (200/data/NonAnonymousSubscriptionRequired) — breadth probe, passive.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (64) 3. apim-anonymous-op-exposure (52)
+[NEXT] PROBE: APIM region-root OSINT battery — GET as.api.daimlertruck.com/status-0123456789abcdef then anonymous-op path set (/api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions,/v1/status) — 1 rps, expect OperationNotFound baseline; any deviation = anonymous-op candidate.
+[RISK] Daimler Truck: 48/100 — claim-contract refines BOLA/BU test plan but value stays gated behind 2 scoped B2C accounts; APIM anonymous-op battery adds a NEW passive surface (B2B truck-API ops, read-only GET, low blast); no live customer data touched (public OIDC metadata only).
+EOF
+echo appended
+appended
+[0m
+All B2C metadata confirmed on both tenants. Now appending the run to my lead file for continuity.
+STEP 1 — DELTA
+- [NEW] B2C OIDC claim contracts (machine-readable, both policies × both tenants): ROW=89 claims DT-employee model (oid/adUpn/adSid/entitlements/scopedEntitlements/homeOrganization); NOAM=102 claims FTL dealer-org model (PrimaryOrgCode/UserAppRoles/SM_USER + FTLOrg* fam: FTLOrgSapCode/DDCID/DCVCM/TSSOC/GSSNCompanyID/VehOwners/Brands_Org/Certifications/Children/IsITAR_Org/IsMexico_Org). Same issuer `.../<tid>/v2.0/`, same aud baseline, single RSA RS256 key per policy on same tenant jwks.
+- [NEW] Both policies advertise implicit response_types (id_token/token) but token endpoint restricted to client_secret_basic/post (confidential client) — code-theft chains require the portal client secret.
+- [NO_DELTA] developer.* portals unchanged (SPA catch-all; /api/graphql + catalog roots 307→B2C).
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+- [PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+- [PRIO] login.ciam.daimlertruck.com,6.4,attack_surface=2,tech_exposure=9,gate_ease=0,cloud_surface=9,freshness=9
+- [PRIO] {as,eu}.api.daimlertruck.com,4.9,attack_surface=3,tech_exposure=6,gate_ease=2,cloud_surface=7,freshness=9
+
+STEP 3 — HYPOTHESES
+- [HYP] graphql-object-id-bola-team-scoped
+  class: IDOR
+  asset: developer.as.api.daimlertruck.com
+  confidence: 75
+  reasoning: buildManifest routes /apis/[apiId],/subscriptions/[subscriptionId],/teams/[teamId]/system-users/associate + client bundle GraphQL ops (subscription(teamId,appId,subscriptionId)) take object IDs; all catalog roots + /api/graphql = 307→B2C; portal now mapped to B2C org-claims (ROW entitlements/oid sub) — orgId is claim-derived, so resolver authz is the only check between tenant boundaries.
+  evidence_needed: authed introspection at /api/graphql listing resolver args; reading foreign object IDs with own session.
+  verify_steps: AUTH_HELPED: staging B2C session → POST /api/graphql `{"query":"{__schema{types{name fields{name args{name}}}}}}"}` → baseline subscription(teamId,appId,subscriptionId) on-org → swap read-only foreign IDs → diff UserCatalogList{catalogs{id name}} + teams{items{id orgId}}.
+  impact: cross-tenant subscription/AccessSecret/system-user password + team PII dump; Severity: high
+  testability: AUTH_HELPED
+- [HYP] b2c-cross-bu-token-boundary
+  class: OATH
+  asset: login.ciam.daimlertruck.com
+  confidence: 64
+  reasoning: ROW (oid/adUpn/entitlements/scopedEntitlements/homeOrganization/companies) and NOAM (PrimaryOrgCode/UserAppRoles/FTLOrg* dealer hierarchy incl GSSNCompanyID/DDCID/SapCode/VehOwners) issue under identical issuer+aud on one tenant+jwks; overlap claims (OIDCScopes/email/tid) give a shared namespace — if backend maps orgId from a claim both policies carry (e.g. companyId/primaryOrgCode chain) or from acr with a fallback, ROW scoping could accept NOAM-shaped tokens and vice versa.
+  evidence_needed: token minted under _noam accepted by row-scoped resolver returning different org catalog than _row token for same principal.
+  verify_steps: AUTH_HELPED: two staging accounts (row/noam) on login-qa → `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` per token, diff catalogs/orgIds for BU confusion.
+  impact: DT/DTNA BU boundary collapse → cross-BU subscriptions + PII + dealer-org data (FTL hierarchy claims); Severity: medium-high
+  testability: AUTH_HELPED
+- [HYP] apim-anonymous-op-exposure
+  class: MISCONFIG
+  asset: as.api.daimlertruck.com
+  confidence: 52
+  reasoning: region/root gateways answer unknown ops with OperationNotFound (subscription-context error); APIM products default to subscription-key gate but per-op anonymous override is a common misconfig; any anonymous-op on the ROW/NOAM truck-API fleet would return non-OperationNotFound (200/data/NonAnonymousSubscriptionRequired). Surface was never breadth-probed beyond doc paths.
+  evidence_needed: an APIM op returning body/status differing from the OperationNotFound baseline unauthenticated.
+  verify_steps: GET /status-0123456789abcdef baseline; then anonymous battery GET /api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions,/v1/status — 1 rps, diff vs baseline.
+  impact: unauthenticated truck-API data/ops (fleet/vehicle B2B) if any anonymous product; Severity: medium
+  testability: PASSIVE
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] ciam-secret-return-in-plaintext: 45 < floor, chained dependency on BOLA proof — park.
+- [PARKED] b2c-implicit-fragment-leak: policy advertises implicit, but client is confidential (client_secret_basic/post) and per-client grant config unverifiable passively — drop to 35.
+- [FINAL] 1. graphql-object-id-bola-team-scoped (75)
+- [FINAL] 2. b2c-cross-bu-token-boundary (64)
+- [FINAL] 3. apim-anonymous-op-exposure (52)
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: GET as.api.daimlertruck.com/status-0123456789abcdef (APIM health beacon) then anonymous-op battery on as.api + eu.api: /api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions — 1 rps sequential, diff every response against OperationNotFound baseline.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED b2c-cross-bu-claim-contract @ login.ciam.daimlertruck.com: both policies under identical issuer+aud with disjoint org-claim universes (ROW 89 vs NOAM 102 claims); BU separation rests solely on acr + policy-specific org claims.
+- [LEARN] ACCEPTED b2c-confidential-client @ login-qa.ciam.daimlertruck.com: token endpoint restricted to client_secret_basic/post — OAuth code-theft chains require portal client secret, so standalone open-redirect→ATO is weak regardless of callback validation.
+- [LEARN] REJECTED staging-token-prod-acceptance @ login.ciam.daimlertruck.com: staging client c387a5ab → AADB2C90018 in prod tenant; staging aud=dtagapim.stg.* vs prod aud=dtagapim.* — B2C env segregation robust.
+
+STEP 7 — RISK
+[RISK] Daimler Truck: 48/100. Claim-contract evidence sharpens the BOLA + cross-BU test plan but all portal value stays gated behind the two scoped staging B2C accounts (row + noam). New passive APIM anonymous-op battery is read-only GET on B2B truck-API ops (low blast). No live customer/employee/auth data touched this cycle (public OIDC metadata only).

@@ -154,3 +154,8 @@ https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 le
 ## 2026-09-05 19:33:57 UTC
 https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
 https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+
+## 2026-09-05 21:47:43 UTC
+https://companion.app.daimlertruck.com` -> ERR <urlopen error [Errno -2] Name or service not know
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341

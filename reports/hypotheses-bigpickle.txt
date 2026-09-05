@@ -1,10 +1,9 @@
-## 2026-09-05 19:31:31 UTC [target] (model bigpickle)
-[HYP] graphql-object-id-bola-team-scoped
-class: IDOR
-asset: developer.as.api.daimlertruck.com
-confidence: 75
-reasoning: buildManifest exposes object-ID routes (/apis/[apiId], /subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle shows GraphQL ops (subscription(teamId,appId,subscriptionId)) taking those IDs at root; /api/graphql and all catalog roots 307 to Azure AD B2C on all 6 portals — real authed endpoint behind middleware
-evidence_needed: authenticated introspection showing resolver set incl. subscription(teamId,appId,subscriptionId); reading foreign object IDs with own valid session
-verify_steps: AUTH_HELPED: B2C session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff UserCatalogList{catalogs{id name}} + teams{items{id orgId}} across row vs noam tokens
-impact: cross-tenant subscription state/config read+modify, system-user password exposure, API access-secret theft, team PII dump; Severity: high
-testability: AUTH_HELPED
+## 2026-09-05 21:45:33 UTC [target] (model bigpickle)
+[NEW] B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/adSid/entitlements/scopedEntitlements/nonScopedEntitlements/homeOrganization/companies); NOAM (102 claims) = FTL dealer-org model (PrimaryOrgCode/UserAppRoles/SM_USER + FTLOrg* family: FTLOrgSapCode, FTLOrgDDCID, FTLOrgDCVCM, FTLOrgTSSOC, FTLOrgGSSNCompanyID/OutletID, FTLOrgBrands_Org, FTLOrgCertifications, FTLOrgChildren, FTLOrgVehOwners, FTLOrgIsITAR_Org, FTLOrgIsMexico_Org). Same issuer, same aud baseline, single RSA RS256 key per policy on same tenant jwks. BU boundary = acr + org-claim mapping only.
+[NEW] Both policies advertise implicit response_types (id_token, id_token token) BUT token_endpoint restricted to client_secret_basic/post (confidential client) — code-theft chains need the portal client secret; standalone open-redirect->ATO weak.
+[HYP] apim-anonymous-op-exposure @ as.api.daimlertruck.com conf 52 — OperationNotFound is subscription-context error; anonymous-allowed ops would return different body (200/data/NonAnonymousSubscriptionRequired) — breadth probe, passive.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (64) 3. apim-anonymous-op-exposure (52)
+[NEXT] PROBE: APIM region-root OSINT battery — GET as.api.daimlertruck.com/status-0123456789abcdef then anonymous-op path set (/api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions,/v1/status) — 1 rps, expect OperationNotFound baseline; any deviation = anonymous-op candidate.
+[RISK] Daimler Truck: 48/100 — claim-contract refines BOLA/BU test plan but value stays gated behind 2 scoped B2C accounts; APIM anonymous-op battery adds a NEW passive surface (B2B truck-API ops, read-only GET, low blast); no live customer data touched (public OIDC metadata only).
+[NEXT] PROBE: GET as.api.daimlertruck.com/status-0123456789abcdef (APIM health beacon) then anonymous-op battery on as.api + eu.api: /api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions — 1 rps sequential, diff every response against OperationNotFound baseline.
+[RISK] Daimler Truck: 48/100. Claim-contract evidence sharpens the BOLA + cross-BU test plan but all portal value stays gated behind the two scoped staging B2C accounts (row + noam). New passive APIM anonymous-op battery is read-only GET on B2B truck-API ops (low blast). No live customer/employee/auth data touched this cycle (public OIDC metadata only).
