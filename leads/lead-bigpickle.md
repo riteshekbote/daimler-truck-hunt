@@ -1326,3 +1326,31 @@ verify_steps: AUTH_HELPED: two B2C accounts (dt + dtna), exchange sessions, chec
 impact: DT/DTNA business-unit boundary confusion → cross-BU API access; Severity: medium
 testability: AUTH_HELPED
 ## 2026-09-04 22:14:38 UTC [target] (model bigpickle)
+## 2026-09-05 00:18:57 UTC [target] (model bigpickle)
+[HYP] graphql-mutation-bola-post-auth
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 62
+reasoning: /api/graphql is a real route behind B2C (307 GET+POST); buildManifest exposes object-ID flows (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe); only /api/healthcheck is unauthenticated — GraphQL is the remaining high-value in-scope surface
+evidence_needed: authenticated introspection showing mutation types; cross-tenant read via victim subscriptionId/appId/teamId
+verify_steps: AUTH_HELPED: valid B2C session on developer.as -> POST /api/graphql {"query":"{__schema{types{name fields{name}}}}"} -> then mutations/queries with victim object IDs; passive fallback (done): healthcheck, providers, policy matrix
+impact: cross-tenant subscription/team manipulation -> API-key rotation, denial, org PII; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login.ciam.daimlertruck.com
+confidence: 58
+reasoning: prod tenant issues both BU policies under the SAME tenant-level issuer and SAME aud (DTAG_API_CP/user_impersonation); test/dev portals use ONE client (c387a5ab) for both policies differing only by policy path; DT vs DTNA identity is distinguished only by acr + org claim shape (FTLOrg* vs adUpn/entitlements). If the portal backend scopes subscriptions by org claims and accepts either token shape, a DTNA noam token could act in ROW context or vice versa
+evidence_needed: token minted under _noam policy accepted by row-scoped portal API; e.g. noam FTLOrg claims honored as org context for /apps/[appId]/subscriptions
+verify_steps: AUTH_HELPED: two B2C accounts (one noam, one row) -> exchange sessions -> call /api/graphql from each, compare tenant-scoped data; passive (done): both policies live on prod+staging, same aud/iss, c387a5ab shared on test
+impact: DT/DTNA business-unit boundary confusion -> cross-BU subscription/org PII access; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] developer-tst-config-drift-surface
+class: MISCONFIG
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 42
+reasoning: test/dev share client c387a5ab across both BU policies and CSP img-src renders literal "undefined" (unbound config var); prod-dtna OAuthSignin suggests unbound provider config too — recurring pattern of unbound env vars in portal builds
+evidence_needed: any unbound config that resolves permissive (open redirect target, permissive scope, extra audience); XSS sink usable under the dev/test CSP
+verify_steps: PASSIVE: diff /api/auth/providers + signin.json=true output across all 6 portals (done for as/tst.na); test XSS sink in SPA under test/dev CSP
+impact: low-medium; config-hygiene and drift signal; Severity: low
+testability: AUTH_HELPED

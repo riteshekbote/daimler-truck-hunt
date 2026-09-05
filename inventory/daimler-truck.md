@@ -155,3 +155,5 @@ www.daimlertruck.com
 ## 2026-09-04 22:25:29 UTC
 - CHANGED NextAuth.js auth flow on developer.*.api.daimlertruck.com (6 portals): previously reported "broken" — testing shows it works correctly; POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 30
 - CHANGED callbackUrl parameter validation: external domains (https://example.com) rejected and replaced with current origin in __Secure-next-auth.callback-url cookie; same-domain paths (e.g., /apis/test123) ac
+
+## 2026-09-05 00:19:09 UTC

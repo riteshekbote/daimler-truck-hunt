@@ -115,3 +115,11 @@ https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 le
 https://developer.tst.na.api.daimlertruck.com/api/auth/session -> HTTP 400
 https://developer.as.api.daimlertruck.com/api/auth/session -> HTTP 400
 https://developer.tst.na.api.daimlertruck.com/apis -> 200 len=196341
+
+## 2026-09-05 00:19:19 UTC
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+https://developer.tst.na.api.daimlertruck.com/api/auth/session -> HTTP 400
+https://developer.as.api.daimlertruck.com/api/auth/session -> HTTP 400
+https://developer.tst.na.api.daimlertruck.com/apis/ -> 200 len=196341
+https://developer.as.api.daimlertruck.com/apis/ -> 200 len=196649
