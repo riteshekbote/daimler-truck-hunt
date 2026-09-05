@@ -189,3 +189,21 @@ www.daimlertruck.com
 - CHANGED `/graphql` and `/api/graphql` return 307 on POST with introspection query (knowledge base) vs 200 SPA shell on GET (probe results) — method-dependent behavior discrepancy.
 - CHANGED OAuth misconfig @ authz.* rejection reinforced: 404s now attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent with no OAuth/OIDC surface.
 - CHANGED `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP.
+
+## 2026-09-05 23:45:19 UTC
+- NEW B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/ad
+- NEW Both policies advertise implicit response_types (id_token, id_token token) BUT token_endpoint restricted to client_secret_basic/post (confidential client) — code-theft chains need the portal client se
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/ad
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW Trailing-slash routing quirk confirmed: `/apis` (no slash) → 307 to Azure AD B2C; `/apis/` (trailing slash) → 308→200 SPA catch-all. Applies to `/apps`, `/teams`, `/products`, `/subscriptions` catalog
+- NEW Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate tenants per region.
+- NEW Build manifest from both prod (`JCvrnrykV_KYBk7pu0Npq`) and test (`JVF_tXHlhCfZQOkT-cULr`) reveals identical route structure including object-ID routes.
+- NEW CSP config drift confirmed: prod CSP includes `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`; test/dev CSP has literal `img-src 'self' data: un
+- CHANGED `/graphql` and `/api/graphql` return 307 on POST with introspection query (knowledge base) vs 200 SPA shell on GET (probe results) — method-dependent behavior discrepancy.
+- CHANGED OAuth misconfig @ authz.* rejection reinforced: 404s now attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent with no OAuth/OIDC surface.
+- CHANGED `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP.

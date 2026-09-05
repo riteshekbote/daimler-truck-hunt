@@ -1,4 +1,4 @@
-## 2026-09-05 21:47:14 UTC [target] (model nemotron3)
+## 2026-09-05 23:41:00 UTC [target] (model nemotron3)
 [NEW] Trailing-slash routing quirk confirmed: `/apis` (no slash) → 307 to Azure AD B2C; `/apis/` (trailing slash) → 308→200 SPA catch-all. Applies to `/apps`, `/teams`, `/products`, `/subscriptions` catalog roots.
 [NEW] Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate tenants per region.
 [NEW] Build manifest from both prod (`JCvrnrykV_KYBk7pu0Npq`) and test (`JVF_tXHlhCfZQOkT-cULr`) reveals identical route structure including object-ID routes.

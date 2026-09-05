@@ -4460,3 +4460,652 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] Daimler Truck: 48/100. Claim-contract evidence sharpens the BOLA + cross-BU test plan but all portal value stays gated behind the two scoped staging B2C accounts (row + noam). New passive APIM anonymous-op battery is read-only GET on B2B truck-API ops (low blast). No live customer/employee/auth data touched this cycle (public OIDC metadata only).
+===== ANALYST bigpickle 2026-09-05 23:45:19 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la && ls art/ 2>/dev/null && ls scripts/ 2>/dev/null
+total 204
+drwxr-xr-x 12 runner runner  4096 Sep  5 23:38 .
+drwxr-xr-x  3 runner runner  4096 Sep  5 23:38 ..
+drwxr-xr-x  7 runner runner  4096 Sep  5 23:38 .git
+drwxr-xr-x  3 runner runner  4096 Sep  5 23:38 .github
+-rw-r--r--  1 runner runner  1715 Sep  5 23:38 README.md
+-rw-r--r--  1 runner runner    32 Sep  5 23:38 analyst-out.txt
+-rw-r--r--  1 runner runner 56077 Sep  5 23:38 analyst-prompt.txt
+-rw-r--r--  1 runner runner 52308 Sep  5 23:38 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 leads
+-rw-r--r--  1 runner runner  8915 Sep  5 23:38 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 reports
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  5 23:38 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 scripts
+-rw-r--r--  1 runner runner    33 Sep  5 23:38 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  5 23:38 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  5 23:38 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  5 23:38 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  5 23:38 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  5 23:38 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  5 23:38 triage
+[0m
+[0m$ [0mls leads/ knowledge/ inventory/ triage/ recon-notes/ reports/
+inventory/:
+daimler-truck.md
+
+knowledge/:
+index.md
+
+leads/:
+lead-bigpickle.md
+lead-laguna.md
+lead-ling3.md
+lead-longcat.md
+lead-mimo.md
+lead-nemotron3.md
+reposcan-daimler-truck.md
+
+recon-notes/:
+CORPUS-DAIMLER.md
+DEDICATED-DEEP.md
+DEEPER-FINDINGS.md
+LOCKDOWN-ASSESSMENT.md
+SCOPE-CONFIRMATION.md
+
+reports/:
+analyst-bigpickle.log
+analyst-laguna.log
+analyst-ling3.log
+analyst-longcat.log
+analyst-nemotron3.log
+hypotheses-bigpickle.txt
+hypotheses-laguna.txt
+hypotheses-ling3.txt
+hypotheses-longcat.txt
+hypotheses-nemotron3.txt
+hypotheses.md
+valid-bugs.md
+
+triage/:
+run-2026-09-02-21-28.md
+run-2026-09-02-23-32.md
+run-2026-09-03-01-24.md
+run-2026-09-03-06-26.md
+run-2026-09-03-11-40.md
+run-2026-09-03-15-10.md
+run-2026-09-03-18-41.md
+run-2026-09-03-21-29.md
+run-2026-09-03-23-30.md
+run-2026-09-04-01-18.md
+run-2026-09-04-05-58.md
+run-2026-09-04-10-36.md
+run-2026-09-04-14-31.md
+run-2026-09-04-17-46.md
+run-2026-09-04-20-01.md
+run-2026-09-04-22-12.md
+run-2026-09-05-00-07.md
+run-2026-09-05-04-31.md
+run-2026-09-05-08-33.md
+run-2026-09-05-12-00.md
+run-2026-09-05-14-47.md
+run-2026-09-05-16-59.md
+run-2026-09-05-18-48.md
+run-2026-09-05-20-48.md
+run-2026-09-05-22-27.md
+[0m
+[0m→ [0mRead scope.yml
+[0m
+[0m$ [0mtail -40 reports/hypotheses-bigpickle.txt; echo ===; tail -20 probe-results.md; echo ===; cat reports/valid-bugs.md 2>/dev/null | tail -20
+## 2026-09-05 21:45:33 UTC [target] (model bigpickle)
+[NEW] B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/adSid/entitlements/scopedEntitlements/nonScopedEntitlements/homeOrganization/companies); NOAM (102 claims) = FTL dealer-org model (PrimaryOrgCode/UserAppRoles/SM_USER + FTLOrg* family: FTLOrgSapCode, FTLOrgDDCID, FTLOrgDCVCM, FTLOrgTSSOC, FTLOrgGSSNCompanyID/OutletID, FTLOrgBrands_Org, FTLOrgCertifications, FTLOrgChildren, FTLOrgVehOwners, FTLOrgIsITAR_Org, FTLOrgIsMexico_Org). Same issuer, same aud baseline, single RSA RS256 key per policy on same tenant jwks. BU boundary = acr + org-claim mapping only.
+[NEW] Both policies advertise implicit response_types (id_token, id_token token) BUT token_endpoint restricted to client_secret_basic/post (confidential client) — code-theft chains need the portal client secret; standalone open-redirect->ATO weak.
+[HYP] apim-anonymous-op-exposure @ as.api.daimlertruck.com conf 52 — OperationNotFound is subscription-context error; anonymous-allowed ops would return different body (200/data/NonAnonymousSubscriptionRequired) — breadth probe, passive.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (64) 3. apim-anonymous-op-exposure (52)
+[NEXT] PROBE: APIM region-root OSINT battery — GET as.api.daimlertruck.com/status-0123456789abcdef then anonymous-op path set (/api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions,/v1/status) — 1 rps, expect OperationNotFound baseline; any deviation = anonymous-op candidate.
+[RISK] Daimler Truck: 48/100 — claim-contract refines BOLA/BU test plan but value stays gated behind 2 scoped B2C accounts; APIM anonymous-op battery adds a NEW passive surface (B2B truck-API ops, read-only GET, low blast); no live customer data touched (public OIDC metadata only).
+[NEXT] PROBE: GET as.api.daimlertruck.com/status-0123456789abcdef (APIM health beacon) then anonymous-op battery on as.api + eu.api: /api/v1/vehicles,/v1/vehicles,/vehicles,/api/health,/health,/catalog/apis,/subscriptions — 1 rps sequential, diff every response against OperationNotFound baseline.
+[RISK] Daimler Truck: 48/100. Claim-contract evidence sharpens the BOLA + cross-BU test plan but all portal value stays gated behind the two scoped staging B2C accounts (row + noam). New passive APIM anonymous-op battery is read-only GET on B2B truck-API ops (low blast). No live customer/employee/auth data touched this cycle (public OIDC metadata only).
+===
+## 2026-09-05 12:10:51 UTC
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+
+## 2026-09-05 15:25:48 UTC
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+
+## 2026-09-05 17:45:30 UTC
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+
+## 2026-09-05 19:33:57 UTC
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+
+## 2026-09-05 21:47:43 UTC
+https://companion.app.daimlertruck.com` -> ERR <urlopen error [Errno -2] Name or service not know
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+===
+# Validated findings (running count 0)
+
+- 2 lead(s) marked VALID at 2026-09-04 20:01:12 UTC
+  - **Verdict: VALID**
+  - | NextAuth.js Open Redirect | **VALID** | 6.1 | Report to bugs.olivermaicher.eu |
+[0m
+[0m$ [0mfor host in as.api.daimlertruck.com eu.api.daimlertruck.com api.daimlertruck.com; do
+  echo "== $host =="
+  for p in /status-0123456789abcdef /api/v1/vehicles /v1/vehicles /vehicles /api/health /health /catalog/apis /subscriptions /v1/status; do
+    curl -s -o /tmp/opcheck.body -w "%{http_code} %{size_download}" -m 15 -A "Mozilla/5.0" "https://$host$p"
+    printf "  %-28s " "$p"
+    head -c 160 /tmp/opcheck.body | tr '\n' ' '
+    echo
+    sleep 1
+  done
+done
+== as.api.daimlertruck.com ==
+200 0  /status-0123456789abcdef     
+404 442  /api/v1/vehicles             {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /v1/vehicles                 {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /vehicles                    {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /api/health                  {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /health                      {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /catalog/apis                {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /subscriptions               {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /v1/status                   {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+== eu.api.daimlertruck.com ==
+200 0  /status-0123456789abcdef     
+404 442  /api/v1/vehicles             {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /v1/vehicles                 {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /vehicles                    {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /api/health                  {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /health                      {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /catalog/apis                {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /subscriptions               {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+404 442  /v1/status                   {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+== api.daimlertruck.com ==
+000 0  /status-0123456789abcdef     {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /api/v1/vehicles             {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /v1/vehicles                 {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /vehicles                    {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /api/health                  {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /health                      {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /catalog/apis                {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /subscriptions               {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+000 0  /v1/status                   {
+   "statusCode": "404",
+   "message": "Unknown operation requested",
+   "reason": "Unable to match incoming request to an operation.",
+   "origin": "config",
+[0m
+[0m$ [0mH=developer.tst.na.api.daimlertruck.com
+ROOTLEN=$(curl -s -m 15 -A "Mozilla/5.0" "https://$H/" -o /tmp/root.body -w "%{http_code} %{size_download}")
+echo "ROOT: $ROOTLEN"
+for p in /api/catalog /api/apis /api/apps /api/teams /api/products /api/subscriptions /api/user /api/me /api/status /api/config /api/graphql /graphql /api/version /api/registration-check /api/profile; do
+  out=$(curl -s -o /tmp/b.body -w "%{http_code} %{size_download} %{redirect_url}" -m 15 -A "Mozilla/5.0" "https://$H$p")
+  code=$(echo "$out" | cut -d' ' -f1); len=$(echo "$out" | cut -d' ' -f2); redir=$(echo "$out" | cut -d' ' -f3-)
+  note=""
+  [ "$code" = "307" ] && note="MIDDLEWARE-AUTH"
+  [ "$code" = "200" ] && [ "$len" = "196341" ] && note="SPA-shell"
+  [ "$code" = "200" ] && [ "$len" != "196341" ] && note="REAL-200"
+  printf "%s %-8s len=%-7s %s %s\n" "$p" "$code" "$len" "$note" "$redir"
+  sleep 1
+done
+ROOT: 200 196341
+/api/catalog 307      len=30      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fcatalog
+/api/apis 307      len=27      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fapis
+/api/apps 307      len=27      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fapps
+/api/teams 307      len=28      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fteams
+/api/products 307      len=31      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fproducts
+/api/subscriptions 307      len=36      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fsubscriptions
+/api/user 307      len=27      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fuser
+/api/me 307      len=25      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fme
+/api/status 307      len=29      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fstatus
+/api/config 307      len=29      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fconfig
+/api/graphql 307      len=30      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fgraphql
+/graphql 307      len=24      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fgraphql
+/api/version 307      len=30      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fversion
+/api/registration-check 307      len=41      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fregistration-check
+/api/profile 307      len=30      MIDDLEWARE-AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fprofile
+[0m
+[0m$ [0mH=developer.tst.na.api.daimlertruck.com
+for p in "/apis/test123.json" "/api/me.json" "//api/graphql" "/API/GRAPHQL" "/api/graphql%2f" "/graphql?" "/apis/test123/" "/teams/xyz/system-users" "/_next/server-actions/foo" "/a/../../../api/healthcheck" "/api/graphql/.json" "/apis/../../api/healthcheck" "/%2e%2e/api/healthcheck"; do
+  out=$(curl -s -o /tmp/c.body -w "%{http_code} %{size_download} %{redirect_url}" -m 15 -A "Mozilla/5.0" "https://$H$p")
+  code=$(echo "$out" | cut -d' ' -f1); len=$(echo "$out" | cut -d' ' -f2); redir=$(echo "$out" | cut -d' ' -f3-)
+  note=""
+  [ "$code" = "307" ] && note="AUTH"
+  [ "$code" = "200" ] && [ "$len" = "196341" ] && note="SPA"
+  [ "$code" = "200" ] && [ "$len" != "196341" ] && note="REAL200"
+  printf "%-36s %s len=%-7s %s %s\n" "$p" "$code" "$len" "$note" "$redir"
+  sleep 1
+done
+/apis/test123.json                   307 len=36      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapis%2Ftest123.json
+/api/me.json                         307 len=30      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fme.json
+//api/graphql                        308 len=12       https://developer.tst.na.api.daimlertruck.com/api/graphql
+/API/GRAPHQL                         307 len=30      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2FAPI%2FGRAPHQL
+/api/graphql%2f                      307 len=35      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fgraphql%252f
+/graphql?                            307 len=24      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fgraphql
+/apis/test123/                       308 len=13       https://developer.tst.na.api.daimlertruck.com/apis/test123
+/teams/xyz/system-users              307 len=43      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fteams%2Fxyz%2Fsystem-users
+/_next/server-actions/foo            404 len=13502    
+/a/../../../api/healthcheck          200 len=70      REAL200 
+/api/graphql/.json                   307 len=38      AUTH https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fgraphql%2F.json
+/apis/../../api/healthcheck          200 len=70      REAL200 
+/%2e%2e/api/healthcheck              200 len=70      REAL200
+[0m
+[0m$ [0mgrep -rhiE "client.?id|205f35f7|88f558f5|3db550f0|login-qa|authorize|single-sign-on|jwks|oauth2/v2.0" recon-notes/ leads/*.md 2>/dev/null | head -50
+- `/v2/auth/api-key` — API key auth (companyId + clientId + key)
+- API keys: `companyId` + `clientId` + `key` (in request body)
+During authorized passive reconnaissance on the **Daimler Truck Holding AG** program (scope: "All infrastructure, digital services, brands and subsidiaries operated by Daimler Truck Holding AG"), I identified a genuine, wildcard-clean set of API/developer hosts under `daimlertruck.com`. I only performed read-only DNS + HTTP(S)-GET fingerpronting (no active testing, no fuzzing, no auth attempts). Before I invest further effort, I'd like written confirmation that the following hosts are in scope and authorized for security testing:
+During authorized passive reconnaissance on the **alfaview gmbh** program (scope: "all company-operated subdomains" of alfaview.com), I identified genuine dedicated hosts. The program scope already states alfaview.com **and company-operated subdomains** are included — I want to confirm the following specific hosts/namespaces are in scope before any active testing:
+impact: Full API schema enumeration → unauthorized mutations (data tampering, BOLA) → Critical/High
+reasoning: 7 authz.* subdomains (all 404 on /) suggest centralized auth service; OAuth/OIDC endpoints typically live at /.well-known/oauth-authorization-server, /authorize, /token, /introspect, /revoke
+evidence_needed: Open redirect on /authorize; PKCE not enforced; state parameter not validated; token endpoint leaks client secrets
+verify_steps: GET /.well-known/oauth-authorization-server; GET /.well-known/openid-configuration; GET /authorize?client_id=test&redirect_uri=https://evil.com&response_type=code&scope=openid; POST /token with various grant_types
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, BOLA across tenant APIs) → Critical/High
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ → capture full Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri); then AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using authenticated session
+verify_steps: GET https://developer.as.api.daimlertruck.com/ → capture Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri); AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using valid session cookie/token
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, BOLA across tenant APIs) → Critical/High
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ → capture full Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri, state parameter); then AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using authenticated session cookie/token from valid test account
+reasoning: 3 prod environments (as,eu,na) share identical buildId `JCvrnrykV_KYBk7pu0Npq`; 3 test/dev environments share `JVF_tXHlhCfZQOkT-cULr`; separate deployments suggest potentially different Azure AD B2C tenant configs; Azure AD B2C may issue tokens valid across environments if same tenant/client_id; no evidence of environment-level token audience validation
+[PARKED] Developer Portal Cross-Environment Token Reuse — Tenant Isolation Bypass Across Prod/Test Deployments: confidence 55 but speculative — requires valid Azure AD B2C session + cross-env token reuse; no evidence yet of shared tenant/client_id across environments; AUTH_HELPED only
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+impact: Medium – unauthorized access to vector database containing corporate document embeddings if defaults are used in production
+impact: Full API schema enumeration → unauthorized mutations (data tampering, BOLA) → Critical/High
+reasoning: 7 authz.* subdomains (all 404 on /) suggest centralized auth service; OAuth/OIDC endpoints typically live at /.well-known/oauth-authorization-server, /authorize, /token, /introspect, /revoke
+evidence_needed: Open redirect on /authorize; PKCE not enforced; state parameter not validated; token endpoint leaks client secrets
+verify_steps: GET /.well-known/oauth-authorization-server; GET /.well-known/openid-configuration; GET /authorize?client_id=test&redirect_uri=https://evil.com&response_type=code&scope=openid; POST /token with various grant_types
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, BOLA across tenant APIs) → Critical/High
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ → capture full Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri); then AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using authenticated session
+verify_steps: GET https://developer.as.api.daimlertruck.com/ → capture Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri); AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using valid session cookie/token
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, BOLA across tenant APIs) → Critical/High
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ → capture full Azure AD B2C auth flow (redirect URL, client_id, scope, redirect_uri, state parameter); then AUTH_HELPED: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name}}}}"}` using authenticated session cookie/token from valid test account
+reasoning: 3 prod environments (as,eu,na) share identical buildId `JCvrnrykV_KYBk7pu0Npq`; 3 test/dev environments share `JVF_tXHlhCfZQOkT-cULr`; separate deployments suggest potentially different Azure AD B2C tenant configs; Azure AD B2C may issue tokens valid across environments if same tenant/client_id; no evidence of environment-level token audience validation
+[PARKED] Developer Portal Cross-Environment Token Reuse — Tenant Isolation Bypass Across Prod/Test Deployments: confidence 55 but speculative — requires valid Azure AD B2C session + cross-env token reuse; no evidence yet of shared tenant/client_id across environments; AUTH_HELPED only
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+impact: Medium – unauthorized access to vector database containing corporate document embeddings if defaults are used in production
+[NEW] OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, policy b2c_1a_signin_oidc_row, client c387a5ab, scope dtagapim.stg.ciam.daimlertruck.com/DTAG_API_CP/user_impersonation, redirect_uri locked to same-origin /api/auth/callback/azure-ad-b2c-dt, PKCE S256 + state present
+[NEW] OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+reasoning: two B2C providers share same client_id c387a5ab and same staging tenant on test; dtna (NOAM) and dt (ROW) differ only in policy (b2c_1a_signin_oidc_noam vs _row); if post-login role/subscription derivation uses only the policy-context user object, cross-bu registration or role confusion between DT and DTNA possible
+evidence_needed: whether same client_id/token audience allows token from row policy to access noam-scoped APIs after redirect_uri swap; test would need valid creds for both policies
+[PARKED] nextauth-dtna-provider-isolation: 45 — requires two valid B2C credentials (dt + dtna) to test cross-policy token validity; human/auth-helped only; no passive way to confirm shared client_id is exploitable
+[LEARN] REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test is proper environment segregation (prod uses login.ciam.daimlertruck.com, test uses login-qa.ciam.daimlertruck.com) — config drift is intentional, not a vuln
+reasoning: two B2C providers share client_id c387a5ab and same staging tenant, differ only in policy (`b2c_1a_signin_oidc_noam` vs `_row`); cross-BU (DT vs DTNA) token/role confusion possible if object derivation is policy-only
+reasoning: Test/dev portals share one B2C `client_id c387a5ab` across both BU policies (`b2c_1a_signin_oidc_row` vs `_noam`), same tenant-level issuer+aud; schema uses `Team.orgId` and `UserCatalogList.catalogs` as the only scoping keys — if backend derives tenant from token `org/acr` claims and one policy's token shape satisfies the other's checks, BU separation collapses
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com (ROW policy `b2c_1a_signin_oidc_row`, plus one NA `_noam`) for developer.tst.na.api.daimlertruck.com; then run AUTH_HELPED verify on this session's schema: POST /api/graphql `{__schema{types{name fields{name}}}}`, then `subscription(teamId,appId,subscriptionId)` with on-org IDs baseline → foreign IDs read-only; diff `UserCatalogList` catalogs between row/noam tokens.
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com (ROW policy `b2c_1a_signin_oidc_row`, plus one NA `_noam`) for developer.tst.na.api.daimlertruck.com; then run AUTH_HELPED verify on this session's schema: POST /api/graphql `{__schema{types{name fields{name}}}}`, then `subscription(teamId,appId,subscriptionId)` with on-org IDs baseline -> foreign IDs read-only; diff `UserCatalogList` catalogs between row/noam tokens.
+reasoning: test/dev portals share one B2C client_id across ROW (`b2c_1a_signin_oidc_row`) and NA (`_noam`) policies under same tenant issuer+aud; schema scopes by Team.orgId + UserCatalogList.catalogs — if backend derives BU from token acr/org claims and one policy's shape satisfies the other's checks, BU separation collapses
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one under ROW policy `b2c_1a_signin_oidc_row` and one under NA policy `b2c_1a_signin_oidc_noam` (separate orgs to enable BU-boundary diff); then AUTH_HELPED run: POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}` across the row vs noam tokens
+[LEARN] REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct on all 6 portals
+reasoning: test/dev portals share one B2C client_id across ROW (`b2c_1a_signin_oidc_row`) and NA (`_noam`) policies under same tenant issuer+aud; schema scopes by Team.orgId + UserCatalogList.catalogs — if backend derives BU from token acr/org claims and one policy's shape satisfies the other's checks, BU separation collapses
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one under ROW policy `b2c_1a_signin_oidc_row` and one under NA policy `b2c_1a_signin_oidc_noam` (separate orgs to enable BU-boundary diff); then AUTH_HELPED run: POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}` across the row vs noam tokens
+[LEARN] REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct on all 6 portals
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one under ROW policy `b2c_1a_signin_oidc_row` and one under NA policy `b2c_1a_signin_oidc_noam` (separate orgs); then AUTH_HELPED run: POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}` across row vs noam tokens
+[NEW] B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/adSid/entitlements/scopedEntitlements/nonScopedEntitlements/homeOrganization/companies); NOAM (102 claims) = FTL dealer-org model (PrimaryOrgCode/UserAppRoles/SM_USER + FTLOrg* family: FTLOrgSapCode, FTLOrgDDCID, FTLOrgDCVCM, FTLOrgTSSOC, FTLOrgGSSNCompanyID/OutletID, FTLOrgBrands_Org, FTLOrgCertifications, FTLOrgChildren, FTLOrgVehOwners, FTLOrgIsITAR_Org, FTLOrgIsMexico_Org). Same issuer, same aud baseline, single RSA RS256 key per policy on same tenant jwks. BU boundary = acr + org-claim mapping only.
+impact: Full API schema enumeration → unauthorized mutations (data tampering, BOLA) → Critical/High
+reasoning: 7 authz.* subdomains (all 404 on /) suggest centralized auth service; OAuth/OIDC endpoints typically live at /.well-known/oauth-authorization-server, /authorize, /token, /introspect, /revoke
+[0m
+[0m$ [0mprobe_authz() {
+  local label="$1" tenant="$2" client="$3" redir="$4" rt="$5" rm="$6"
+  local url="https://login-qa.ciam.daimlertruck.com/$tenant/oauth2/v2.0/authorize?p=b2c_1a_signin_oidc_row&client_id=$client&nonce=abc&redirect_uri=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$redir")&scope=openid&response_type=$rt&response_mode=$rm&state=xyz"
+  curl -s -D /tmp/h.txt -o /tmp/a.body -w "$label code=%{http_code} redir=%{redirect_url}\n" -m 20 -A "Mozilla/5.0" "$url"
+  loc=$(grep -i '^location:' /tmp/h.txt | head -1 | cut -c1-160)
+  size=$(wc -c < /tmp/a.body)
+  echo "  size=$size loc=$loc"
+  head -c 120 /tmp/a.body | tr '\n' ' '; echo
+  sleep 1
+}
+ST8=88f558f5-a216-470b-b34a-3164f5d6ec0f
+probe_authz "stg-RT=code    " "$ST8" "c387a5ab" "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt" "code" "query"
+probe_authz "stg-RT=token   " "$ST8" "c387a5ab" "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt" "token" "fragment"
+probe_authz "stg-RT=id_token" "$ST8" "c387a5ab" "https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt" "id_token" "fragment"
+stg-RT=code     code=200 redir=
+  size=130923 loc=
+<!DOCTYPE html>
+ <!-- Build: 1.1.783.0 -->
+ <!-- StateVersion: 2.1.1 -->
+ <!-- DeploymentMode: Development -->
+ <!-- Cor
+stg-RT=token    code=200 redir=
+  size=130923 loc=
+<!DOCTYPE html>
+ <!-- Build: 1.1.783.0 -->
+ <!-- StateVersion: 2.1.1 -->
+ <!-- DeploymentMode: Development -->
+ <!-- Cor
+stg-RT=id_token code=200 redir=
+  size=130923 loc=
+<!DOCTYPE html>
+ <!-- Build: 1.1.783.0 -->
+ <!-- StateVersion: 2.1.1 -->
+ <!-- DeploymentMode: Development -->
+ <!-- Cor
+[0m
+[0m$ [0mgrep -oE "<title>[^<]*</title>|error_description|AADB2C[0-9]+|input name=\"(logonIdentifier|candidate|rememberMe)|autotId|drt=B2C_1A_SIGNIN_OIDC_ROW|signInName" /tmp/a.body | sort -u; echo ---; ls -la /tmp/a.body
+<title>Loading...</title>
+AADB2C90018
+---
+-rw-r--r-- 1 runner runner 130923 Sep  5 23:41 /tmp/a.body
+[0m
+[0m$ [0mgrep -rhoE "c387a5ab[0-9a-f-]*" recon-notes/ leads/ knowledge/ reports/ 2>/dev/null | sort -u | head; echo ---; grep -rhoE "client_id=[0-9a-f-]{20,}" recon-notes/ leads/ 2>/dev/null | sort -u | head; echo ---; grep -rn "c387a5ab" recon-notes/DEEPER-FINDINGS.md 2>/dev/null | head
+c387a5ab
+c387a5ab-f534-48ee-b026-c24f9a0a92d5
+---
+---
+[0m
+[0m$ [0mprobe_authz() {
+  local label="$1" tenant="$2" client="$3" redir="$4" rt="$5" rm="$6"
+  local url="https://login-qa.ciam.daimlertruck.com/$tenant/oauth2/v2.0/authorize?p=b2c_1a_signin_oidc_row&client_id=$client&nonce=abc&redirect_uri=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$redir")&scope=openid&response_type=$rt&response_mode=$rm&state=xyz"
+  curl -s -D /tmp/h.txt -o /tmp/a.body -w "$label code=%{http_code} redir=%{redirect_url}\n" -m 20 -A "Mozilla/5.0" "$url"
+  loc=$(grep -i '^location:' /tmp/h.txt | head -1 | cut -c1-120)
+  size=$(wc -c < /tmp/a.body)
+  err=$(grep -oE "AADB2C[0-9]+|error_[a-z]+|title>[^<]*" /tmp/a.body | sort -u | tr '\n' ' ')
+  echo "  size=$size err=[$err] loc=$loc"
+  sleep 1
+}
+ST8=88f558f5-a216-470b-b34a-3164f5d6ec0f
+CID=c387a5ab-f534-48ee-b026-c24f9a0a92d5
+REDIR=https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt
+probe_authz "stg-RT=code     " "$ST8" "$CID" "$REDIR" "code" "query"
+probe_authz "stg-RT=token    " "$ST8" "$CID" "$REDIR" "token" "fragment"
+probe_authz "stg-RT=id_token " "$ST8" "$CID" "$REDIR" "id_token" "fragment"
+stg-RT=code      code=302 redir=https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/authorize?client_id=a43f98c7-88be-4bfa-975c-8b8caa86ba48&redirect_uri=https%3a%2f%2flogin-qa.ciam.daimlertruck.com%2f88f558f5-a216-470b-b34a-3164f5d6ec0f%2foauth2%2fauthresp&response_type=code&scope=openid&response_mode=form_post&nonce=ZIBc0rnWZC468TUCovD9MQ%3d%3d&AppClientID=c387a5ab-f534-48ee-b026-c24f9a0a92d5&state=StateProperties%3deyJTSUQiOiJ4LW1zLWNwaW0tcmM6YzViNDU1MTQtODhmZS00MWEwLWE2OTMtNDQ0MmE1YWI4ZTg2IiwiVElEIjoiMjJiYTIzNTctMDlkNi00Y2ZiLTg5MTktYjdkZjQzZDIyODQ4IiwiVE9JRCI6Ijg4ZjU1OGY1LWEyMTYtNDcwYi1iMzRhLTMxNjRmNWQ2ZWMwZiJ9
+  size=791 err=[title> title>Object moved ] loc=location: https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/au
+stg-RT=token     code=302 redir=https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt#error=invalid_request&error_description=AADB2C90055%3a+The+scope+%27openid%27+provided+in+request+must+specify+a+resource%2c+such+as+%27https%3a%2f%2fexample.com%2fcalendar.read%27.%0d%0aCorrelation+ID%3a+5db062da-163e-4498-8582-63fea49f3de8%0d%0aTimestamp%3a+2026-09-05+23%3a42%3a21Z%0d%0a&state=xyz
+  size=505 err=[AADB2C90055 error_description title> title>Object moved ] loc=location: https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt#error=invalid_request&error_de
+stg-RT=id_token  code=302 redir=https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt#error=unauthorized_client&error_description=AADB2C90057%3a+The+provided+application+is+not+configured+to+allow+the+%27OAuth%27+Implicit+flow.%0d%0aCorrelation+ID%3a+fa09ecab-cfc3-4cd4-b3e4-fd3f61c7d395%0d%0aTimestamp%3a+2026-09-05+23%3a42%3a23Z%0d%0a&state=xyz
+  size=465 err=[AADB2C90057 error_description title> title>Object moved ] loc=location: https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt#error=unauthorized_client&erro
+[0m
+[0m$ [0mgrep -rhoE "205f35f7[0-9a-f-]*" recon-notes/ leads/ knowledge/ 2>/dev/null | sort -u | head; echo ---BUSID-PROD-AND-STG---; for h in login.businessid.daimlertruck.com login.businessid-qa.daimlertruck.com; do echo "== $h =="; curl -s -o /tmp/o.body -w "code=%{http_code} size=%{size_download}\n" -m 15 -A "Mozilla/5.0" "https://$h"; head -c 150 /tmp/o.body | tr '\n' ' '; echo; sleep 1; done; echo ---OIDC-STG---; curl -s -o /tmp/o2.body -w "code=%{http_code} size=%{size_download}\n" -m 15 -A "Mozilla/5.0" "https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/v2.0/.well-known/openid-configuration"; head -c 400 /tmp/o2.body; echo
+205f35f7
+---BUSID-PROD-AND-STG---
+== login.businessid.daimlertruck.com ==
+code=404 size=103
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+== login.businessid-qa.daimlertruck.com ==
+code=404 size=103
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+---OIDC-STG---
+code=200 size=2909
+{
+  "issuer": "https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/v2.0/",
+  "authorization_endpoint": "https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/token",
+  "en
+[0m
+[0m$ [0mgrep -rh "205f35f7\|c387a5ab" recon-notes/ leads/ knowledge/ reports/*.log 2>/dev/null | grep -vE "205f35f7$|c387a5ab$" | head -20
+[NEW] OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, policy b2c_1a_signin_oidc_row, client c387a5ab, scope dtagapim.stg.ciam.daimlertruck.com/DTAG_API_CP/user_impersonation, redirect_uri locked to same-origin /api/auth/callback/azure-ad-b2c-dt, PKCE S256 + state present
+[NEW] OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+reasoning: two B2C providers share same client_id c387a5ab and same staging tenant on test; dtna (NOAM) and dt (ROW) differ only in policy (b2c_1a_signin_oidc_noam vs _row); if post-login role/subscription derivation uses only the policy-context user object, cross-bu registration or role confusion between DT and DTNA possible
+reasoning: two B2C providers share client_id c387a5ab and same staging tenant, differ only in policy (`b2c_1a_signin_oidc_noam` vs `_row`); cross-BU (DT vs DTNA) token/role confusion possible if object derivation is policy-only
+reasoning: prod tenant issues both BU policies under the SAME tenant-level issuer and SAME aud (DTAG_API_CP/user_impersonation); test/dev portals use ONE client (c387a5ab) for both policies differing only by policy path; DT vs DTNA identity is distinguished only by acr + org claim shape (FTLOrg* vs adUpn/entitlements). If the portal backend scopes subscriptions by org claims and accepts either token shape, a DTNA noam token could act in ROW context or vice versa
+verify_steps: AUTH_HELPED: two B2C accounts (one noam, one row) -> exchange sessions -> call /api/graphql from each, compare tenant-scoped data; passive (done): both policies live on prod+staging, same aud/iss, c387a5ab shared on test
+reasoning: test/dev share client c387a5ab across both BU policies and CSP img-src renders literal "undefined" (unbound config var); prod-dtna OAuthSignin suggests unbound provider config too — recurring pattern of unbound env vars in portal builds
+reasoning: Test/dev portals share one B2C `client_id c387a5ab` across both BU policies (`b2c_1a_signin_oidc_row` vs `_noam`), same tenant-level issuer+aud; schema uses `Team.orgId` and `UserCatalogList.catalogs` as the only scoping keys — if backend derives tenant from token `org/acr` claims and one policy's token shape satisfies the other's checks, BU separation collapses
+{"url":"https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=nbBowZ_qiAstO83Zl3xRYQZX-AHgv3aGo8Li1Sb7K68&code_challenge=Y5fZd76EWemmXXhYQusr39jtUtW0t96CMmP9nBU5zns&code_challenge_method=S256"}
+4. The client_id is `c387a5ab-f534-48ee-b026-c24f9a0a92d5`.
+https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=205f35f7-db26-47b8-806d-5387ee8e48a4&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.as.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=8cp-SiOiKw9YLtTOnDc_0Rs5HfDpTq80pb-Wcg7ar3s&code_challenge=Q-fsInB9RLHYuOpQc3l1fdloU8noGplntFWkaNHuL0k&code_challenge_method=S256
+{"url":"https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dtna&state=Gmwa7BLMzHQPhedWq4XOMhOFajVma20UW145ZRRPwuc&code_challenge=AZMzfR7vD-KgX5M_u6DgYPMXJFyJSsEqc8N3aZkCM2E&code_challenge_method=S256"}
+[NEW] OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, policy b2c_1a_signin_oidc_row, client c387a5ab, scope dtagapim.stg.ciam.daimlertruck.com/DTAG_API_CP/user_impersonation, redirect_uri locked to same-origin /api/auth/callback/azure-ad-b2c-dt, PKCE S256 + state present
+[NEW] OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+reasoning: two B2C providers share same client_id c387a5ab and same staging tenant on test; dtna (NOAM) and dt (ROW) differ only in policy (b2c_1a_signin_oidc_noam vs _row); if post-login role/subscription derivation uses only the policy-context user object, cross-bu registration or role confusion between DT and DTNA possible
+- Same client_id `c387a5ab-f534-48ee-b026-c24f9a0a92d5`
+- client_id `205f35f7-db26-47b8-806d-5387ee8e48a4`
+- [NEW] `/api/auth/providers` exposes 2 OAuth providers on all portals: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NOAM, policy `b2c_1a_signin_oidc_noam`), shared client_id `c387a5ab` on test
+reasoning: two B2C providers share client_id c387a5ab and same staging tenant, differ only in policy (`b2c_1a_signin_oidc_noam` vs `_row`); cross-BU (DT vs DTNA) token/role confusion possible if object derivation is policy-only
+{"url":"https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=205f35f7-db26-47b8-806d-5387ee8e48a4&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.as.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=7sbICksqteoruGD1By8iY_tNcbilVCFNJf-F36KhEUk&code_challenge=fMq2AzWq3Jvy6Z1dUquNf_D2pFrTPDX2T8-tDotxyhU&code_challenge_method=S256"}
+[0m
+[0m$ [0mREDIR=https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt
+url="https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=205f35f7-db26-47b8-806d-5387ee8e48a4&nonce=abc&redirect_uri=$(python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$REDIR")&scope=openid&response_type=code&state=xyz"
+curl -s -o /dev/null -D /tmp/h2.txt -w "code=%{http_code} redir=%{redirect_url}\n" -m 20 -A "Mozilla/5.0" "$url"
+grep -i '^location:' /tmp/h2.txt | cut -c1-200
+code=302 redir=https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize?client_id=82559bb7-9291-485c-abb0-02eb14429aad&redirect_uri=https%3a%2f%2flogin.ciam.daimlertruck.com%2f3db550f0-0c7f-439b-8e24-e32bf233615d%2foauth2%2fauthresp&response_type=code&scope=openid&response_mode=form_post&nonce=C2HxvWYtIvQ8AWxq61kvdg%3d%3d&AppClientID=205f35f7-db26-47b8-806d-5387ee8e48a4&state=StateProperties%3deyJTSUQiOiJ4LW1zLWNwaW0tcmM6NTI0Y2RiODItYTU5YS00YjEyLTg1ZTgtM2IzNTEyNDQ5NTZjIiwiVElEIjoiYzcwMzRlNTctNTBjNS00ZjBmLWE3MDItMTM0YTAyM2NhZGMzIiwiVE9JRCI6IjNkYjU1MGYwLTBjN2YtNDM5Yi04ZTI0LWUzMmJmMjMzNjE1ZCJ9
+location: https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize?client_id=82559bb7-9291-485c-abb0-02eb14429aad&redirect_uri=https%3a%2f%2fl
+[0m
+[0m$ [0mfor t in "e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7|login.businessid-qa.daimlertruck.com|STG" "f266a340-d336-4be7-a230-704d8fcf0211|login.businessid.daimlertruck.com|PRD"; do
+  T=$(echo "$t" | cut -d'|' -f1); H=$(echo "$t" | cut -d'|' -f2); L=$(echo "$t" | cut -d'|' -f3)
+  echo "===== $L businessid metadata ($H / $T) ====="
+  curl -s -m 20 -A "Mozilla/5.0" "https://$H/$T/b2c_1a_signin/v2.0/.well-known/openid-configuration" -o /tmp/m.json
+  wc -c /tmp/m.json
+  python3 -c "import json;d=json.load(open('/tmp/m.json'));print({k:d.get(k) for k in ['issuer','authorization_endpoint','token_endpoint','jwks_uri','response_types_supported','response_modes_supported','grant_types_supported','subject_types_supported','id_token_signing_alg_values_supported','token_endpoint_auth_methods_supported']})"
+  sleep 1
+  echo "--- jwks ---"
+  JWKS=$(python3 -c "import json;print(json.load(open('/tmp/m.json')).get('jwks_uri',''))")
+  curl -s -m 20 -A "Mozilla/5.0" "$JWKS" -o /tmp/j.json
+  python3 -c "
+import json
+d=json.load(open('/tmp/j.json'))
+for k in d.get('keys',[]):
+    print('kid='+k.get('kid',''),'kty='+k.get('kty',''),'alg='+k.get('alg',''),'n_len='+str(len(k.get('n',''))))
+"
+  sleep 1
+done
+===== STG businessid metadata (login.businessid-qa.daimlertruck.com / e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7) =====
+2909 /tmp/m.json
+{'issuer': 'https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/v2.0/', 'authorization_endpoint': 'https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/authorize', 'token_endpoint': 'https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/token', 'jwks_uri': 'https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/discovery/v2.0/keys', 'response_types_supported': ['code', 'code id_token', 'code token', 'code id_token token', 'id_token', 'id_token token', 'token', 'token id_token'], 'response_modes_supported': ['query', 'fragment', 'form_post'], 'grant_types_supported': None, 'subject_types_supported': ['pairwise'], 'id_token_signing_alg_values_supported': ['RS256'], 'token_endpoint_auth_methods_supported': ['client_secret_post', 'client_secret_basic']}
+--- jwks ---
+kid=ckbK-lTE7PK4MpfC5CfYliaYLjECE91Ki1sf1TVUp-c kty=RSA alg= n_len=342
+===== PRD businessid metadata (login.businessid.daimlertruck.com / f266a340-d336-4be7-a230-704d8fcf0211) =====
+2891 /tmp/m.json
+{'issuer': 'https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/v2.0/', 'authorization_endpoint': 'https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize', 'token_endpoint': 'https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/token', 'jwks_uri': 'https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/discovery/v2.0/keys', 'response_types_supported': ['code', 'code id_token', 'code token', 'code id_token token', 'id_token', 'id_token token', 'token', 'token id_token'], 'response_modes_supported': ['query', 'fragment', 'form_post'], 'grant_types_supported': None, 'subject_types_supported': ['pairwise'], 'id_token_signing_alg_values_supported': ['RS256'], 'token_endpoint_auth_methods_supported': ['client_secret_post', 'client_secret_basic']}
+--- jwks ---
+kid=tfwD7DvpHMavsGSSNLYB3AELcGjOQrNKwj9cGpSHI-0 kty=RSA alg= n_len=342
+[0m
+[0m$ [0menc(){ python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$1"; }
+STG="https://login.businessid-qa.daimlertruck.com/e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7/b2c_1a_signin/oauth2/v2.0/authorize"
+PRD="https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize"
+STGREDIR="https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/oauth2/authresp"
+PRDREDIR="https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/oauth2/authresp"
+awk_dev(){ python3 -c "
+import re,sys
+s=sys.stdin.read()
+m=re.search(r'error_description[^&\"]*',s)
+print((m.group(0)[:120] if m else 'NO-ERROR-FIELD'))
+print('has-login-form:', '<form' in s)
+print('title:', (re.search(r'<title>([^<]*)',s).group(1) if re.search(r'<title>([^<]*)',s) else 'none'))
+"; }
+probe(){ local L="$1" base="$2" cid="$3" redir="$4" rt="$5" rm="$6"
+  local u="$base?client_id=$cid&nonce=abc&redirect_uri=$(enc "$redir")&scope=openid&response_type=$rt&response_mode=$rm&state=xyz"
+  curl -s -D /tmp/bb.txt -o /tmp/bb.body -w "$L RT=$rt RM=$rm code=%{http_code}\n" -m 20 -A "Mozilla/5.0" "$u"
+  grep -i '^location:' /tmp/bb.txt | cut -c1-150
+  awk_dev < /tmp/bb.body; sleep 1; }
+probe "BUSID-STG" "$STG" "a43f98c7-88be-4bfa-975c-8b8caa86ba48" "$STGREDIR" "id_token" "fragment"
+probe "BUSID-PRD" "$PRD" "82559bb7-9291-485c-abb0-02eb14429aad" "$PRDREDIR" "id_token" "fragment"
+BUSID-STG RT=id_token RM=fragment code=302
+location: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/oauth2/authresp#error=unauthorized_client&error_description=AADB
+error_description=AADB2C90057%3a+The+provided+application+is+not+configured+to+allow+the+%27OAuth%27+Implicit+flow.%0d%0
+has-login-form: False
+title: Object moved
+BUSID-PRD RT=id_token RM=fragment code=302
+location: https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/oauth2/authresp#error=unauthorized_client&error_description=AADB2C9
+error_description=AADB2C90057%3a+The+provided+application+is+not+configured+to+allow+the+%27OAuth%27+Implicit+flow.%0d%0
+has-login-form: False
+title: Object moved
+[0m
+[0m$ [0menc(){ python3 -c "import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1],safe=''))" "$1"; }
+PRD="https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize"
+PRDREDIR="https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/oauth2/authresp"
+u="$PRD?client_id=82559bb7-9291-485c-abb0-02eb14429aad&nonce=abc&redirect_uri=$(enc "$PRDREDIR")&scope=openid&response_type=code&response_mode=query&state=xyz"
+curl -s -D /tmp/c.txt -o /tmp/c.body -w "code=%{http_code} size=%{size_download}\n" -m 25 -A "Mozilla/5.0" "$u"
+grep -iE '^location:|^set-cookie' /tmp/c.txt | head -8
+echo "--- body hints ---"
+grep -oE "<title>[^<]*</title>|login.microsoftonline.com[^\"']*|signin[^\"']*|Daimler[^<]{0,40}|id=\"[a-zA-Z]+\"|B2C_DEFAULT|forgot|facebook|google" /tmp/c.body | sort -u | head -20
+code=200 size=175061
+set-cookie: x-ms-cpim-csrf=SThmdkxLSW9taGluK28xcldOdHFtbU11M1F1bVFLS0F2VVlrVUtZdU1vWUxLSWNNM3VBK2dEQkVhTHZhRllWK3RoTVEwWWdtdS94WTI3QmtaMXhHbnc9PTsyMDI2LTA5LTA1VDIzOjQ0OjE1LjAyNTQxOTVaOzUvQkszSXczV1MzTDR5K2FXQVNKRWc9PTt7Ik9yY2hlc3RyYXRpb25TdGVwIjoyfQ==; domain=login.businessid.daimlertruck.com; path=/; SameSite=None; secure; HttpOnly
+set-cookie: x-ms-cpim-cache|rwuvcnkmfuua2uca_cj3aq_0=m1.TREXdD13H5I1jWaP.l/swc6Dfi0wBb03IF3FeCQ==.0.CpKJvVNGa8Roob16WTmVdho/VX4IM/qc3lqVyO2At247ASYXm2oGXHXGr5x9fTYlTV57XZPm5QfwYWegr2xgUdn5MUmCYvbTiYv49PIjiKQ3ledMEbDXetje1eM2hMvZ3x3uI4aVTUGu2jT3b4R2aQhEbXiKmIhINrvyqaaYrg01wLm+CaXXjVK/ISsnAJIx6Of2a0R6DSUN4vGwMbwB65FI1Hq0IIg/Y8gsc5iZxKacaqjWE5NT5R19i0oLo6GDc5xX0HZ/kMUYcMrUO5RtyqgGSU/FnSi0dMSHvZEnV5b6YUwEEzWkYV4YyO/fOo1UK1muM2ptMZAg2gh31g4AfpQjxE4w3P1sgy12eEJruRstEJ+/TVhzSLrXpJE1ROLOtqvbknQRW52FAkP8PxYMPYwYiJcPG14oGdkxe0GC0Ak34/fzoGXIfM2m8CzyEobcgQtF5kQOpO9wEiWQ34cbF2pIXM/bso8O4qxz0Ib/3DUPcniyIQAuJ10dm7WhhiinUGcltBGGcVcwI5eQsWcbipXvpaT+/YzfVHf56ZrwUZk8QJpc+g10WMW1avldi5bvRNJmYbehacTCUWGsNz7Vv6+VKcERvGvQRr71y6ln6i8Bmrl8Am+Clnt6v7xPOY6lqD3javfnLt7tpzz0xaGLPK4iUWUxvM9iXY0xkAumuESM3nPAFM/G2x7WhCWQdPv85gfhDo80t+aUfb4uBYo0uWYruPOBVpzlmTcWfw==; domain=login.businessid.daimlertruck.com; path=/; SameSite=None; secure; HttpOnly
+set-cookie: x-ms-cpim-trans=eyJUX0RJQyI6W3siSSI6IjBhMTU2NWFkLWE2NzItNGI3ZC05YWQ5LTQwOWFmZGM4Zjc2OSIsIlQiOiJjb3JwdGJiaWQub25taWNyb3NvZnQuY29tIiwiUCI6ImIyY18xYV9zaWduaW4iLCJDIjoiODI1NTliYjctOTI5MS00ODVjLWFiYjAtMDJlYjE0NDI5YWFkIiwiUyI6MSwiTSI6e30sIkQiOjAsIkUiOiIifV0sIkNfSUQiOiIwYTE1NjVhZC1hNjcyLTRiN2QtOWFkOS00MDlhZmRjOGY3NjkifQ==; domain=login.businessid.daimlertruck.com; path=/; SameSite=None; secure; HttpOnly
+set-cookie: x-ms-cpim-geo=EU; expires=Sun, 06 Sep 2026 00:44:15 GMT; path=/; secure; samesite=none; httponly
+set-cookie: ASLBSA=00032b04fa0b5f5abc6ed484856d3bcba6db53a2dc6ba91cad36e9a02bdc86052f15; Path=/; Secure; HttpOnly;
+set-cookie: ASLBSACORS=00032b04fa0b5f5abc6ed484856d3bcba6db53a2dc6ba91cad36e9a02bdc86052f15; SameSite=none; Path=/; Secure; HttpOnly;
+--- body hints ---
+<title>Loading...</title>
+Daimler Truck Account"},{"id":"ForgotPasswordEx
+forgot
+id="Unified"
+id="api"
+id="createAccount"
+id="element"
+id="forgotPassword"
+id="localAccountForm"
+id="next"
+id="rememberMe"
+signin
+signing you in. Please try again later.
+[0m
+STEP 1 — DELTA
+- [NEW] Corporate SSO broker discovered behind CIAM ROW login: `login.businessid.daimlertruck.com` (tenant `f266a340-d336-4be7-a230-704d8fcf0211`, broker client `82559bb7-9291-485c-abb0-02eb14429aad`) and `login.businessid-qa.daimlertruck.com` (tenant `e39fd9b6-5ec8-494f-9884-ebbdfd0a25d7`, broker client `a43f98c7-88be-4bfa-975c-8b8caa86ba48`). ROW chain = portal → `login.ciam` (b2c_1a_signin_oidc_row) → `login.businessid` (b2c_1a_signin, form_post to ciam `/oauth2/authresp`) → corporate dir (`corptbbid.onmicrosoft.com`). OIDC+JWKS public on both (RS256, pairwise sub, 1 key each).
+- [NEW] Implicit flow DISABLED across entire identity stack: portal app, businessid prod, businessid stg all return AADB2C90057 on `response_type=id_token`; token endpoints confidential-only — token-in-fragment/code-interception chains are dead.
+- [CHANGED] APIM region roots (as/eu): `/status-0123456789abcdef` = default APIM health beacon (200 empty); 16 anonymous-op paths all uniform 442-byte OperationNotFound (origin:config) — apim-anonymous-op-exposure falsified.
+- [CHANGED] Portal `/api/*`, catalog and object-ID routes: blanket 307 wildcard middleware — 15-path battery incl. fabricated `/api/registration-check`, `/api/profile`, dot/case/%2f variants all auth-redirect; only `/api/healthcheck` (intentional) + NextAuth endpoints anonymous-reachable; passive route enumeration on portals is dead.
+
+STEP 2 — PRIORITIZE
+[PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] login.businessid.daimlertruck.com,6.4,attack_surface=3,business_value=10,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] login.businessid-qa.daimlertruck.com,6.0,attack_surface=3,business_value=9,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] {as,eu}.api.daimlertruck.com,3.1,attack_surface=2,tech_exposure=6,gate_ease=2,cloud_surface=7,freshness=8
+
+STEP 3 — HYPOTHESES
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest reveals object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle shows root GraphQL ops (subscription(teamId,appId,subscriptionId)); /api/graphql + every /api/* path blanket-307 to Azure AD B2C on all 6 portals — wildcard middleware confirms single auth gate for the whole resolver surface
+evidence_needed: authenticated introspection on /api/graphql; reading foreign object IDs with own valid session returns data
+verify_steps: AUTH_HELPED: B2C ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state}}` on-org → swap foreign IDs read-only → diff `UserCatalogList{catalogs{id name}}`+`teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + access-secret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 64
+reasoning: ROW+NOAM policies share one staging B2C app (c387a5ab-f534-48ee-b026-c24f9a0a92d5), same tenant issuer+aud, BU distinctions only in acr + org-claim shape (ROW: 89 claims, adUpn/entitlements/companies; NOAM: 102 claims, FTLOrg* family); schema scoping is Team.orgId + UserCatalogList.catalogs
+evidence_needed: a NOAM-policy token accepted by a ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: two accounts (one `_row`, one `_noam`) → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token, diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] businessid-corporate-sso-chain-misconfig
+class: OATH
+asset: login.businessid.daimlertruck.com
+confidence: 45
+reasoning: previously unmapped DT-employee SSO broker (custom-policy B2C tenant corptbbid.onmicrosoft.com) sits behind CIAM ROW flow; broker→ciam code handoff is form_post to `/oauth2/authresp`; broker app implicit disabled, token endpoint confidential-only — only unvalidated surface is the two-hop nonce/state and policy-chaining integrity, never exercised end-to-end
+evidence_needed: valid ROW login traversing broker hop where state/nonce from portal fails to constrain the returned code; or ciam accepting a code from a different businessid policy/flow
+verify_steps: AUTH_HELPED: full ROW login on developer.tst.na (through login.businessid-qa) capturing the code at ciam authresp; repeat broker authorize with swapped response_mode=query vs form_post and with alternate `p` values; confirm NextAuth callback rejects tampered state/nonce
+impact: employee-SSO session confusion across broker hops; ATO of DT employees if integrity fails; Severity: high (conditional)
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] ciam-secret-return-in-plaintext: confidence 45 < 50 and chained on BOLA proof — park until hypothesis #1 confirmed.
+[PARKED] apim-anonymous-op-exposure: falsified by uniform OperationNotFound across 16 probes — dropped from rankings.
+[PARKED] nextauth-open-redirect / implicit-flow chains: AADB2C90057 verified portal+broker both envs — dead end, do not re-rank.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (64) 3. businessid-corporate-sso-chain-misconfig (45)
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: obtain 2 scoped test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one ROW (`b2c_1a_signin_oidc_row`, broker hop login.businessid-qa/corptbbid onmicrosoft staging) + one NA (`_noam`, separate org); then AUTH_HELPED run: POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` → baseline on-org `subscription(teamId,appId,subscriptionId)` → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row vs noam tokens; capture broker-hop code to validate state/nonce integrity.
+
+STEP 6 — LEARNING
+[LEARN] REJECTED apim-anonymous-op-exposure @ {as,eu}.api.daimlertruck.com: 16 anonymous-op paths all identical OperationNotFound (origin:config); /status-0123456789abcdef = default APIM beacon — no anonymous ops.
+[LEARN] REJECTED implicit-token-fragment / code-interception @ developer.* + login.businessid(.qa): AADB2C90057 on portal app, broker prod, broker stg — implicit disabled stack-wide; confidential code+PKCE only.
+[LEARN] ACCEPTED businessid-broker-surface @ login.businessid(.qa).daimlertruck.com: DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82559bb7 / a43f98c7, IdP corptbbid.onmicrosoft.com) behind CIAM ROW flow; OIDC+JWKS public; highest-sensitivity identity surface.
+[LEARN] ACCEPTED portal-blanket-auth-middleware @ developer.*: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery on portals exhausted; only /api/healthcheck public.
+
+STEP 7 — RISK
+[RISK] Daimler Truck: 46/100. This cycle solidly falsified the last two passive hypotheses (APIM anonymous ops, implicit-flow token theft) and mapped a major new identity surface (corporate BusinessID broker) that is hardening-positive (implicit off everywhere, confidential PKCE/code only). No new exploitable anonymous surface; high-value returns still gated solely behind the two scoped staging B2C accounts (BOLA 75, cross-BU 64). Read-only, on-owned operations only; no customer/employee data touched.
