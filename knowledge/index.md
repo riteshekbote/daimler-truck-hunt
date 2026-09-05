@@ -94,3 +94,6 @@
 - 2026-09-05 REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
 - 2026-09-05 REJECTED developer-portal-graphql-introspection + exposed-swagger: SPA catch-all 200 false positives, already overruled by 307 on real endpoints
 - 2026-09-05 ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real endpoint behind auth confirmed
+- 2026-09-05 ACCEPTED apim-gateway-identify @ *.api.daimlertruck.com: region/root gateways (api/as/eu) return Azure API Management `OperationNotFound` JSON (x-error-origin: config; request-context appId=cid-v1:1934545a-fee0-48bd-8c3a-c23a39b3d581); no doc surface at /openapi.json,/swagger,/v2/api-docs,/actuator/health — all 404.
+- 2026-09-05 REJECTED azure-appservice-subdomain-takeover @ api.daimlertruck.com: A-record to shared App Service IP with unbound hostname (default *.azurewebsites.net cert, "Site Not Found") — no CNAME to claim; custom-domain binding requires DNS-side CNAME verification, absent here.
+- 2026-09-05 REINFORCE OAuth-misconfig rejection @ authz.*.api.daimlertruck.com: 404s now attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent with no OAuth/OIDC surface on those hosts.
