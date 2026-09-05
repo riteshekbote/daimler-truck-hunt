@@ -1,28 +1,30 @@
-## 2026-09-05 00:18:57 UTC [target] (model bigpickle)
-[HYP] graphql-mutation-bola-post-auth
+## 2026-09-05 04:44:25 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-team-scoped
 class: IDOR
 asset: developer.as.api.daimlertruck.com
-confidence: 62
-reasoning: /api/graphql is a real route behind B2C (307 GET+POST); buildManifest exposes object-ID flows (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe); only /api/healthcheck is unauthenticated — GraphQL is the remaining high-value in-scope surface
-evidence_needed: authenticated introspection showing mutation types; cross-tenant read via victim subscriptionId/appId/teamId
-verify_steps: AUTH_HELPED: valid B2C session on developer.as -> POST /api/graphql {"query":"{__schema{types{name fields{name}}}}"} -> then mutations/queries with victim object IDs; passive fallback (done): healthcheck, providers, policy matrix
-impact: cross-tenant subscription/team manipulation -> API-key rotation, denial, org PII; Severity: high
+confidence: 72
+reasoning: Client bundle exposes every GraphQL op taking explicit `teamId`/`appId`/`subscriptionId`/`authenticationId` args at operation root (no implicit org scoping visible): `subscription(teamId,appId,subscriptionId)` returns product+`customFields{value}`; `teamMembers(teamId)` returns PII (email/firstName/lastName); `createCIAMAuthenticationSecret→accessSecret`, `associateSystemUser→SystemUser` (schema `SystemUserInfo{password,objectId}`), `deleteSubscription/deleteTeamMember` mutators; `/api/graphql` is a real 307-behind-B2C route and only `/api/healthcheck` is unauth
+evidence_needed: authenticated `{__schema{types{name fields{name args{name}}}}}` at `/api/graphql` showing the server-side resolver set; then present foreign `teamId/victimSubscriptionId` in read ops and confirm response (previously: rejected=false expected if BOLA)
+verify_steps: AUTH_HELPED: B2C session on developer.as → POST /api/graphql `{"query":"{__schema{types{name fields{name}}}}"}` → `{"query":"query{subscription(teamId:\"victim\",appId:\"victim\",subscriptionId:\"victim\"){name state product{name} customFields{...}}}"}` with your own team's IDs first (baseline), then swapped victim IDs; compare
+impact: cross-tenant subscription state/config read+modify, system-user password exposure, API access-secret theft, team PII dump; Severity: high
 testability: AUTH_HELPED
 [HYP] b2c-cross-bu-token-boundary
 class: OATH
 asset: login.ciam.daimlertruck.com
 confidence: 58
-reasoning: prod tenant issues both BU policies under the SAME tenant-level issuer and SAME aud (DTAG_API_CP/user_impersonation); test/dev portals use ONE client (c387a5ab) for both policies differing only by policy path; DT vs DTNA identity is distinguished only by acr + org claim shape (FTLOrg* vs adUpn/entitlements). If the portal backend scopes subscriptions by org claims and accepts either token shape, a DTNA noam token could act in ROW context or vice versa
-evidence_needed: token minted under _noam policy accepted by row-scoped portal API; e.g. noam FTLOrg claims honored as org context for /apps/[appId]/subscriptions
-verify_steps: AUTH_HELPED: two B2C accounts (one noam, one row) -> exchange sessions -> call /api/graphql from each, compare tenant-scoped data; passive (done): both policies live on prod+staging, same aud/iss, c387a5ab shared on test
-impact: DT/DTNA business-unit boundary confusion -> cross-BU subscription/org PII access; Severity: medium-high
+reasoning: Test/dev portals share one B2C `client_id c387a5ab` across both BU policies (`b2c_1a_signin_oidc_row` vs `_noam`), same tenant-level issuer+aud; schema uses `Team.orgId` and `UserCatalogList.catalogs` as the only scoping keys — if backend derives tenant from token `org/acr` claims and one policy's token shape satisfies the other's checks, BU separation collapses
+evidence_needed: token minted under `_noam` policy accepted by row-scoped resolver returning a different `orgId` catalog set than the `_row` token for the same principal
+verify_steps: AUTH_HELPED: two B2C accounts (one row, one noam) → call `query UserCatalogList{userCatalogList{catalogs{id name}}}` and `teams{items{id orgId}}` from each, diff catalog/org scoping
+impact: DT/DTNA business-unit boundary confusion → cross-BU API subscriptions and PII; Severity: medium-high
 testability: AUTH_HELPED
-[HYP] developer-tst-config-drift-surface
-class: MISCONFIG
-asset: developer.tst.na.api.daimlertruck.com
-confidence: 42
-reasoning: test/dev share client c387a5ab across both BU policies and CSP img-src renders literal "undefined" (unbound config var); prod-dtna OAuthSignin suggests unbound provider config too — recurring pattern of unbound env vars in portal builds
-evidence_needed: any unbound config that resolves permissive (open redirect target, permissive scope, extra audience); XSS sink usable under the dev/test CSP
-verify_steps: PASSIVE: diff /api/auth/providers + signin.json=true output across all 6 portals (done for as/tst.na); test XSS sink in SPA under test/dev CSP
-impact: low-medium; config-hygiene and drift signal; Severity: low
+[HYP] ciam-secret-return-in-plaintext
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 45
+reasoning: Schema (`0qxdtaywcjipf.js`) returns `accessSecret`, and `SystemUserInfo{userId,password,objectId}` to the client — design review signal that secrets/passwords traverse the portal API unencrypted from the resolver; combined with the BOLA arg surface this is the highest-value chained object set
+evidence_needed: post-auth introspection confirming resolver still returns `password`/`accessSecret` fields; any retention in response body/har/client storage
+verify_steps: AUTH_HELPED: after BOLA proof, call `mutation createCIAMAuthenticationSecret(teamId,appId,authenticationId){accessSecret}` on-owned only to observe channel/retention; no victim data
+impact: credential/API-key material handled insecurely at rest/in-flight; amplification factor for BOLA; Severity: medium
 testability: AUTH_HELPED
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com (ROW policy `b2c_1a_signin_oidc_row`, plus one NA `_noam`) for developer.tst.na.api.daimlertruck.com; then run AUTH_HELPED verify on this session's schema: POST /api/graphql `{__schema{types{name fields{name}}}}`, then `subscription(teamId,appId,subscriptionId)` with on-org IDs baseline → foreign IDs read-only; diff `UserCatalogList` catalogs between row/noam tokens.
+[RISK] Daimler Truck: 42/100. Defense-in-depth reconfirmed — single unauth data route (/api/healthcheck), auth flow hardened (PKCE/state/same-origin redirect), all API behind B2C. Real value now hinges on the post-auth GraphQL surface, exactly reconstructed passively (object-ID args, secret+password returning schema). No new unauth defect; unauthenticated phase is functionally exhausted.

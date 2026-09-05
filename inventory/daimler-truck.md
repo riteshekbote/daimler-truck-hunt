@@ -157,3 +157,8 @@ www.daimlertruck.com
 - CHANGED callbackUrl parameter validation: external domains (https://example.com) rejected and replaced with current origin in __Secure-next-auth.callback-url cookie; same-domain paths (e.g., /apis/test123) ac
 
 ## 2026-09-05 00:19:09 UTC
+
+## 2026-09-05 04:44:34 UTC
+- NEW `/apis` (no trailing slash) returns 307 to Azure AD B2C on all 6 portals — real API catalog endpoint behind auth confirmed; `/apis/` (trailing slash) returns 308→200 SPA shell (catch-all) — Next.js ro
+- NEW `/apis/test123` returns 307 (31 bytes) on prod+test — object-ID routes from buildManifest (`/apis/[apiId]`) are real auth-protected endpoints, not SPA catch-all
+- CHANGED Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real middleware-protected route

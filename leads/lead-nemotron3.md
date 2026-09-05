@@ -573,3 +573,60 @@ testability: AUTH_HELPED
 [LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy  
 [LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy  
 [RISK] daimler-truck: 72 — 6 live developer portals with GraphQL behind Azure AD B2C; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) create BOLA surface across AS/EU/NA tenant boundaries; capacitor-admin and authz surfaces remain dark (000/404)
+## 2026-09-05 04:42:13 UTC [target] (model nemotron3)
+[NEW] `/apis` (no trailing slash) returns 307 to Azure AD B2C on all 6 portals — real API catalog endpoint behind auth confirmed; `/apis/` (trailing slash) returns 308→200 SPA shell (catch-all) — Next.js routing quirk creates false SPA surface
+[NEW] `/apis/test123` returns 307 (31 bytes) on prod+test — object-ID routes from buildManifest (`/apis/[apiId]`) are real auth-protected endpoints, not SPA catch-all
+[CHANGED] Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real middleware-protected route
+[PRIO] developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=6,cloud_surface=8,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,7.9,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.eu.api.daimlertruck.com,7.9,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.na.api.daimlertruck.com,7.9,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.dev.na.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] developer.tst.eu.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] www.daimlertruck.com,5.8,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
+[HYP] Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: 6 portals expose GraphQL at /graphql behind Azure AD B2C (307); portal markets "single source of truth for APIs" with "Subscribe" card implying mutation surface (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C per region (as/eu/na) suggests tenant isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential config drift in authorization logic; /apis/[apiId] confirmed real endpoint behind auth
+evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId, webhookId); evidence of missing authorization checks on mutation resolvers
+verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session; POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}`; test mutations with cross-tenant IDs (AS vs EU vs NA)
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+[HYP] Developer Portal Object-ID Routes — BOLA/IDOR on Tenant-Scoped Resources
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 70
+reasoning: buildManifest reveals object-ID routes requiring authorization: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate; /apis/test123 returns 307 (real endpoint) vs /apis/ returns SPA catch-all — confirms real routes behind auth; identical routes on prod/test with separate build IDs suggest independent authZ logic; "single source of truth for APIs" implies cross-tenant API catalog access
+evidence_needed: Authenticated access to object-ID routes; evidence of missing ownership checks when accessing apiId/subscriptionId/teamId from different tenant (AS vs EU vs NA)
+verify_steps: AUTH_HELPED: Obtain valid session; GET https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId>; GET /apps/<appId>/subscriptions/<other-subscriptionId>; POST /teams/<teamId>/system-users/associate with cross-tenant payload
+impact: Cross-tenant API catalog enumeration, subscription takeover, team member invitation hijacking, system-user association abuse → High/Critical
+testability: AUTH_HELPED
+[HYP] NextAuth.js Session Token / JWT Handling — Secret Reuse or Alg Confusion Across Prod/Test
+class: AUTH
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 50
+reasoning: /api/auth/session returns 200 {} unauthenticated on prod but 400 on test (inconsistent); /api/auth/csrf returns valid token; two distinct B2C providers (dt, dtna) suggest multi-tenant; separate build IDs confirm separate deployments; if NEXTAUTH_SECRET shared or weak across environments, JWT forgery possible; test env may have debug features enabled
+evidence_needed: Session cookie structure (next-auth.session-token vs __Secure-next-auth.session-token); JWT alg (HS256 vs RS256); key confusion via /api/auth/session response; NEXTAUTH_SECRET entropy
+verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/session (inspect Set-Cookie after auth); GET https://developer.as.api.daimlertruck.com/api/auth/session (compare); attempt JWT alg confusion with none/HS256; check for debug endpoints (/api/auth/_log)
+impact: Session token prediction/forgery → ATO across developer portals; cross-tenant API catalog access → High
+testability: AUTH_HELPED
+[PARKED] NextAuth.js Session Token / JWT Handling — Secret Reuse or Alg Confusion Across Prod/Test: confidence 50 borderline; speculative — requires valid session + JWT analysis; no evidence of weak secret or shared secret; AUTH_HELPED only; inconsistent /api/auth/session behavior (200 vs 400) may be probe artifact
+[FINAL] 1. Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations (75)
+[FINAL] 2. Developer Portal Object-ID Routes — BOLA/IDOR on Tenant-Scoped Resources (70)
+[NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/apps/ — enumerate apps catalog structure (no trailing slash) to confirm 307 vs SPA catch-all; then GET https://developer.as.api.daimlertruck.com/apps/ for prod comparison
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+[LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential config differences
+[LEARN] ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) — high-value BOLA probing surface post-auth
+[LEARN] ACCEPTED /api/healthcheck-live: 200 JSON with uptime on both prod and test — real server route; informational only (not a vuln alone)
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive
+[LEARN] REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin; subdomains rejected — not an open redirect
+[LEARN] REJECTED nextauth-broken-auth-flow: POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, and same-origin redirect_uri — auth flow works correctly on all 6 portals
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+[RISK] daimler-truck: 74 — 6 live developer portals with GraphQL + object-ID REST routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) behind Azure AD B2C; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk (/apis/ vs /apis) masks real endpoints; capacitor-admin and authz surfaces remain dark (000/404)
