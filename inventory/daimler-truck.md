@@ -162,3 +162,11 @@ www.daimlertruck.com
 - NEW `/apis` (no trailing slash) returns 307 to Azure AD B2C on all 6 portals — real API catalog endpoint behind auth confirmed; `/apis/` (trailing slash) returns 308→200 SPA shell (catch-all) — Next.js ro
 - NEW `/apis/test123` returns 307 (31 bytes) on prod+test — object-ID routes from buildManifest (`/apis/[apiId]`) are real auth-protected endpoints, not SPA catch-all
 - CHANGED Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real middleware-protected route
+
+## 2026-09-05 08:57:39 UTC
+- NEW `/apps`, `/teams`, `/products`, `/subscriptions` (no trailing slash) return 307 to Azure AD B2C on all 6 portals — real middleware-protected catalog endpoints confirmed; trailing-slash variants return
+- NEW buildManifest from both prod (`JCvrnrykV_KYBk7pu0Npq`) and test (`JVF_tXHlhCfZQOkT-cULr`) reveals identical route structure including object-ID routes: `/apis/[apiId]`, `/apps/[appId]/subscriptions/[s
+- NEW CSP config drift confirmed: prod CSP includes `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`; test/dev CSP has literal `img-src 'self' data: un
+- NEW Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate tenants per region
+- CHANGED Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real auth-protected route — applies to all catalog roots
+- CHANGED GraphQL introspection: `/graphql` and `/api/graphql` return 307 on POST with introspection query — real endpoints behind auth, not SPA false positive

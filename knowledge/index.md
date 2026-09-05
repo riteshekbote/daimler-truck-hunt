@@ -83,3 +83,6 @@
 - 2026-09-05 REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
 - 2026-09-05 REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
 - 2026-09-05 REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- 2026-09-05 ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQL ops with these IDs.
+- 2026-09-05 ACCEPTED b2c-cross-bu-token-boundary: prod tenant issues ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims.
+- 2026-09-05 ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers.

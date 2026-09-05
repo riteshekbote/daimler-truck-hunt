@@ -1,13 +1,16 @@
-## 2026-09-05 04:42:13 UTC [target] (model nemotron3)
-[NEW] `/apis` (no trailing slash) returns 307 to Azure AD B2C on all 6 portals — real API catalog endpoint behind auth confirmed; `/apis/` (trailing slash) returns 308→200 SPA shell (catch-all) — Next.js routing quirk creates false SPA surface
-[NEW] `/apis/test123` returns 307 (31 bytes) on prod+test — object-ID routes from buildManifest (`/apis/[apiId]`) are real auth-protected endpoints, not SPA catch-all
-[CHANGED] Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real middleware-protected route
-[PRIO] developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=6,cloud_surface=8,freshness=9
-[PRIO] developer.as.api.daimlertruck.com,7.9,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
-[PRIO] developer.eu.api.daimlertruck.com,7.9,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
-[PRIO] developer.na.api.daimlertruck.com,7.9,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
-[PRIO] developer.dev.na.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
-[PRIO] developer.tst.eu.api.daimlertruck.com,7.4,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+## 2026-09-05 08:57:30 UTC [target] (model nemotron3)
+[NEW] `/apps`, `/teams`, `/products`, `/subscriptions` (no trailing slash) return 307 to Azure AD B2C on all 6 portals — real middleware-protected catalog endpoints confirmed; trailing-slash variants return 308→SPA catch-all
+[NEW] buildManifest from both prod (`JCvrnrykV_KYBk7pu0Npq`) and test (`JVF_tXHlhCfZQOkT-cULr`) reveals identical route structure including object-ID routes: `/apis/[apiId]`, `/apps/[appId]/subscriptions/[subscriptionId]`, `/teams/[teamId]/system-users/associate`, `/products/[productId]/subscribe`
+[NEW] CSP config drift confirmed: prod CSP includes `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`; test/dev CSP has literal `img-src 'self' data: undefined` + empty `frame-src`
+[NEW] Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate tenants per region
+[CHANGED] Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real auth-protected route — applies to all catalog roots
+[CHANGED] GraphQL introspection: `/graphql` and `/api/graphql` return 307 on POST with introspection query — real endpoints behind auth, not SPA false positive
+[PRIO] developer.tst.na.api.daimlertruck.com,8.4,attack_surface=9,business_value=8,tech_exposure=9,gate_ease=6,cloud_surface=8,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.eu.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.na.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.dev.na.api.daimlertruck.com,7.7,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
+[PRIO] developer.tst.eu.api.daimlertruck.com,7.7,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=6,cloud_surface=7,freshness=8
 [PRIO] www.daimlertruck.com,5.8,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
 [HYP] Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations
 class: OTHER
@@ -22,7 +25,7 @@ testability: AUTH_HELPED
 class: IDOR
 asset: developer.tst.na.api.daimlertruck.com
 confidence: 70
-reasoning: buildManifest reveals object-ID routes requiring authorization: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate; /apis/test123 returns 307 (real endpoint) vs /apis/ returns SPA catch-all — confirms real routes behind auth; identical routes on prod/test with separate build IDs suggest independent authZ logic; "single source of truth for APIs" implies cross-tenant API catalog access
+reasoning: buildManifest reveals object-ID routes requiring authorization: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe; /apis/test123 returns 307 (real endpoint) vs /apis/ returns SPA catch-all — confirms real routes behind auth; identical routes on prod/test with separate build IDs suggest independent authZ logic; "single source of truth for APIs" implies cross-tenant API catalog access
 evidence_needed: Authenticated access to object-ID routes; evidence of missing ownership checks when accessing apiId/subscriptionId/teamId from different tenant (AS vs EU vs NA)
 verify_steps: AUTH_HELPED: Obtain valid session; GET https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId>; GET /apps/<appId>/subscriptions/<other-subscriptionId>; POST /teams/<teamId>/system-users/associate with cross-tenant payload
 impact: Cross-tenant API catalog enumeration, subscription takeover, team member invitation hijacking, system-user association abuse → High/Critical
@@ -36,10 +39,10 @@ evidence_needed: Session cookie structure (next-auth.session-token vs __Secure-n
 verify_steps: GET https://developer.tst.na.api.daimlertruck.com/api/auth/session (inspect Set-Cookie after auth); GET https://developer.as.api.daimlertruck.com/api/auth/session (compare); attempt JWT alg confusion with none/HS256; check for debug endpoints (/api/auth/_log)
 impact: Session token prediction/forgery → ATO across developer portals; cross-tenant API catalog access → High
 testability: AUTH_HELPED
-[PARKED] NextAuth.js Session Token / JWT Handling — Secret Reuse or Alg Confusion Across Prod/Test: confidence 50 borderline; speculative — requires valid session + JWT analysis; no evidence of weak secret or shared secret; AUTH_HELPED only; inconsistent /api/auth/session behavior (200 vs 400) may be probe artifact
+[PARKED] NextAuth.js Session Token / JWT Handling — Secret Reuse or Alg Confusion Across Prod/Test: confidence 50 borderline; speculative — requires valid session + JWT analysis; no evidence of weak secret or shared secret; AUTH_HELPED only; inconsistent /api/auth/session behavior may be probe artifact
 [FINAL] 1. Developer Portal GraphQL Mutation Exposure Post-Auth — BOLA via Tenant-Scoped Mutations (75)
 [FINAL] 2. Developer Portal Object-ID Routes — BOLA/IDOR on Tenant-Scoped Resources (70)
-[NEXT] PROBE: GET https://developer.tst.na.api.daimlertruck.com/apps/ — enumerate apps catalog structure (no trailing slash) to confirm 307 vs SPA catch-all; then GET https://developer.as.api.daimlertruck.com/apps/ for prod comparison
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com (ROW policy `b2c_1a_signin_oidc_row`, plus one NA `_noam`) for developer.tst.na.api.daimlertruck.com to enable authenticated GraphQL introspection and object-ID route BOLA testing
 [LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
 [LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
 [LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential config differences
