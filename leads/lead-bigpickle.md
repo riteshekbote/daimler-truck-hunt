@@ -1462,3 +1462,49 @@ testability: AUTH_HELPED
 [LEARN] REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
 [LEARN] REJECTED developer-portal-graphql-introspection + exposed-swagger: SPA catch-all 200 false positives, already overruled by 307 on real endpoints
 [RISK] Daimler Truck: 42/100. Defense-in-depth reconfirmed: single unauth data route (/api/healthcheck), auth flow hardened (PKCE/state/same-origin redirect), all API + catalog behind B2C. Real value now hinges entirely on the post-auth GraphQL surface, which was reconstructed passively (object-ID args, accessSecret+password returning schema, cross-BU token boundary). No new unauth defect; unauthenticated phase is functionally exhausted — progress requires the two scoped test B2C accounts. Low residual risk of touching live customer data since only read-only/on-owned operations are planned.
+## 2026-09-05 15:25:09 UTC [target] (model bigpickle)
+[PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] www.daimlertruck.com,3.2,attack_surface=4,tech_exposure=2,gate_ease=10,cloud_surface=7,freshness=3
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest reveals object-ID routes (/apis/[apiId], /subscriptions/[subscriptionId], /teams/[teamId]); client bundle shows GraphQL ops taking these IDs at root; /api/graphql is a real endpoint behind B2C that returns 307 pre-auth; all catalog roots (/apps,/teams,/products,/subscriptions) 307-auth confirmed
+evidence_needed: authenticated introspection at /api/graphql revealing resolver set incl. subscription(teamId,appId,subscriptionId); reading/mutating foreign object IDs with own valid session
+verify_steps: AUTH_HELPED: B2C session on developer.as → POST /api/graphql `{"query":"{__schema{types{name fields{name args{name}}}}}"}` → baseline query with own teamId/appId/subscriptionId → swap to victim/foreign IDs read-only, compare response bodies (BOLA if data returned)
+impact: cross-tenant subscription state/config read+modify, system-user password exposure, API access-secret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login.ciam.daimlertruck.com
+confidence: 58
+reasoning: test/dev portals share one B2C client_id across ROW (`b2c_1a_signin_oidc_row`) and NA (`_noam`) policies under same tenant issuer+aud; schema scopes by Team.orgId + UserCatalogList.catalogs — if backend derives BU from token acr/org claims and one policy's shape satisfies the other's checks, BU separation collapses
+evidence_needed: token minted under _noam policy accepted by row-scoped resolver returning different orgId catalog set than _row token for same principal
+verify_steps: AUTH_HELPED: two B2C accounts (one row, one noam) → call `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each, diff catalog/org scoping
+impact: DT/DTNA BU boundary confusion → cross-BU API subscriptions and PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] ciam-secret-return-in-plaintext
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 45
+reasoning: schema (`0qxdtaywcjipf.js`) returns accessSecret, and SystemUserInfo{userId,password,objectId} to the client — design-review signal that secrets/passwords traverse the portal resolver unencrypted; combined with BOLA arg surface this is the highest-value chained object set
+evidence_needed: post-auth introspection confirming resolver still returns password/accessSecret; retention in response/har/client storage
+verify_steps: AUTH_HELPED: after BOLA proof, call `mutation createCIAMAuthenticationSecret(teamId,appId,authenticationId){accessSecret}` on-owned only to observe channel/retention; no victim data
+impact: credential/API-key material handled insecurely at rest/in-flight; amplification for BOLA; Severity: medium
+testability: AUTH_HELPED
+[PARKED] ciam-secret-return-in-plaintext: confidence 45 < 50; requires BOLA proof as prerequisite; chained dependency — park until #1 confirmed.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75)
+[FINAL] 2. b2c-cross-bu-token-boundary (58)
+[FINAL] 3. ciam-secret-return-in-plaintext (45, chained)
+[NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one under ROW policy `b2c_1a_signin_oidc_row` and one under NA policy `b2c_1a_signin_oidc_noam` (separate orgs to enable BU-boundary diff); then AUTH_HELPED run: POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}` across the row vs noam tokens
+[LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows object-ID routes; client bundle shows GraphQL ops with these IDs
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
+[LEARN] ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real endpoint behind auth confirmed
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals
+[LEARN] REJECTED nextauth-callback-open-redirect: callbackUrl validated to same-domain; subdomains rejected; external replaced with origin — not an open redirect
+[LEARN] REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct on all 6 portals
+[LEARN] REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
+[LEARN] REJECTED developer-portal-graphql-introspection + exposed-swagger: SPA catch-all 200 false positives, already overruled by 307 on real endpoints
+[RISK] Daimler Truck: 42/100. Defense-in-depth reconfirmed: single unauth data route (/api/healthcheck), auth flow hardened (PKCE/state/same-origin redirect), all API + catalog behind B2C. Real value now hinges entirely on the post-auth GraphQL surface, which was reconstructed passively (object-ID args, accessSecret+password returning schema, cross-BU token boundary). No new unauth defect; unauthenticated phase is functionally exhausted — progress requires the two scoped test B2C accounts. Low residual risk of touching live customer data since only read-only/on-owned operations are planned.

@@ -172,3 +172,5 @@ www.daimlertruck.com
 - CHANGED GraphQL introspection: `/graphql` and `/api/graphql` return 307 on POST with introspection query — real endpoints behind auth, not SPA false positive
 
 ## 2026-09-05 12:10:47 UTC
+
+## 2026-09-05 15:25:44 UTC

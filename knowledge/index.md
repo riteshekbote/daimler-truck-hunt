@@ -93,3 +93,4 @@
 - 2026-09-05 REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct on all 6 portals
 - 2026-09-05 REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
 - 2026-09-05 REJECTED developer-portal-graphql-introspection + exposed-swagger: SPA catch-all 200 false positives, already overruled by 307 on real endpoints
+- 2026-09-05 ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real endpoint behind auth confirmed
