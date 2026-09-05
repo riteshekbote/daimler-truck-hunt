@@ -4127,3 +4127,113 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] Daimler Truck: 42/100. Fresh probes added no exploitable surface: bare api.daimlertruck.com is an unbound App Service (dangling infra, no takeover path), region roots are APIM gateways with zero doc/actuator exposure, and all prior 404s are clean APIM OperationNotFound. Unauthenticated phase remains functionally exhausted; all high-value routes (/api/graphql, catalog roots, object-ID pages) sit behind Azure AD B2C. Real returns still hinge solely on the post-auth GraphQL BOLA + cross-BU token-boundary tests — blocked on the two scoped test B2C accounts. Planned read-only, on-owned operations keep live-customer-data risk low.
+===== ANALYST bigpickle 2026-09-05 19:33:54 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "art/**/*.txt"[90m 0 matches[0m
+[0m✱ [0mGlob "**/*daimler*"[90m 2 matches[0m
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/ && echo "---ART---" && ls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/art 2>/dev/null; echo "---LEADS---" && ls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads 2>/dev/null
+total 204
+drwxr-xr-x 12 runner runner  4096 Sep  5 19:30 .
+drwxr-xr-x  3 runner runner  4096 Sep  5 19:30 ..
+drwxr-xr-x  7 runner runner  4096 Sep  5 19:30 .git
+drwxr-xr-x  3 runner runner  4096 Sep  5 19:30 .github
+-rw-r--r--  1 runner runner  1715 Sep  5 19:30 README.md
+-rw-r--r--  1 runner runner   134 Sep  5 19:31 analyst-out.txt
+-rw-r--r--  1 runner runner 53730 Sep  5 19:30 analyst-prompt.txt
+-rw-r--r--  1 runner runner 49961 Sep  5 19:30 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 leads
+-rw-r--r--  1 runner runner  8447 Sep  5 19:30 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 reports
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  5 19:30 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 scripts
+-rw-r--r--  1 runner runner    33 Sep  5 19:30 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  5 19:30 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  5 19:30 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  5 19:30 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  5 19:30 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  5 19:30 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  5 19:30 triage
+---ART---
+---LEADS---
+total 352
+drwxr-xr-x  2 runner runner   4096 Sep  5 19:30 .
+drwxr-xr-x 12 runner runner   4096 Sep  5 19:30 ..
+-rw-r--r--  1 runner runner 195531 Sep  5 19:30 lead-bigpickle.md
+-rw-r--r--  1 runner runner    816 Sep  5 19:30 lead-laguna.md
+-rw-r--r--  1 runner runner    800 Sep  5 19:30 lead-ling3.md
+-rw-r--r--  1 runner runner    832 Sep  5 19:30 lead-longcat.md
+-rw-r--r--  1 runner runner     18 Sep  5 19:30 lead-mimo.md
+-rw-r--r--  1 runner runner 127017 Sep  5 19:30 lead-nemotron3.md
+-rw-r--r--  1 runner runner   7031 Sep  5 19:30 reposcan-daimler-truck.md
+[0m
+[0m→ [0mRead probe-results.md
+[0m→ [0mRead analyst-out.txt
+[0m→ [0mRead state_bigpickle.json
+My state is a bug bounty analyst role. Let me review the current context and probe results, then emit my structured analysis. Let me check the latest probe results and any fresh state.
+[0m→ [0mRead leads/lead-nemotron3.md[90m [limit=120][0m
+The probe results show no new delta from 15:25 to 17:45 — `/graphql` and `/apis/<other-tenant-apiId>` returns identical SPA-shell lengths on all runs. My knowledge tail already reflects this exhausted unauthenticated phase.
+
+Let me review the other analysts' leads to identify cross-synergies and confirm there's no fresh surface, then check the reposcan and the ROW/NOAM provider detail for the BOLA chain.
+[0m→ [0mRead leads/reposcan-daimler-truck.md
+I have enough context. My own knowledge tail is comprehensive and the nemotron analyst independently converged on the same top hypothesis (post-auth GraphQL BOLA). Let me check the reposcan briefly to see if there's any fresh surface (source/config leak) worth noting, then emit.
+
+Given the exhaustive knowledge, the unauthenticated phase is genuinely exhausted. The probes at 17:45 show no change from prior — `/graphql` and `/apis/<other-tenant-apiId>` still return identical SPA-shell lengths. There's no new delta.
+
+Let me look at the reposcan raw to check for any fresh build/config info that could inform the [NEXT] action.
+The reposcan has unverified SECRET/MISCONFIG hypotheses (MeiliSearch master key, RAG API defaults, LibreChat) but all from `SRC-*` repos that are NOT confirmed to be deployed anywhere in-scope; those are speculative repo findings, not confirmed on scoped surfaces. The reposcan is "TARGET_ORG not configured" so these are low-context.
+
+The current probe batch at 17:45 shows zero delta from prior — `/graphql` and `/apis/<other-tenant-apiId>` both return identical SPA-shell lengths (196649/196341), matching the established "unauth phase exhausted" conclusion. No new surface.
+
+I have all I need. The ranking converges with nemotron3: top hypothesis is post-auth GraphQL BOLA, blocked on HUMAN B2C accounts. Let me emit my structured analysis. No new live probes needed — they'd just repeat the exhausted passive surface.
+
+STEP 1 — DELTA: NO_DELTA (17:45 probes match 15:25; unauth surface unchanged and exhausted).
+
+Let me write the output clearly.
+
+---
+
+STEP 1 — DELTA
+- NO_DELTA: 2026-09-05 17:45 probes on `/graphql` (196649) and `/apis/<other-tenant-apiId>` (196341) byte-identical to 15:25 batch — unauthenticated surface unchanged, no new endpoints/status codes.
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+- [PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+- [PRIO] login-qa.ciam.daimlertruck.com,7.2,attack_surface=5,tech_exposure=9,gate_ease=0,cloud_surface=9,freshness=10 (new: the auth boundary host the BOLA chain depends on)
+- [PRIO] developer.as.api.daimlertruck.com /api/auth/*,6.5,attack_surface=4,tech_exposure=8,gate_ease=1,cloud_surface=6,freshness=7
+
+STEP 3 — HYPOTHESES
+Hold: my 3 existing hypotheses are still the ranked set. I'll keep #1 as the flagship and not invent a lower-quality one. The reposcan SECRET/MISCONFIG items are speculative (SRC-* not confirmed deployed on scoped hosts) so they fall below confidence floor on program relevance.
+
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest exposes object-ID routes (/apis/[apiId], /subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle shows GraphQL ops (subscription(teamId,appId,subscriptionId)) taking those IDs at root; /api/graphql and all catalog roots 307 to Azure AD B2C on all 6 portals — real authed endpoint behind middleware
+evidence_needed: authenticated introspection showing resolver set incl. subscription(teamId,appId,subscriptionId); reading foreign object IDs with own valid session
+verify_steps: AUTH_HELPED: B2C session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff UserCatalogList{catalogs{id name}} + teams{items{id orgId}} across row vs noam tokens
+impact: cross-tenant subscription state/config read+modify, system-user password exposure, API access-secret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] ciam-secret-return-in-plaintext: confidence 45 < 50; chained behind BOLA proof — park until #1 confirmed.
+- [PARKED] azure-appservice-dangling-pointer @ api.daimlertruck.com: A-record to shared App Service IP, no CNAME claim path — informational, below floor.
+- [FINAL] 1. graphql-object-id-bola-team-scoped (75)
+- [FINAL] 2. b2c-cross-bu-token-boundary (58)
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one under ROW policy `b2c_1a_signin_oidc_row`, one under NA policy `b2c_1a_signin_oidc_noam` (separate orgs so BU-boundary diff is measurable); then AUTH_HELPED: POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org subscription query baseline → swap foreign IDs read-only → diff catalog/team scoping between row and noam tokens.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED no-delta: 2026-09-05 17:45 probes reproduce exact 196649/196341 bytes on /graphql+object-ID routes — unauth phase confirmed static, no new surface.
+- [LEARN] REJECTED reposcan SECRET/MISCONFIG @ SRC-rag_api, SRC-LibreChat: MeiliSearch key / mongo / CORS findings trace to unconfirmed SRC-* repos not shown deployed on any scoped host — no program-relevant evidence; keep for RAG/manual correlation only.
+- [LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql 307 to B2C; buildManifest object-ID routes; client bundle GraphQL ops with object-ID args — high-value authed surface.
+
+STEP 7 — RISK
+- [RISK] Daimler Truck: 42/100. No change from prior batch — the unauth surface is provably static (byte-identical probes). All real value concentrates on the post-auth GraphQL BOLA + cross-BU token-boundary tests, both blocked on the two scoped test B2C accounts. No new exploitable unauth defect; read-only/on-owned post-auth plans keep live-customer-data risk low while the program's exclusion of auth-bypass/mutating tests against customer data is respected.

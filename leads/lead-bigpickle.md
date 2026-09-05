@@ -1549,3 +1549,13 @@ testability: AUTH_HELPED
 [LEARN] REJECTED azure-appservice-subdomain-takeover @ api.daimlertruck.com: A-record to shared App Service IP with unbound hostname (default *.azurewebsites.net cert, "Site Not Found") — no CNAME to claim; custom-domain binding requires DNS-side CNAME verification, absent here.
 [LEARN] REINFORCE OAuth-misconfig rejection @ authz.*.api.daimlertruck.com: 404s now attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent with no OAuth/OIDC surface on those hosts.
 [RISK] Daimler Truck: 42/100. Fresh probes added no exploitable surface: bare api.daimlertruck.com is an unbound App Service (dangling infra, no takeover path), region roots are APIM gateways with zero doc/actuator exposure, and all prior 404s are clean APIM OperationNotFound. Unauthenticated phase remains functionally exhausted; all high-value routes (/api/graphql, catalog roots, object-ID pages) sit behind Azure AD B2C. Real returns still hinge solely on the post-auth GraphQL BOLA + cross-BU token-boundary tests — blocked on the two scoped test B2C accounts. Planned read-only, on-owned operations keep live-customer-data risk low.
+## 2026-09-05 19:31:31 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest exposes object-ID routes (/apis/[apiId], /subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle shows GraphQL ops (subscription(teamId,appId,subscriptionId)) taking those IDs at root; /api/graphql and all catalog roots 307 to Azure AD B2C on all 6 portals — real authed endpoint behind middleware
+evidence_needed: authenticated introspection showing resolver set incl. subscription(teamId,appId,subscriptionId); reading foreign object IDs with own valid session
+verify_steps: AUTH_HELPED: B2C session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → baseline `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` with on-org IDs → swap foreign/victim IDs read-only → diff UserCatalogList{catalogs{id name}} + teams{items{id orgId}} across row vs noam tokens
+impact: cross-tenant subscription state/config read+modify, system-user password exposure, API access-secret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
