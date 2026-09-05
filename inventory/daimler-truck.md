@@ -170,3 +170,5 @@ www.daimlertruck.com
 - NEW Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate tenants per region
 - CHANGED Prior belief: `/apis/` was SPA catch-all; NOW: trailing slash triggers SPA, no-trailing-slash hits real auth-protected route — applies to all catalog roots
 - CHANGED GraphQL introspection: `/graphql` and `/api/graphql` return 307 on POST with introspection query — real endpoints behind auth, not SPA false positive
+
+## 2026-09-05 12:10:47 UTC

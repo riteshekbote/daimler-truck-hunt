@@ -86,3 +86,10 @@
 - 2026-09-05 ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQL ops with these IDs.
 - 2026-09-05 ACCEPTED b2c-cross-bu-token-boundary: prod tenant issues ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims.
 - 2026-09-05 ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers.
+- 2026-09-05 ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows object-ID routes; client bundle shows GraphQL ops with these IDs
+- 2026-09-05 ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
+- 2026-09-05 ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 portals
+- 2026-09-05 REJECTED nextauth-callback-open-redirect: callbackUrl validated to same-domain; subdomains rejected; external replaced with origin — not an open redirect
+- 2026-09-05 REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct on all 6 portals
+- 2026-09-05 REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
+- 2026-09-05 REJECTED developer-portal-graphql-introspection + exposed-swagger: SPA catch-all 200 false positives, already overruled by 307 on real endpoints
