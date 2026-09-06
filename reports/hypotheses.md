@@ -708,3 +708,23 @@
 - LEARN: ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
 - LEARN: ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route 
 - LEARN: ACCEPTED businessid-broker-surface: login.businessid(.qa).daimlertruck.com DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82
+
+## RANKED HYPOTHESES 2026-09-06 17:34:34 UTC
+- [70] companion.app.daimlertruck.com: Companion App Post-Auth BOLA via Object-ID Routes (from art/lead_nemotron3.txt)
+- [60] login.ciam.daimlertruck.com: companion-b2c-redirect-uri-allowlist-enumeration (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `GET https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-a
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET `https://companion-dev.app.daimlertruck.com/api/auth/providers` — compare provider config to prod (expect 2 providers: azure-ad-b2c-dt + azure-ad-b2c
+- LEARN: ACCEPTED companion-app-live @ companion.app.daimlertruck.com: LIVE prod DT Companion AI (build IqPB_zhGzw2eQTiap3_bK, frontend 1.91.0, istio-envoy). /admin /cha
+- LEARN: ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: identical build, debug flags, dev auth not wired to live tenant.
+- LEARN: ACCEPTED b2c-error-info-leak @ login.ciam.daimlertruck.com: prod B2C error discloses companion-dev host.
+- LEARN: REJECTED companion-open-redirect: callbackUrl validated to same-domain; subdomains rejected — not an open redirect.
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM share tenant-level issuer + same portal client c387a5ab.
+- LEARN: ACCEPTED companion-app-live @ companion.app.daimlertruck.com: previously NXDOMAIN prod CSP frame-src dead-reference, now LIVE prod DT Companion AI (build IqPB_z
+- LEARN: ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: same build/version as prod but enables showFrontendVersion:true + connectionTypeSelecto
+- LEARN: ACCEPTED b2c-error-info-leak @ login.ciam.daimlertruck.com client cd34584a: unregistered redirect_uri → AADB2C90006 whose error location points to companion-dev
+- LEARN: REJECTED companion-open-redirect / callbackUrl @ companion.app(.dev): GET/POST callbackUrl=https://evil.com and https://attacker.daimlertruck.com both replaced 
+- LEARN: REJECTED rag-librechat-meili-live-surface @ *.daimlertruck.com: RAG API whitelisted /docs,/openapi.json,/health + Meili /indexes return 307 (developer.* blanket
+- LEARN: REJECTED dt-dds-design-system @ daimlertruck/DT-DDS: original Daimler repo but pure frontend component library (Storybook on github.io pages, no backend, no env
+- LEARN: ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, cr
+- LEARN: REJECTED broker-selfservice-signup @ login.businessid(.qa): only b2c_1a_signin policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no s
+- LEARN: ACCEPTED businessid-broker-first-hop @ login.businessid(.qa): ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a4

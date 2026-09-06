@@ -8620,3 +8620,110 @@ Wait — the risk guidance says "any exposure of customer/employee/financial/aut
 I should note the /api/proxy-http revealed a real server-side proxy route on a live production asset — that's the highest-value technical surface (SSRF candidate), even if currently 401-gated. This is worth escalating via AUTH_HELPED.
 
 Let me finalize the output.
+===== ANALYST bigpickle 2026-09-06 17:34:34 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m• [0mExplore workspace files[90m Explore Agent[0m
+[0m✓ [0mExplore workspace files[90m Explore Agent[0m
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/hypotheses-nemotron3.txt
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead leads/lead-nemotron3.md
+[0m→ [0mRead triage/run-2026-09-06-15-54.md
+[0m→ [0mRead probe-results.md
+[0m✗ [0mRead reports/hypotheses-bigpickle.txt failed[90m [offset=479][0m
+[91m[1mError: [0mOffset 479 is out of range for this file (34 lines)
+[0m✗ [0mRead reports/hypotheses-nemotron3.txt failed[90m [offset=361][0m
+[91m[1mError: [0mOffset 361 is out of range for this file (59 lines)
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead state_nemotron3.json
+[0m→ [0mRead scope.yml
+[0m→ [0mRead knowledge/index.md
+Now I have full context. Here is my structured analysis:
+
+---
+
+## STEP 1 — DELTA
+
+- **[NEW]** `companion.app.daimlertruck.com` now LIVE (previously NXDOMAIN) — prod DT Companion AI with /admin, /chat, /api/proxy-http behind B2C client cd34584a
+- **[NEW]** `companion-dev.app.daimlertruck.com` exposed — identical build to prod, debug flags enabled (showFrontendVersion:true), dev auth provider not wired to live tenant
+- **[NEW]** B2C error AADB2C90006 on prod client cd34584a leaks companion-dev hostname as error callback target
+- **[NEW]** Proxy-HTTP route at /api/proxy-http on companion.app — POST returns 401 (auth-gated SSRF surface in istio AKS mesh)
+- **[CHANGED]** valid-bugs.md has stale verdicts — shows "VALID" for NextAuth.js Open Redirect but knowledge base REJECTED it (PKCE S256 + same-origin redirect_uri enforced); needs cleanup
+- **NO_DELTA** on developer.* portals, authz.*, capacitor-admin.*, www — unchanged since 2026-09-05
+
+## STEP 2 — PRIORITIZE
+
+| Asset | Score | a | b | t | g | c | f |
+|---|---|---|---|---|---|---|---|
+| companion.app.daimlertruck.com | 7.8 | 8 | 8 | 9 | 2 | 8 | 9 |
+| developer.as.api.daimlertruck.com | 8.0 | 9 | 9 | 8 | 3 | 7 | 8 |
+| login.ciam.daimlertruck.com | 7.2 | 7 | 10 | 9 | 1 | 6 | 8 |
+| companion-dev.app.daimlertruck.com | 6.5 | 7 | 6 | 7 | 3 | 7 | 9 |
+
+[PRIO] companion.app.daimlertruck.com,7.8,attack_surface=8,business_value=8,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=8
+[PRIO] login.ciam.daimlertruck.com,7.2,attack_surface=7,business_value=10,tech_exposure=9,gate_ease=1,cloud_surface=6,freshness=8
+[PRIO] companion-dev.app.daimlertruck.com,6.5,attack_surface=7,business_value=6,tech_exposure=7,gate_ease=3,cloud_surface=7,freshness=9
+
+## STEP 3 — HYPOTHESES
+
+[HYP] companion-b2c-redirect-uri-allowlist-enumeration
+class: MISCONFIG
+asset: login.ciam.daimlertruck.com client cd34584a
+confidence: 60
+reasoning: Sending unregistered redirect_uri to prod B2C client cd34584a returns AADB2C90006 whose error location field discloses companion-dev.app.daimlertruck.com — a previously undiscoverable dev deployment host. The prod client's error handling reveals which hosts it recognizes vs rejects. Iterating callback paths (/api/auth/callback/azure-ad-b2c, /callback, /widget/callback, /admin/callback) on both prod and dev hosts will map the full registered redirect URI allowlist for the highest-sensitivity identity client in the program.
+evidence_needed: AADB2C90006 error responses with location fields showing which redirect URIs are registered vs unregistered on prod client cd34584a; confirm whether companion-dev is registered as a valid redirect target (not just an error fallback)
+verify_steps: PASSIVE: GET `https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid` (registered — expect AADB2C90006 or redirect). Repeat with redirect_uri=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c, /widget/callback, /admin/callback. Diff error messages between registered and unregistered URIs.
+impact: Dev environment registration on prod B2C client → credential linkage risk; if dev uses weaker auth config → escalation path to prod; Severity: medium (info-disclosure + potential auth escalation)
+testability: PASSIVE
+
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 48
+reasoning: buildManifest lists /api/proxy-http — POST returns 401 "Unauthorized", GET/other 405 "Method not allowed". This is a server-side HTTP proxy likely used for AI/web-browsing features. The companion app runs in istio AKS mesh (server: istio-envoy) — authenticated SSRF would reach cloud metadata 169.254.169.254 or internal AI services. /api/[...slug] catch-all also POST 401.
+evidence_needed: a valid companion session (authMechanism azure-ad-b2c, prod client cd34584a) then POST /api/proxy-http with internal target URLs
+verify_steps: AUTH_HELPED: obtain companion.app session → `POST /api/proxy-http` `{"url":"http://169.254.169.254/latest/meta-data/"}` and `{"url":"http://companion-service.internal/"}` → observe response
+impact: SSRF → cloud metadata keys / internal AI service access; Severity: high (conditional on reachable session)
+testability: AUTH_HELPED
+
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: /graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes (/apis/[apiId], /subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle shows GraphQL ops with these IDs; portal-blanket-auth-middleware confirmed; only barrier is valid B2C session
+evidence_needed: authenticated GraphQL introspection showing mutation types + test cross-tenant ID access
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `{__schema{types{name fields{name args{name}}}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+
+## STEP 4 — SELF-CRITIQUE
+
+[PARKED] companion-proxy-http-ssrf-auth-required: confidence 48 < 50; requires companion session which does not yet exist; all evidence is from buildManifest/route probing only. Re-promote once companion auth is obtained.
+
+[PARKED] graphql-object-id-bola-team-scoped: confidence 75 but blocked on two admin-provisioned staging accounts — unchanged since 2026-09-03. No new evidence this cycle.
+
+[FINAL] 1. companion-b2c-redirect-uri-allowlist-enumeration (60) — PASSIVE, executable now, novel surface (companion-app discovered this cycle)
+[FINAL] 2. graphql-object-id-bola-team-scoped (75) — AUTH_HELPED, highest potential impact
+[FINAL] 3. companion-proxy-http-ssrf-auth-required (48) — PARKED, needs auth
+
+## STEP 5 — NEXT ACTION
+
+[NEXT] PROBE: `GET https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid` — test whether the REGISTERED callback URI triggers a different error (or redirect) than the unregistered one that leaked the dev host. Then iterate: redirect_uri=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c, redirect_uri=https://companion.app.daimlertruck.com/widget/callback, redirect_uri=https://companion.app.daimlertruck.com/admin/callback. Diff error messages (AADB2C90006 vs AADB2C90227 or success). Passive, read-only, <=1 req/sec.
+
+## STEP 6 — LEARNING
+
+[LEARN] ACCEPTED companion-app-live @ companion.app.daimlertruck.com: LIVE prod DT Companion AI (build IqPB_zhGzw2eQTiap3_bK, frontend 1.91.0, istio-envoy). /admin /chat /api/proxy-http behind B2C client cd34584a; callbackUrl same-origin enforced.
+[LEARN] ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: identical build, debug flags, dev auth not wired to live tenant.
+[LEARN] ACCEPTED b2c-error-info-leak @ login.ciam.daimlertruck.com: prod B2C error discloses companion-dev host.
+[LEARN] REJECTED companion-open-redirect: callbackUrl validated to same-domain; subdomains rejected — not an open redirect.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM share tenant-level issuer + same portal client c387a5ab.
+
+## STEP 7 — RISK
+
+[RISK] Daimler Truck: 45/100. Risk steady (42→45 last cycle, unchanged now). New companion.app surface adds /api/proxy-http (SSRF class) and /admin, but all behind auth (307/401). Developer portal BOLA + cross-BU token boundary remain highest potential impact but gated on two admin-provisioned staging accounts. No anonymous exploit reachable this cycle. The B2C error-URI enumeration is the only new passive finding that could narrow the gap to a reportable finding. This cycle: read-only GETs on public B2C authorize error endpoints + health/ready/widget JS; no customer/employee data, no auth bypass, no mutating requests.
+
+**Stale valid-bugs.md cleanup needed:** The file shows "VALID" for NextAuth.js Open Redirect but the knowledge base has REJECTED it 5+ times (PKCE S256 + same-origin redirect_uri + callbackUrl same-domain-only). These verdicts are stale from a 2026-09-04 triage run before the POST-based CSRF test was completed.
