@@ -111,3 +111,35 @@ TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 ## REPOSCAN 2026-09-06 06:07:59 UTC
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-06 11:09:12 UTC
+class: SECRET
+asset: `daimlertruck/SRC-rag_api/app/config.py:59`
+confidence: 90
+reasoning: `POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD", "mypassword")` — if the env var is unset, the RAG API connects to PostgreSQL with the hardcoded password `mypassword`. The username `myuser` and database `mydatabase` follow the same pattern (lines 58-59).
+impact: HIGH — Default credentials on a database holding document embeddings could allow unauthorized data access if deployed without overriding env vars.
+verify_steps: Check whether any live deployment of `SRC-rag_api` omits `POSTGRES_PASSWORD` from its environment. If the container starts and connects to a real Postgres instance with `mypassword`, the finding is confirmed.
+class: MISCONFIG
+asset: `daimlertruck/SRC-rag_api/app/middleware.py:18-21`
+confidence: 85
+reasoning: When `JWT_SECRET` is unset, the middleware logs a warning and calls `next_middleware_call()` without validating any token. Every protected endpoint becomes unauthenticated.
+impact: HIGH — If deployed without `JWT_SECRET`, the RAG API is fully open. An attacker can access all document endpoints without credentials.
+verify_steps: Deploy SRC-rag_api without setting `JWT_SECRET`. Confirm that requests to `/documents` etc. return 200 without a valid bearer token.
+class: MISCONFIG
+asset: `daimlertruck/SRC-rag_api/main.py:72-77`
+confidence: 80
+reasoning: `allow_origins=["*"]` combined with `allow_credentials=True` allows any origin to make credentialed cross-origin requests to the API. This is a textbook CORS misconfiguration.
+impact: MEDIUM — Enables CSRF-like attacks against authenticated endpoints if the API uses cookie-based auth. Combined with finding #2, any origin can access the open API.
+verify_steps: Send an `Origin: https://evil.com` request with `credentials: include` to an authenticated endpoint. If the response includes `Access-Control-Allow-Origin: https://evil.com` and `Access-Control-Allow-Credentials: true`, the finding is confirmed.
+class: MISCONFIG
+asset: `daimlertruck/SRC-openai-aca-lb/infra/core/database/sql/sql-server.bicep` (firewall resource)
+confidence: 75
+reasoning: The SQL Server firewall rule is defined with `startIpAddress: '0.0.0.1'` and `endIpAddress: '255.255.255.254'`, allowing connections from any public IP. The comment notes this is for "debugging purposes" but the template is committed as-is.
+impact: MEDIUM — If deployed to a real Azure subscription, the SQL Server is exposed to the entire internet. The `@secure()` parameter for the password is correct, but the network perimeter is wide open.
+verify_steps: Deploy the Bicep template and inspect the SQL Server's firewall rules in the Azure portal. Confirm the rule covers `0.0.0.1-255.255.255.254`.
+class: MISCONFIG
+asset: `daimlertruck/SRC-openai-aca-lb/infra/core/host/container-registry.bicep:24`
+confidence: 60
+reasoning: `publicNetworkAccess string = 'Enabled'` is the default. Combined with the SQL firewall above, this defaults to a posture where container images and the database are both publicly reachable.
+impact: LOW — Standard for dev/test templates. `adminUserEnabled` and `anonymousPullEnabled` default to false, so the direct risk is limited.
+verify_steps: Deploy and verify the ACR's public network access setting in the Azure portal.
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
