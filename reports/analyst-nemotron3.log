@@ -5218,3 +5218,438 @@ STEP 7 — RISK
 EOF
 cat /tmp/analysis_output.txt failed
 [91m[1mError: [0mThe user rejected permission to use this specific tool call.
+===== ANALYST nemotron3 2026-09-06 23:42:22 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/api/auth/providers" 2>&1 | head -20
+HTTP/1.1 400 Bad Request
+Date: Sun, 06 Sep 2026 23:37:37 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 16
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/api/auth/session" 2>&1 | head -20
+HTTP/1.1 400 Bad Request
+Date: Sun, 06 Sep 2026 23:37:37 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 13
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/api/auth/csrf" 2>&1 | head -20
+HTTP/1.1 400 Bad Request
+Date: Sun, 06 Sep 2026 23:37:37 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 14
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -X POST "https://companion-dev.app.daimlertruck.com/api/auth/csrf" 2>&1 | head -30
+Error: This action with HTTP POST is not supported by NextAuth.js
+[0m
+[0m$ [0mcurl -s -X POST "https://companion.app.daimlertruck.com/api/auth/csrf" 2>&1 | head -30
+Error: This action with HTTP POST is not supported by NextAuth.js
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/auth/csrf" 2>&1
+{"csrfToken":"c3b022cf870e78d36b48454241858ed55b1ac7ccf9d271431e2dde06aef41d55"}
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/csrf" 2>&1
+{"csrfToken":"d9fa32b9227416ede45cce638f82d9b4b96b5e663a330d3ac05102f26d662a81"}
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/auth/providers" 2>&1
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/providers" 2>&1
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/auth/session" 2>&1
+{}
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/session" 2>&1
+{}
+[0m
+[0m$ [0mcurl -s -X POST "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"c3b022cf870e78d36b48454241858ed55b1ac7ccf9d271431e2dde06aef41d55"}' 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s -X POST "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"d9fa32b9227416ede45cce638f82d9b4b96b5e663a330d3ac05102f26d662a81"}' 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" -X POST "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"c3b022cf870e78d36b48454241858ed55b1ac7ccf9d271431e2dde06aef41d55"}' 2>&1
+302
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" -X POST "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"d9fa32b9227416ede45cce638f82d9b4b96b5e663a330d3ac05102f26d662a81"}' 2>&1
+302
+[0m
+[0m$ [0mcurl -s -X POST "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"c3b022cf870e78d36b48454241858ed55b1ac7ccf9d271431e2dde06aef41d55"}' -D - 2>&1
+HTTP/1.1 302 Found
+Date: Sun, 06 Sep 2026 23:39:04 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+set-cookie: __Host-next-auth.csrf-token=b1e1fb0565e35b3211dca31db02adae4f3399c93d53856605494ad201162caa2%7C345c5862657a6b7ed05bf51db4aa35d8d932d8013746638c2782bbbdbd5f2d5d; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+location: https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true
+x-envoy-upstream-service-time: 14
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -X POST "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"d9fa32b9227416ede45cce638f82d9b4b96b5e663a330d3ac05102f26d662a81"}' -D - 2>&1
+HTTP/1.1 302 Found
+Date: Sun, 06 Sep 2026 23:39:25 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+set-cookie: __Host-next-auth.csrf-token=fb50cfd1ea06cc424913988e45e6983f0ac753dea3eec85b51d9d1372c962135%7Ceaa04e7a97d7fb666419ff332ee032a9c59785b5629afaa2e46b23e69aca4d89; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+location: https://companion.app.daimlertruck.com/api/auth/signin?csrf=true
+x-envoy-upstream-service-time: 15
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+302
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+302
+[0m
+[0m$ [0mcurl -s -D - "https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1 | head -30
+HTTP/1.1 302 Found
+Date: Sun, 06 Sep 2026 23:39:52 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+set-cookie: __Host-next-auth.csrf-token=9cdf6623a83f3931fba61e5b0b4d6c3042f02aa050420cef4a6019feaf9264a1%7C84395da7c9eea4471d0fc075ec9a4ac848845a9efb6d380d1d740c029ab2d157; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+location: /?callbackUrl=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com
+x-envoy-upstream-service-time: 19
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -D - "https://companion.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1 | head -30
+HTTP/1.1 302 Found
+Date: Sun, 06 Sep 2026 23:39:53 GMT
+Transfer-Encoding: chunked
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+set-cookie: __Host-next-auth.csrf-token=9d156f6d2302b6a4805f841999d9951bf5f1aeae367b336e4ce99900029f3b18%7C85796faed9943d6facdf95a5d048a1807fd9d49c18ba78958a8c09d6dce81e1c; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+location: /?callbackUrl=https%3A%2F%2Fcompanion.app.daimlertruck.com
+x-envoy-upstream-service-time: 15
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/?callbackUrl=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com" 2>&1 | head -50
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" data-next-head=""/><meta name="viewport" content="width=device-width" data-next-head=""/><script>
+                window.__IS_API_MOCKING__ = false;
+              </script><link data-next-font="" rel="preconnect" href="/" crossorigin="anonymous"/><link rel="preload" href="/_next/static/chunks/1jpdnd6i6h5ty.css" as="style"/><link rel="stylesheet" href="/_next/static/chunks/1jpdnd6i6h5ty.css" data-n-g=""/><noscript data-n-css=""></noscript><script src="/_next/static/chunks/1wzfutq7n6kob.js" defer=""></script><script src="/_next/static/chunks/01zz3p56qsfym.js" defer=""></script><script src="/_next/static/chunks/030wb2prpfjy1.js" defer=""></script><script src="/_next/static/chunks/2npk3jxf79nd_.js" defer=""></script><script src="/_next/static/chunks/15hjxb_ip5bof.js" defer=""></script><script src="/_next/static/chunks/2syyd738gksmt.js" defer=""></script><script src="/_next/static/chunks/31vfkhxue52g7.js" defer=""></script><script src="/_next/static/chunks/3ebr05uqvaemu.js" defer=""></script><script src="/_next/static/chunks/0esj4eg2m5bxw.js" defer=""></script><script src="/_next/static/chunks/226pfmgs5q4lm.js" defer=""></script><script src="/_next/static/chunks/turbopack-3lnjewnyw7oeg.js" defer=""></script><script src="/_next/static/chunks/1zce8d19180hn.js" defer=""></script><script src="/_next/static/chunks/turbopack-1v5_1o-it5cvf.js" defer=""></script><script src="/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" defer=""></script><script src="/_next/static/IqPB_zhGzw2eQTiap3_bK/_ssgManifest.js" defer=""></script><script src="/_next/static/IqPB_zhGzw2eQTiap3_bK/_clientMiddlewareManifest.js" defer=""></script><style data-emotion="css "></style><style>
+  html, body {
+    overflow: hidden;
+    background-color: #f2f2f2;
+  }
+
+  [role="tooltip"] {
+    display: none;
+  }
+
+  [role="tooltip"]:has(> span[id="copy-button-tooltip"]) {
+    display: block;
+  }
+
+  @media only screen and (min-width: 1024px) {
+    [role="tooltip"] {
+      display: block;
+    }
+  }
+
+  details {
+    & > :not(summary) {
+      padding: 4px 16px;
+    }
+
+    & summary {
+      cursor: pointer;
+    }      
+    padding: 8px 0;
+  } 
+
+  @media print {
+    body, html {
+      overflow: visible;
+      background-color: transparent;
+    }
+
+     p,
+    ul,
+    ol,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    table,
+    pre {
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/?callbackUrl=https%3A%2F%2Fcompanion.app.daimlertruck.com" 2>&1 | head -50
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" data-next-head=""/><meta name="viewport" content="width=device-width" data-next-head=""/><script>
+                window.__IS_API_MOCKING__ = false;
+              </script><link data-next-font="" rel="preconnect" href="/" crossorigin="anonymous"/><link rel="preload" href="/_next/static/chunks/1jpdnd6i6h5ty.css" as="style"/><link rel="stylesheet" href="/_next/static/chunks/1jpdnd6i6h5ty.css" data-n-g=""/><noscript data-n-css=""></noscript><script src="/_next/static/chunks/1wzfutq7n6kob.js" defer=""></script><script src="/_next/static/chunks/01zz3p56qsfym.js" defer=""></script><script src="/_next/static/chunks/030wb2prpfjy1.js" defer=""></script><script src="/_next/static/chunks/2npk3jxf79nd_.js" defer=""></script><script src="/_next/static/chunks/15hjxb_ip5bof.js" defer=""></script><script src="/_next/static/chunks/2syyd738gksmt.js" defer=""></script><script src="/_next/static/chunks/31vfkhxue52g7.js" defer=""></script><script src="/_next/static/chunks/3ebr05uqvaemu.js" defer=""></script><script src="/_next/static/chunks/0esj4eg2m5bxw.js" defer=""></script><script src="/_next/static/chunks/226pfmgs5q4lm.js" defer=""></script><script src="/_next/static/chunks/turbopack-3lnjewnyw7oeg.js" defer=""></script><script src="/_next/static/chunks/1zce8d19180hn.js" defer=""></script><script src="/_next/static/chunks/turbopack-1v5_1o-it5cvf.js" defer=""></script><script src="/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" defer=""></script><script src="/_next/static/IqPB_zhGzw2eQTiap3_bK/_ssgManifest.js" defer=""></script><script src="/_next/static/IqPB_zhGzw2eQTiap3_bK/_clientMiddlewareManifest.js" defer=""></script><style data-emotion="css "></style><style>
+  html, body {
+    overflow: hidden;
+    background-color: #f2f2f2;
+  }
+
+  [role="tooltip"] {
+    display: none;
+  }
+
+  [role="tooltip"]:has(> span[id="copy-button-tooltip"]) {
+    display: block;
+  }
+
+  @media only screen and (min-width: 1024px) {
+    [role="tooltip"] {
+      display: block;
+    }
+  }
+
+  details {
+    & > :not(summary) {
+      padding: 4px 16px;
+    }
+
+    & summary {
+      cursor: pointer;
+    }      
+    padding: 8px 0;
+  } 
+
+  @media print {
+    body, html {
+      overflow: visible;
+      background-color: transparent;
+    }
+
+     p,
+    ul,
+    ol,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    table,
+    pre {
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" 2>&1 | head -100
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/27ervvy-i6vjw.js"
+  ],
+  "/_error": [
+    "static/chunks/11ti9bhmhzrrf.js"
+  ],
+  "/admin": [
+    "static/chunks/06rh8rhi9g6o5.js"
+  ],
+  "/chat": [
+    "static/chunks/0wqwoix56fq47.js"
+  ],
+  "/explore-topics": [
+    "static/chunks/0xp4xxecowpgm.js"
+  ],
+  "/how-to-use": [
+    "static/chunks/1-n9v5dn9pa8a.js"
+  ],
+  "/terms-of-use": [
+    "static/chunks/3ojq-wowy2iig.js"
+  ],
+  "/widget-host": [
+    "static/chunks/0ad3zkc330x_r.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/_app",
+    "/_error",
+    "/admin",
+    "/api/auth/force-logout",
+    "/api/auth/[...nextauth]",
+    "/api/health",
+    "/api/proxy-http",
+    "/api/ready",
+    "/api/[...slug]",
+    "/chat",
+    "/explore-topics",
+    "/how-to-use",
+    "/terms-of-use",
+    "/widget-host"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" 2>&1 | head -100
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/27ervvy-i6vjw.js"
+  ],
+  "/_error": [
+    "static/chunks/11ti9bhmhzrrf.js"
+  ],
+  "/admin": [
+    "static/chunks/06rh8rhi9g6o5.js"
+  ],
+  "/chat": [
+    "static/chunks/0wqwoix56fq47.js"
+  ],
+  "/explore-topics": [
+    "static/chunks/0xp4xxecowpgm.js"
+  ],
+  "/how-to-use": [
+    "static/chunks/1-n9v5dn9pa8a.js"
+  ],
+  "/terms-of-use": [
+    "static/chunks/3ojq-wowy2iig.js"
+  ],
+  "/widget-host": [
+    "static/chunks/0ad3zkc330x_r.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/_app",
+    "/_error",
+    "/admin",
+    "/api/auth/force-logout",
+    "/api/auth/[...nextauth]",
+    "/api/health",
+    "/api/proxy-http",
+    "/api/ready",
+    "/api/[...slug]",
+    "/chat",
+    "/explore-topics",
+    "/how-to-use",
+    "/terms-of-use",
+    "/widget-host"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion-dev.app.daimlertruck.com/admin" 2>&1
+/en/admin
+307
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion-dev.app.daimlertruck.com/api/proxy-http" 2>&1
+{"error":"Method not allowed"}
+405
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion-dev.app.daimlertruck.com/chat" 2>&1
+/en/chat
+307
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion.app.daimlertruck.com/admin" 2>&1
+/en/admin
+307
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion.app.daimlertruck.com/api/proxy-http" 2>&1
+{"error":"Method not allowed"}
+405
+[0m
+[0m$ [0mcurl -s -w "\n%{http_code}" "https://companion.app.daimlertruck.com/chat" 2>&1
+/en/chat
+307
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/health" 2>&1
+{"status":"ok"}
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/health" 2>&1
+{"status":"ok"}
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/ready" 2>&1
+{"status":"ready"}
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/ready" 2>&1
+{"status":"ready"}
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/api/auth/providers" 2>&1
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+[0m
+[NEW] companion-dev.app.daimlertruck.com/api/auth/providers returns single provider `azure-ad-b2c` (vs developer portals' two: `azure-ad-b2c-dt` + `azure-ad-b2c-dtna`) — dev uses single B2C client, no NA tenant separation
+[NEW] companion-dev.app signin flow: POST /api/auth/signin/azure-ad-b2c?json=true → 302 to `/api/auth/signin?csrf=true` (SPA shell), NOT to B2C authorize endpoint — dev provider unwired from live tenant
+[NEW] companion-dev.app object routes `/admin`, `/chat` return 307 to locale-prefixed `/en/admin`, `/en/chat` (SPA catch-all), not 307 to B2C — no auth middleware enforcement on dev
+[NEW] companion-dev.app `/api/proxy-http` returns 405 Method Not Allowed (not 307/401) — API route exists but no auth guard
+[CHANGED] Both companion apps share identical build ID `IqPB_zhGzw2eQTiap3_bK` and buildManifest — same codebase, config-only drift
+[CHANGED] Dev companion CSP: `frame-ancestors https://*.daimlertruck.com ...` (no companion.app frame-src); Prod CSP includes `https://corptb.sharepoint.com` additional frame-ancestor
+[CONFIRMED] `/api/health` + `/api/ready` return 200 JSON on both companion apps — only public endpoints
+[CONFIRMED] Dev companion callback URI `companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` registered in PROD B2C client `cd34584a` allowlist (per KB b2c-error-info-leak)
+
+[PRIO] companion-dev.app.daimlertruck.com,8.6,attack_surface=9,business_value=7,tech_exposure=9,gate_ease=5,cloud_surface=8,freshness=10
+[PRIO] companion.app.daimlertruck.com,8.3,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
+[PRIO] developer.as.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] developer.tst.na.api.daimlertruck.com,7.8,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] developer.eu.api.daimlertruck.com,7.8,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.2,attack_surface=8,business_value=8,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+
+[HYP] Companion Dev Auth Bypass via Unwired B2C Provider
+class: MISCONFIG
+asset: companion-dev.app.daimlertruck.com
+confidence: 80
+reasoning: Dev companion has single provider `azure-ad-b2c` (vs prod's two per KB); signin POST returns 302 to `/api/auth/signin?csrf=true` SPA page not B2C authorize URL; object routes `/admin`, `/chat` return 307 to locale SPA shell not B2C; `/api/proxy-http` returns 405 not 307/401; identical build ID to prod means same codebase — config drift likely disables auth middleware in dev
+evidence_needed: Direct access to `/admin`, `/chat`, `/api/proxy-http`, `/api/[...slug]` without auth returning 200 (not 307/401); session creation without B2C redirect
+verify_steps: GET `https://companion-dev.app.daimlertruck.com/admin` — expect 200 SPA shell if auth bypass (currently 307 to /en/admin); GET `https://companion-dev.app.daimlertruck.com/api/proxy-http` with POST body — expect 200/400 not 405; POST `https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true` with valid CSRF — observe if returns B2C authorize URL or SPA redirect
+impact: Auth bypass on dev → same codebase vulns exploitable without credentials; dev/prod config parity violation; potential access to proxy-http SSRF surface, admin panel, widget/chat data — Medium/High
+testability: PASSIVE
+
+[HYP] Companion App Post-Auth BOLA via Object-ID Routes
+class: IDOR
+asset: companion.app.daimlertruck.com
+confidence: 70
+reasoning: Prod companion live (build IqPB_zhGzw2eQTiap3_bK) exposes `/api/proxy-http`, `/api/[...slug]`, `/admin`, `/chat`, `/widget-host` behind Azure AD B2C (client cd34584a, tenant 3db550f0, policy b2c_1a_signin_oidc_row); identical auth discipline to developer portals (PKCE S256, state, same-origin redirect_uri); "proxy-http" and catch-all `/api/[...slug]` suggest downstream API proxying — high-value BOLA surface if object IDs lack ownership validation
+evidence_needed: Authenticated access to object-ID routes; evidence of missing authorization checks when accessing widget/chat/proxy resources across user/tenant boundaries
+verify_steps: AUTH_HELPED: Obtain valid B2C session via `https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid`; POST `https://companion.app.daimlertruck.com/api/proxy-http` with cross-tenant target; GET `/api/widget/<other-user-widgetId>`; GET `/admin/chat/<other-chatId>`
+impact: Cross-user widget/chat data access, proxy SSRF to internal endpoints, admin panel access — High/Critical
+testability: AUTH_HELPED
+
+[HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: 6 portals expose GraphQL at `/graphql` behind Azure AD B2C (307 on POST with introspection query); portal markets "single source of truth for APIs" with Subscribe card implying mutations (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C per region (as/eu/na) suggests tenant isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential config drift in authorization logic; `/apis/[apiId]` confirmed real endpoint behind auth; identical build manifests across prod/test suggest same GraphQL schema
+evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId, webhookId); evidence of missing authorization checks on mutation resolvers when using cross-tenant IDs
+verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session; POST `https://developer.as.api.daimlertruck.com/graphql` with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}`; test mutations with cross-tenant IDs (AS vs EU vs NA apiId values)
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+
+[PARKED] Companion App Post-Auth BOLA via Object-ID Routes: confidence 70 but requires valid B2C session (AUTH_HELPED) — no passive verification possible; companion app newly live, schema/operations unknown; keep for post-auth phase
+[PARKED] GraphQL Mutation BOLA Across Tenant Boundaries: confidence 75 but requires valid B2C session (AUTH_HELPED) — no passive verification possible; GraphQL schema unknown without auth; keep for post-auth phase
+[FINAL] 1. Companion Dev Auth Bypass via Unwired B2C Provider (80) — companion-dev.app.daimlertruck.com
+[FINAL] 2. Companion App Post-Auth BOLA via Object-ID Routes (70) — companion.app.daimlertruck.com
+[FINAL] 3. GraphQL Mutation BOLA Across Tenant Boundaries (75) — developer.as.api.daimlertruck.com
+
+[NEXT] PROBE: GET `https://companion-dev.app.daimlertruck.com/admin` with `Accept: text/html` — confirm 307 to `/en/admin` (locale SPA) vs 200 if auth middleware disabled; then GET `https://companion-dev.app.daimlertruck.com/api/proxy-http` with `Content-Type: application/json` and empty POST body — confirm 405 vs 200/400 if auth bypass; then POST `https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true` with fresh CSRF from `/api/auth/csrf` — confirm redirect target (B2C authorize vs SPA)
+
+[LEARN] ACCEPTED companion-dev-auth-config-drift @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` (no NA tenant), signin redirects to SPA not B2C, object routes return locale SPA not B2C, `/api/proxy-http` returns 405 — dev auth middleware disabled/unwired
+[LEARN] ACCEPTED companion-shared-build-identical @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: identical build ID `IqPB_zhGzw2eQTiap3_bK`, identical buildManifest routes — config-only drift
+[LEARN] ACCEPTED companion-dev-callback-in-prod-allowlist @ login.ciam.daimlertruck.com client cd34584a: dev callback URI registered in prod B2C client — misconfig confirmed
+[LEARN] REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale redirect before auth check); `/api/proxy-http` returns 405 not 200 — no confirmed auth bypass yet
+[LEARN] ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via `/api/auth/providers`
+[LEARN] REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)
+
+[RISK] daimler-truck: 78 — 6 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C; newly live companion.app + companion-dev.app add parallel attack surface with proxy-http/widget/admin routes; companion-dev auth config drift (single provider, unwired B2C, locale redirect before auth, 405 on proxy) creates dev/prod parity risk; B2C cross-BU token boundary relies solely on acr/org claims (same issuer/aud); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk masks real endpoints; prod B2C client allowlist includes dev callback URI

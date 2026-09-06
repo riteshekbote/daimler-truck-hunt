@@ -2257,3 +2257,38 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED companion-widget-inert @ companion.app/widget/dt-companion.js: iframe launcher only (`?externalDomain={{bool}}`), localStorage drag state, clipboard-read/write allow; no /api refs, no tokens, no role logic — no anonymous attack surface in the embedder.
 [LEARN] REJECTED widget-embed-auth-bypass @ companion iframe: external-domain embedding still routes all app pages through B2C 307 + same-origin callbackUrl; clipboard allow + drag position offer no demonstrated exploit (clickjacking class).
 [RISK] Daimler Truck: 46/100. Risk steady (unchanged). NOAM discovery documents a richer dealer-PII claim surface (FTLOrg* superset) under the same per-tenant issuer — reinforces the cross-BU boundary finding but adds no reachable exposure; companion widget is inert; all companion/dev/admin/SSRF paths remain B2C-gated. Only reportable item remains the confirmed dev-callback MISCONFIG on prod client cd34584a (info-level; dev provider unwired). This cycle: two read-only discovery GETs on B2C openid-configuration + one public widget JS fetch. No customer/employee data, no auth bypass, no mutating requests, <=1 rps.
+## 2026-09-06 23:40:16 UTC [target] (model bigpickle)
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 (30B) proves registered handler exempt from blanket wildcard (catch-all /api/px-9f2c→401); POST→401 unauth = only live method; handler named `proxy-http` on istio-AKS mesh; identical listener on companion-dev (same build).
+evidence_needed: valid companion session then POST body `{"url":"http://169.254.169.254/latest/meta-data/"}` and `{"url":"http://companion-service.internal/"}` → capture status + response
+verify_steps: AUTH_HELPED: `POST /api/proxy-http` with session cookie vs without; diff status; then internal/metadata URLs
+impact: cloud-metadata creds / internal AI-service access; high (conditional)
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: unchanged — /api/graphql 307-to-B2C; buildManifest object-ID routes (/apis/[apiId], teams/[teamId]/system-users/associate); GraphQL ops in client bundle; blanket middleware; barrier = valid B2C session.
+evidence_needed: authenticated introspection + cross-tenant ID diff
+verify_steps: AUTH_HELPED: `_row` + `_noam` accounts → POST /api/graphql `{__schema{types{name}}}` then `teams{items{id orgId}}` from both; diff scoping
+impact: cross-BU API subscriptions + dealer PII; medium-high
+testability: AUTH_HELPED
+[HYP] companion-admin-authz-role-claim
+class: AUTH
+asset: companion.app.daimlertruck.com/admin
+confidence: 42
+reasoning: 11 admin-chained chunks fetched — no UserAppRoles/AppRoles/isAdmin strings statically reachable (framework/vendor chunks); role enforcement server-side undetermined; /admin behind same single-provider B2C as /chat.
+evidence_needed: authenticated ROW token reaching /admin vs /chat; inspect appRoles claim
+verify_steps: AUTH_HELPED: valid session → GET /admin, GET /chat; diff status; decode JWT appRoles
+impact: any employee ROW token reaching AI admin console; medium-high
+testability: AUTH_HELPED
+[NEXT] PROBE: `GET https://companion.app.daimlertruck.com/api/{admin,chat,context,memory,models,user,users,files}` — diff status codes (401 catch-all vs 405/other = first-class handler) to map companion's real API handlers anonymously; strongest listener becomes the AUTH_HELPED deep-probe target. Read-only GETs, <=1 rps.
+[LEARN] ACCEPTED companion-proxy-http-ssrf-auth-required @ companion.app: GET /api/proxy-http→405 (30B, prod+dev) vs catch-all→401 proves first-class POST-only handler exempt from blanket middleware — listener + middleware-exempt evidence now concrete.
+[LEARN] ACCEPTED companion-route-map-complete @ companion.app: buildManifest = 6 pages + 6 api routes, no object-ID routes, empty rewrites.
+[LEARN] REJECTED nemotron3-companion-object-id-BOLA: no object-ID route surface on companion; route basis was developer.*.
+[LEARN] INFO force-logout @ companion.app(+dev): /api/auth/force-logout 302→/ unauth — logout-CSRF class, program out-of-scope; no hypothesis spawned.
+[LEARN] ACCEPTED companion-health-no-leak @ companion.app: health/ready = static {"status":...}, no uptime/build disclosure (dev+prod identical) vs developer /api/healthcheck uptime leak.
+[RISK] Daimler Truck: 46/100. Risk steady. New cycle evidence strengthens the companion proxy surface (real 405-listener, both envs) but stays strictly B2C-gated; force-logout is out-of-scope class; dev auth remains unwired (no token flow reachable). Only reportable item is still the dev-callback MISCONFIG on prod client cd34584a (info-level). This cycle: 2 manifest/providers fetches + 11 chunk GETs + 6 status-code probes on companion (prod+dev), all read-only, <=1 rps. No customer/employee data, no auth bypass, no mutating requests.

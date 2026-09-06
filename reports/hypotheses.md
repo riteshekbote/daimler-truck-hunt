@@ -752,3 +752,20 @@
 - LEARN: ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, cr
 - LEARN: REJECTED broker-selfservice-signup @ login.businessid(.qa): only b2c_1a_signin policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no s
 - LEARN: ACCEPTED businessid-broker-first-hop @ login.businessid(.qa): ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a4
+
+## RANKED HYPOTHESES 2026-09-06 23:42:22 UTC
+- [80] companion-dev.app.daimlertruck.com: Companion Dev Auth Bypass via Unwired B2C Provider (from art/lead_nemotron3.txt)
+- [55] companion.app.daimlertruck.com/api/proxy-http: companion-proxy-http-ssrf-auth-required (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `GET https://companion.app.daimlertruck.com/api/{admin,chat,context,memory,models,user,users,files}` — diff status codes (401 catch-all vs 405/other = fi
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET `https://companion-dev.app.daimlertruck.com/admin` with `Accept: text/html` — confirm 307 to `/en/admin` (locale SPA) vs 200 if auth middleware disab
+- LEARN: ACCEPTED companion-proxy-http-ssrf-auth-required @ companion.app: GET /api/proxy-http→405 (30B, prod+dev) vs catch-all→401 proves first-class POST-only handler 
+- LEARN: ACCEPTED companion-route-map-complete @ companion.app: buildManifest = 6 pages + 6 api routes, no object-ID routes, empty rewrites.
+- LEARN: REJECTED nemotron3-companion-object-id-BOLA: no object-ID route surface on companion; route basis was developer.*.
+- LEARN: INFO force-logout @ companion.app(+dev): /api/auth/force-logout 302→/ unauth — logout-CSRF class, program out-of-scope; no hypothesis spawned.
+- LEARN: ACCEPTED companion-health-no-leak @ companion.app: health/ready = static {"status":...}, no uptime/build disclosure (dev+prod identical) vs developer /api/healt
+- LEARN: ACCEPTED companion-dev-auth-config-drift @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` (no NA tenant), signin redirects to SPA not B2C, o
+- LEARN: ACCEPTED companion-shared-build-identical @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: identical build ID `IqPB_zhGzw2eQTiap3_bK`, ide
+- LEARN: ACCEPTED companion-dev-callback-in-prod-allowlist @ login.ciam.daimlertruck.com client cd34584a: dev callback URI registered in prod B2C client — misconfig conf
+- LEARN: REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale r
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via 
+- LEARN: REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)
