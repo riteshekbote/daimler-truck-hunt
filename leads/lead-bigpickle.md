@@ -2103,3 +2103,37 @@ class: IDOR
 asset: developer.tst.na.api.daimlertruck.com
 confidence: 75
 reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session
+## 2026-09-06 14:37:29 UTC [target] (model bigpickle)
+[HYP] companion-b2c-error-uri-leaks-dev-surface
+class: MISCONFIG
+asset: login.ciam.daimlertruck.com client cd34584a
+confidence: 60
+reasoning: Sending unregistered redirect_uri (e.g. //callback) to prod B2C client cd34584a returns AADB2C90006 whose error location points to `https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` — the prod client's configured error/callback host leaks the dev deployment hostname that was previously undiscoverable. Both companion hosts share identical build (IqPB_zhGzw2eQTiap3_bK) so dev is not isolated by version.
+evidence_needed: confirm dev host is registered as error redirect for prod client and reachable (it is — 200); determine whether dev host uses intended separate B2C client/tenant or accidentally shares prod credentials
+verify_steps: PASSIVE: `GET https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/callback&scope=openid` → error leaks dev host (confirmed); then `POST /api/auth/signin/azure-ad-b2c` on companion-dev to get its B2C tenant/client (confirmed: returns generic csrf=true, provider not wired to tenant — dev auth config differs)
+impact: dev environment disclosure + potential dev/prod credential linkage; if dev B2C client uses weaker policy → AUTH escalation to prod data; Severity: medium (info-disclosure now, higher if dev client shares prod tenant)
+testability: PASSIVE
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 45
+reasoning: buildManifest lists `/api/proxy-http` — a server-side HTTP proxy route (POST returns 401 "Unauthorized", GET/other 405 "Method not allowed"). Combined with `/api/[...slug]` catch-all (all POST 401), this is a backend proxy likely to hit internal/AI/cloud-metadata targets once authenticated. The companion app sits in istio AKS mesh (server: istio-envoy) — authenticated SSRF would reach cloud metadata 169.254.169.254 or internal services.
+evidence_needed: a valid companion session (authMechanism azure-ad-b2c, prod client cd34584a) then POST /api/proxy-http to internal targets
+verify_steps: AUTH_HELPED: obtain companion session → `POST /api/proxy-http` `{"url":"http://169.254.169.254/latest/meta-data/"}` and `{"url":"http://companion-service.internal/"}` → observe response; also probe `POST /api/[...slug]` for arbitrary fetch behaviour
+impact: SSRF → cloud metadata keys / internal AI service access; Severity: high (conditional on reachable session)
+testability: AUTH_HELPED
+[HYP] companion-admin-authz-function
+class: AUTH
+asset: companion.app.daimlertruck.com/en/admin
+confidence: 50
+reasoning: buildManifest exposes `/admin` and `/api/auth/force-logout`; /admin returns 307 to B2C auth (`/?callbackUrl=%2Fen%2Fadmin`) same as /chat — blanket middleware. But companion uses a DIFFERENT B2C client (cd34584a) and DIFFERENT authMechanism than developer portal; if /admin is role-gated by a claim (e.g. admin group in B2C) rather than business-role enforcement, an employee account may reach CDN/chat admin. force-logout works unauthenticated with only CSRF (302, clears cookies) — indicator of a distinct (simpler) auth assembly on this new app.
+evidence_needed: authenticated /admin response and role-claim check
+verify_steps: AUTH_HELPED: ROW employee session on companion.app → `GET /en/admin` → capture admin API calls from client bundle → test role escalation within employee token
+impact: chatbot admin panel / AI admin access if only employee-auth not admin-role; Severity: medium-high
+testability: AUTH_HELPED
+[NEXT] PROBE: `GET https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...` iterate candidate registered redirect_uris on prod client cd34584a (companion.app/api/auth/callback/azure-ad-b2c, companion-dev.app/..., plus any /widget or /admin callback) to enumerate the B2C client's registered redirect allowlist and confirm exactly which companion hosts (prod/dev) are bound to this client — passive, read-only.
+[LEARN] ACCEPTED companion-app-live @ companion.app.daimlertruck.com: previously NXDOMAIN prod CSP frame-src dead-reference, now LIVE prod DT Companion AI (build IqPB_zhGzw2eQTiap3_bK, frontend 1.91.0, istio-envoy). Routes /admin /chat /widget-host /api/proxy-http /api/[...slug] /widget/dt-companion.js; auth prod CIAM 3db550f0 + b2c_1a_signin_oidc_row + NEW client cd34584a; only /api/health + /api/ready public (200), all /api/* & object routes 307/401-auth; callbackUrl same-origin enforced; PKCE S256 + state + same-origin redirect_uri (matches developer portal discipline).
+[LEARN] ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: same build/version as prod but enables showFrontendVersion:true + connectionTypeSelector:true (disabled on prod); discovered via prod B2C AADB2C90006 error leaking dev callback host. Public only /api/health+/api/ready; /api/* 401; /admin/chat 307. Dev/prod auth config differs (dev provider not wired to a live tenant client — signin returns generic csrf=true).
+[LEARN] ACCEPTED b2c-error-info-leak @ login.ciam.daimlertruck.com client cd34584a: unregistered redirect_uri → AADB2C90006 whose error location points to companion-dev.app.daimlertruck.com — production client error handling discloses the dev deployment host. Informational/misconfig, not yet a compromise.
+[LEARN] REJECTED companion-open-redirect / callbackUrl @ companion.app(.dev): GET/POST callbackUrl=https://evil.com and https://attacker.daimlertruck.com both replaced with origin cookie (https://companion.app.daimlertruck.com) — same-domain enforced, subdomains rejected. Not an open redirect (consistent with developer portal prior rejection).
+[RISK] Daimler Truck: 45/100. Risk up (42→45) from a freshly-live unnamed production+dev AI service surface: companion.app creates a new corporate-employee AI chatbot (businessid broker chain ROW) with /admin + /api/proxy-http (SSRF class) behind a DIFFERENT B2C client (cd34584a) than the developer portal — new attack surface not in prior inventory. All mutating/SSRF/admin paths are auth-gated (307/401), so no anonymous compromise; top returns gated on a companion session (proxy-http SSRF, admin authz) or prod-B2C redirect-allowlist enumeration (passive). This cycle: read-only GET/POST of public health/ready/auth-metadata/widget JS + B2C authorize error responses; no customer/employee data, no auth bypass, no mutating requests.

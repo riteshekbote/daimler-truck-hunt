@@ -678,3 +678,33 @@
 - LEARN: ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
 - LEARN: ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route 
 - LEARN: ACCEPTED businessid-broker-surface: login.businessid(.qa).daimlertruck.com DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82
+
+## RANKED HYPOTHESES 2026-09-06 14:37:39 UTC
+- [75] developer.as.api.daimlertruck.com: GraphQL Mutation BOLA Across Tenant Boundaries (from art/lead_nemotron3.txt)
+- [60] login.ciam.daimlertruck.com: companion-b2c-error-uri-leaks-dev-surface (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `GET https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...` iterate candidate registe
+- NEXT(hypotheses-nemotron3.txt): PROBE: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}` — verify real GraphQL endp
+- LEARN: ACCEPTED companion-app-live @ companion.app.daimlertruck.com: previously NXDOMAIN prod CSP frame-src dead-reference, now LIVE prod DT Companion AI (build IqPB_z
+- LEARN: ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: same build/version as prod but enables showFrontendVersion:true + connectionTypeSelecto
+- LEARN: ACCEPTED b2c-error-info-leak @ login.ciam.daimlertruck.com client cd34584a: unregistered redirect_uri → AADB2C90006 whose error location points to companion-dev
+- LEARN: REJECTED companion-open-redirect / callbackUrl @ companion.app(.dev): GET/POST callbackUrl=https://evil.com and https://attacker.daimlertruck.com both replaced 
+- LEARN: ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+- LEARN: ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer porta
+- LEARN: ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential c
+- LEARN: ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-u
+- LEARN: ACCEPTED /api/healthcheck-live: 200 JSON with uptime on both prod and test — real server route; informational only (not a vuln alone)
+- LEARN: REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
+- LEARN: REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive
+- LEARN: REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin; subdo
+- LEARN: REJECTED nextauth-broken-auth-flow: POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, 
+- LEARN: REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
+- LEARN: REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+- LEARN: REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+- LEARN: REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+- LEARN: REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+- LEARN: REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+- LEARN: ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQ
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
+- LEARN: ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
+- LEARN: ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route 
+- LEARN: ACCEPTED businessid-broker-surface: login.businessid(.qa).daimlertruck.com DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82

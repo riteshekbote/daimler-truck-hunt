@@ -1,11 +1,9 @@
-## 2026-09-06 11:26:35 UTC [target] (model nemotron3)
+## 2026-09-06 14:34:29 UTC [target] (model nemotron3)
 [PRIO] developer.as.api.daimlertruck.com,8.5,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
 [PRIO] developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
 [PRIO] developer.eu.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
-[PRIO] developer.na.api.daimlertruck.com,7.8,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=2,cloud_surface=7,freshness=9
 [PRIO] login.businessid.daimlertruck.com,7.5,attack_surface=8,business_value=10,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=8
 [PRIO] api.daimlertruck.com,6.2,attack_surface=5,business_value=6,tech_exposure=4,gate_ease=8,cloud_surface=8,freshness=7
-[PRIO] www.daimlertruck.com,5.5,attack_surface=4,business_value=8,tech_exposure=3,gate_ease=10,cloud_surface=7,freshness=5
 [HYP] GraphQL Mutation BOLA Across Tenant Boundaries
 class: OTHER
 asset: developer.as.api.daimlertruck.com
@@ -56,6 +54,6 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQL ops with these IDs
 [LEARN] ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
 [LEARN] ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
-[LEARN] ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery on portals exhausted; only /api/healthcheck public
+[LEARN] ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery exhausted; only /api/healthcheck public
 [LEARN] ACCEPTED businessid-broker-surface: login.businessid(.qa).daimlertruck.com DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82559bb7 / a43f98c7, IdP corptbbid.onmicrosoft.com) behind CIAM ROW flow; OIDC+JWKS public; highest-sensitivity identity surface
 [RISK] daimler-truck: 74 — 6 live developer portals with GraphQL + object-ID REST routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) behind Azure AD B2C; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk (/apis/ vs /apis) masks real endpoints; capacitor-admin and authz surfaces remain dark (000/404); B2C cross-tenant token boundary relies solely on acr/org claim validation; companion.app.daimlertruck.com NXDOMAIN in prod CSP frame-src indicates dead reference

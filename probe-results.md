@@ -180,3 +180,12 @@ https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 le
 ## 2026-09-06 11:26:47 UTC
 https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
 https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+
+## 2026-09-06 14:37:49 UTC
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196649
+https://developer.tst.na.api.daimlertruck.com/apis/<other-tenant-apiId -> 200 len=196341
+https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` -> HTTP 400
+https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/callback&scope=openid` -> HTTP 404
+https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...` -> HTTP 404
+https://attacker.daimlertruck.com -> ERR <urlopen error [Errno -2] Name or service not know
+https://companion.app.daimlertruck.com -> 200 len=3330
