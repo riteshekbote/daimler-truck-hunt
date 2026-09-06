@@ -4450,3 +4450,652 @@ testability: AUTH_HELPED
 ### STEP 7 — RISK
 
 [RISK] daimler-truck: 76 — 6 live developer portals with GraphQL + object-ID REST routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) behind Azure AD B2C; newly live companion.app.daimlertruck.com adds parallel attack surface with proxy-http/widget/admin routes behind same auth discipline; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk (/apis/ vs /apis) masks real endpoints; capacitor-admin and authz surfaces remain dark (000/404); B2C cross-tenant token boundary relies solely on acr/org claim validation; companion-dev.app.daimlertruck.com config drift (feature flags, unwired auth) creates dev/prod parity risk
+===== ANALYST nemotron3 2026-09-06 19:50:34 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mdate -u +"%Y-%m-%d %H:%M:%S UTC"
+2026-09-06 19:31:11 UTC
+[0m
+[0m$ [0mcurl -sI https://companion.app.daimlertruck.com 2>&1 | head -20
+HTTP/1.1 200 OK
+Date: Sun, 06 Sep 2026 19:32:09 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 3330
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+set-cookie: __Host-next-auth.csrf-token=11dcf9c818b8eee064b8aaf04e47f58f57fa717046d3fc216fe6872e3cb143a3%7Cb261308b389e295f71279ad0c17975b2787c28ecb279fbcadfe9ae340b6aac50; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+x-powered-by: Next.js
+etag: "9l900qxf762kh"
+vary: Accept-Encoding
+x-envoy-upstream-service-time: 9
+server: istio-envoy
+[0m
+[0m$ [0mcurl -sI https://companion-dev.app.daimlertruck.com 2>&1 | head -20
+HTTP/1.1 200 OK
+Date: Sun, 06 Sep 2026 19:32:09 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 3330
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+set-cookie: __Host-next-auth.csrf-token=f23afa3f2be0cf9c0f71c2151eca25389c34964bcbd8ddc979433dd7cd4538ea%7Ce6be63e70eb448edf065b7c36382d6905558df42cc698810ece9e1c74811cb8d; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+x-powered-by: Next.js
+etag: "9l900qxf762kh"
+vary: Accept-Encoding
+x-envoy-upstream-service-time: 9
+server: istio-envoy
+[0m
+[0m$ [0mcurl -sI https://developer.as.api.daimlertruck.com 2>&1 | head -20
+HTTP/2 200 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: https://app.usercentrics.eu; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src https://companion.app.daimlertruck.com
+x-powered-by: Next.js
+etag: "o7lsz5k5zy47qh"
+content-type: text/html; charset=utf-8
+content-length: 196649
+vary: Accept-Encoding
+date: Sun, 06 Sep 2026 19:32:09 GMT
+[0m
+[0m$ [0mcurl -sI https://companion.app.daimlertruck.com/api/health 2>&1 | head -15
+HTTP/1.1 200 OK
+Date: Sun, 06 Sep 2026 19:32:57 GMT
+Content-Type: application/json
+Connection: keep-alive
+x-envoy-upstream-service-time: 3
+server: istio-envoy
+[0m
+[0m$ [0mcurl -sI https://companion.app.daimlertruck.com/api/auth/providers 2>&1 | head -15
+HTTP/1.1 400 Bad Request
+Date: Sun, 06 Sep 2026 19:32:57 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 15
+server: istio-envoy
+[0m
+[0m$ [0mcurl -sI https://companion-dev.app.daimlertruck.com/api/auth/providers 2>&1 | head -15
+HTTP/1.1 400 Bad Request
+Date: Sun, 06 Sep 2026 19:32:58 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 14
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s https://companion.app.daimlertruck.com/api/auth/providers 2>&1
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl -s https://companion-dev.app.daimlertruck.com/api/auth/providers 2>&1
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl -s https://companion.app.daimlertruck.com/api/health 2>&1
+{"status":"ok"}
+[0m
+[0m$ [0mcurl -s https://companion-dev.app.daimlertruck.com/api/auth/csrf 2>&1
+{"csrfToken":"a3abdcf002eee457443fe7530a17894d7fb916b8dfef79bce45b36c132c98893"}
+[0m
+[0m$ [0mcurl -s https://companion.app.daimlertruck.com/api/auth/csrf 2>&1
+{"csrfToken":"40b4fca88e9ababc3cf781e12741690014efe85282b8524b8913647ecfe0f1b4"}
+[0m
+[0m$ [0mcurl -s -X POST "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"test"}' 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -v -X POST "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"a3abdcf002eee457443fe7530a17894d7fb916b8dfef79bce45b36c132c98893"}' 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c?json=true HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 80
+> 
+} [80 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 302 Found
+< Date: Sun, 06 Sep 2026 19:35:44 GMT
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< set-cookie: __Host-next-auth.csrf-token=3356b80e55ac8ee0b1b22e718a5772f2608c168aa091c5aff6d0c3ff698800ad%7C93670d043799172f48a8fc563fe6b702708a299ac6136ed0d7fc779d598d405b; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true
+< x-envoy-upstream-service-time: 15
+< server: istio-envoy
+< 
+
+100    80    0     0  100    80      0    172 --:--:-- --:--:-- --:--:--   173
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl -v -X POST "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"40b4fca88e9ababc3cf781e12741690014efe85282b8524b8913647ecfe0f1b4"}' 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 9.163.68.3
+*   Trying 9.163.68.3:443...
+* Connected to companion.app.daimlertruck.com (9.163.68.3) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3967 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion.app.daimlertruck.com
+*  start date: Oct 14 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion.app.daimlertruck.com" matched cert's "companion.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c?json=true HTTP/1.1
+> Host: companion.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 80
+> 
+} [80 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [281 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [281 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 302 Found
+< Date: Sun, 06 Sep 2026 19:35:44 GMT
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+< set-cookie: __Host-next-auth.csrf-token=9da118f279e82b869f954f3b269d1b7411a31bd46f8587ee28ae05aa554ce85e%7C60717c27833ca85d63c18f314aa39bab37ee3432f57500f6db243cc2f37509b5; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://companion.app.daimlertruck.com/api/auth/signin?csrf=true
+< x-envoy-upstream-service-time: 13
+< server: istio-envoy
+< 
+
+100    80    0     0  100    80      0    179 --:--:-- --:--:-- --:--:--   179
+* Connection #0 to host companion.app.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -v "https://companion.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1 | head -30
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 9.163.68.3
+*   Trying 9.163.68.3:443...
+* Connected to companion.app.daimlertruck.com (9.163.68.3) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3967 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+[0m
+[0m$ [0mcurl -v "https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1 | head -30
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+[0m
+[0m$ [0mcurl --max-time 10 "https://companion.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+[0m
+[0m$ [0mcurl --max-time 10 "https://companion-dev.app.daimlertruck.com/api/auth/signin?csrf=true" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0
+curl: (28) Operation timed out after 10002 milliseconds with 0 bytes received
+[0m
+[0m$ [0mcurl -sI https://developer.as.api.daimlertruck.com/api/auth/providers 2>&1 | head -20
+HTTP/2 400 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: https://app.usercentrics.eu; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src https://companion.app.daimlertruck.com
+etag: "uqvs2d7v1c1t"
+content-length: 65
+date: Sun, 06 Sep 2026 19:40:36 GMT
+[0m
+[0m$ [0mcurl -s https://developer.as.api.daimlertruck.com/api/auth/providers 2>&1
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+[0m
+[0m$ [0mcurl -s https://developer.as.api.daimlertruck.com/api/auth/csrf 2>&1
+{"csrfToken":"20a6874d90d4c0c2a9415efd3578e187aea1fc63542a6ed927b7c32df20f5f37"}
+[0m
+[0m$ [0mcurl -v -X POST "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"test"}' 2>&1 | head -30
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host developer.as.api.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 4.214.165.88
+*   Trying 4.214.165.88:443...
+* Connected to developer.as.api.daimlertruck.com (4.214.165.88) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [15 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4497 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [520 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+[0m
+[0m$ [0mcurl --max-time 15 -X POST "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"20a6874d90d4c0c2a9415efd3578e187aea1fc63542a6ed927b7c32df20f5f37"}' 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    80    0     0  100    80      0    255 --:--:-- --:--:-- --:--:--   255
+[0m
+[0m$ [0mcurl -v --max-time 15 -X POST "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"20a6874d90d4c0c2a9415efd3578e187aea1fc63542a6ed927b7c32df20f5f37"}' 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host developer.as.api.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 4.214.165.88
+*   Trying 4.214.165.88:443...
+* Connected to developer.as.api.daimlertruck.com (4.214.165.88) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [15 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4497 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [520 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=as.api.daimlertruck.com
+*  start date: Jan 18 00:00:00 2026 GMT
+*  expire date: Feb 18 23:59:59 2027 GMT
+*  subjectAltName: host "developer.as.api.daimlertruck.com" matched cert's "developer.as.api.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (4096/152 Bits/secBits), signed using sha384WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+} [5 bytes data]
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: developer.as.api.daimlertruck.com]
+* [HTTP/2] [1] [:path: /api/auth/signin/azure-ad-b2c-dt?json=true]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [content-length: 80]
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c-dt?json=true HTTP/2
+> Host: developer.as.api.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 80
+> 
+} [80 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/2 302 
+< x-frame-options: SAMEORIGIN
+< strict-transport-security: max-age=31536000; includeSubDomains; preload
+< content-security-policy: font-src 'self'; img-src 'self' data: https://app.usercentrics.eu; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src https://companion.app.daimlertruck.com
+< set-cookie: __Host-next-auth.csrf-token=bfba9ac023f30e29e0d3d2201f6e91db3951cb1351b69d5992eba5ba366e7ea5%7C096ecbed5b0c2947d21f4a1b8243634ba08d7978c65025f03484db7b0490a2da; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.as.api.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://developer.as.api.daimlertruck.com/api/auth/signin?csrf=true
+< date: Sun, 06 Sep 2026 19:45:31 GMT
+< 
+
+100    80    0     0  100    80      0    248 --:--:-- --:--:-- --:--:--   248
+* Connection #0 to host developer.as.api.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl -v --max-time 15 -X POST "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"test"}' 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host developer.tst.na.api.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.72.235.110
+*   Trying 20.72.235.110:443...
+* Connected to developer.tst.na.api.daimlertruck.com (20.72.235.110) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [15 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4533 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [520 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=tst.na.api.daimlertruck.com
+*  start date: Nov 18 00:00:00 2025 GMT
+*  expire date: Dec 19 23:59:59 2026 GMT
+*  subjectAltName: host "developer.tst.na.api.daimlertruck.com" matched cert's "developer.tst.na.api.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (4096/152 Bits/secBits), signed using sha384WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+} [5 bytes data]
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: developer.tst.na.api.daimlertruck.com]
+* [HTTP/2] [1] [:path: /api/auth/signin/azure-ad-b2c-dt?json=true]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [content-length: 20]
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c-dt?json=true HTTP/2
+> Host: developer.tst.na.api.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 20
+> 
+} [20 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/2 302 
+< x-frame-options: SAMEORIGIN
+< strict-transport-security: max-age=31536000; includeSubDomains; preload
+< content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+< set-cookie: __Host-next-auth.csrf-token=05ad298e607d654faf6568ed7ab3f4bdad55cd75c5f390377d594d8a32c19c5b%7Cd1df2631bcefbfaebb337339a8981e2f72c2289067fd4537472e7cb9c91c9908; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://developer.tst.na.api.daimlertruck.com/api/auth/signin?csrf=true
+< date: Sun, 06 Sep 2026 19:47:16 GMT
+< 
+
+100    20    0     0  100    20      0    168 --:--:-- --:--:-- --:--:--   169
+* Connection #0 to host developer.tst.na.api.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl -s https://developer.tst.na.api.daimlertruck.com/api/auth/csrf 2>&1
+{"csrfToken":"5e44118450762c61fc876a0bb76002002055b2585bfaedb415bad23f156ef3e9"}
+[0m
+[0m$ [0mcurl -v --max-time 15 -X POST "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" -H "Content-Type: application/json" -d '{"csrfToken":"05ad298e607d654faf6568ed7ab3f4bdad55cd75c5f390377d594d8a32c19c5b"}' 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host developer.tst.na.api.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.72.235.110
+*   Trying 20.72.235.110:443...
+* Connected to developer.tst.na.api.daimlertruck.com (20.72.235.110) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [15 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4533 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [520 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=tst.na.api.daimlertruck.com
+*  start date: Nov 18 00:00:00 2025 GMT
+*  expire date: Dec 19 23:59:59 2026 GMT
+*  subjectAltName: host "developer.tst.na.api.daimlertruck.com" matched cert's "developer.tst.na.api.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (4096/152 Bits/secBits), signed using sha384WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+} [5 bytes data]
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: developer.tst.na.api.daimlertruck.com]
+* [HTTP/2] [1] [:path: /api/auth/signin/azure-ad-b2c-dt?json=true]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [content-length: 80]
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c-dt?json=true HTTP/2
+> Host: developer.tst.na.api.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 80
+> 
+} [80 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/2 302 
+< x-frame-options: SAMEORIGIN
+< strict-transport-security: max-age=31536000; includeSubDomains; preload
+< content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+< set-cookie: __Host-next-auth.csrf-token=4dfc2869b4a4573a3733384d9db000bd99fdf978b7d0fcdef63ffe31bdf4f731%7Cfb4f592b719f7c931cc550bd6a4455d7b49dde51e2224c44e9837c5d2f37d9fc; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< location: https://developer.tst.na.api.daimlertruck.com/api/auth/signin?csrf=true
+< date: Sun, 06 Sep 2026 19:48:01 GMT
+< 
+
+100    80    0     0  100    80      0   2173 --:--:-- --:--:-- --:--:--  2222
+* Connection #0 to host developer.tst.na.api.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/api/auth/signin?csrf=true" 2>&1 | head -100
+(no output)
+[0m

@@ -2181,3 +2181,37 @@ testability: AUTH_HELPED
 [LEARN] REJECTED companion-open-redirect: callbackUrl validated to same-domain; subdomains rejected — not an open redirect.
 [LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM share tenant-level issuer + same portal client c387a5ab.
 [RISK] Daimler Truck: 45/100. Risk steady (42→45 last cycle, unchanged now). New companion.app surface adds /api/proxy-http (SSRF class) and /admin, but all behind auth (307/401). Developer portal BOLA + cross-BU token boundary remain highest potential impact but gated on two admin-provisioned staging accounts. No anonymous exploit reachable this cycle. The B2C error-URI enumeration is the only new passive finding that could narrow the gap to a reportable finding. This cycle: read-only GETs on public B2C authorize error endpoints + health/ready/widget JS; no customer/employee data, no auth bypass, no mutating requests.
+## 2026-09-06 19:35:31 UTC [target] (model bigpickle)
+[PRIO] companion.app.daimlertruck.com,7.8,attack_surface=8,business_value=8,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.4,attack_surface=7,business_value=10,tech_exposure=9,gate_ease=1,cloud_surface=7,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=8
+[HYP] companion-admin-authz-role-claim
+class: AUTH
+asset: companion.app.daimlertruck.com/admin
+confidence: 40
+reasoning: /admin 307-to-B2C like /chat (blanket middleware); companion uses DIFFERENT client cd34584a + single azure-ad-b2c provider vs developer portal. If admin gated only by "authenticated employee" claim (not groups/appRoles), any ROW token reaches AI admin panel. 89-claim ROW contract includes groups — need server-side vs client-side check.
+impact: chatbot admin console reachable by any employee → AI config surface; medium-high
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 48
+reasoning: POST /api/proxy-http → 401 (real route); istio AKS mesh; server-side proxy for AI web-browsing; auth-gated SSRF to 169.254.169.254 / internal AI services is top post-auth prize.
+impact: SSRF → cloud metadata / internal service access; high
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: unchanged — /api/graphql 307-to-B2C; buildManifest object-ID routes; GraphQL ops in client bundle; blanket middleware; barrier = valid B2C session.
+impact: cross-BU API subscriptions + PII; medium-high
+testability: AUTH_HELPED
+[PARKED] companion-admin-authz-role-claim: confidence 40 < 50, session-gated, no role-claim evidence passively.
+[PARKED] companion-proxy-http-ssrf-auth-required: 48 < 50, session-gated. Re-promote on companion session.
+[PARKED] graphql-object-id-bola-team-scoped: 75 but blocked on two admin-provisioned staging accounts since 2026-09-03.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) — AUTH_HELPED, highest potential impact
+[FINAL] 2. companion-b2c-dev-callback-registered — CONFIRMED MISCONFIG this cycle (exact allowlist evidence)
+[NEXT] PROBE: GET https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration — diff NOAM staging issuer/policy surface against ROW prior to drafting the misconfig report (expect same tenant-level issuer + shared client, reinforcing b2c-cross-bu-token-boundary with stage evidence). Passive, <=1 rps.
+[LEARN] ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev callback URI is a REGISTERED redirect target AND the global AADB2C90006 error fallback on the PRODUCTION identity client. Prod sign-in fully wired (302→B2C authorize, PKCE S256, scope `openid offline_access <client_id>`, redirect_uri same-origin); dev sign-in unwired (504 App Gateway). MISCONFIG confirmed with exact allowlist — reportable as info/misconfig (no live code-exchange chain today).
+[LEARN] REJECTED positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback are NOT registered B2C URIs — only /api/auth/callback/azure-ad-b2c per host. No extra allowlist surface.
+[RISK] Daimler Truck: 46/100. Risk up (45→46). The allowlist enumeration converts a prior error-page info-leak into a concrete, evidence-backed MISCONFIG: production identity client cd34584a binds the dev deployment (first-class callback + error fallback). Not yet a compromise — dev provider is unwired (504) so no code exchange/token flow is reachable today; SSRF/admin on companion remain auth-gated; BOLA still blocked on staging accounts. This cycle: read-only GETs of B2C authorize (registered vs unregistered redirect_uri), providers/csrf metadata, policy well-known, plus two NextAuth sign-in initiations against self-issued CSRF cookies (no credentials; prod→redirect only, dev→harmless 504). No customer/employee data, no auth bypass, no mutating requests, <=1 rps.

@@ -203,3 +203,6 @@ https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_
 https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
 https://companion.app.daimlertruck.com/widget/callback -> 200 len=3365
 https://companion.app.daimlertruck.com/admin/callback -> 200 len=3364
+
+## 2026-09-06 19:50:36 UTC
+https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration -> HTTP 404

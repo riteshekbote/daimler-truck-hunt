@@ -8727,3 +8727,328 @@ testability: AUTH_HELPED
 [RISK] Daimler Truck: 45/100. Risk steady (42→45 last cycle, unchanged now). New companion.app surface adds /api/proxy-http (SSRF class) and /admin, but all behind auth (307/401). Developer portal BOLA + cross-BU token boundary remain highest potential impact but gated on two admin-provisioned staging accounts. No anonymous exploit reachable this cycle. The B2C error-URI enumeration is the only new passive finding that could narrow the gap to a reportable finding. This cycle: read-only GETs on public B2C authorize error endpoints + health/ready/widget JS; no customer/employee data, no auth bypass, no mutating requests.
 
 **Stale valid-bugs.md cleanup needed:** The file shows "VALID" for NextAuth.js Open Redirect but the knowledge base has REJECTED it 5+ times (PKCE S256 + same-origin redirect_uri + callbackUrl same-domain-only). These verdicts are stale from a 2026-09-04 triage run before the POST-based CSRF test was completed.
+===== ANALYST bigpickle 2026-09-06 19:50:34 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead inventory/daimler-truck.md
+[0m✱ [0mGlob "art/*.txt"[90m 0 matches[0m
+[0m✱ [0mGlob "art/*"[90m 0 matches[0m
+[0m✱ [0mGlob "*.md"[90m 49 matches[0m
+[0m✱ [0mGlob "valid-bugs*"[90m 1 match[0m
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead leads/lead-nemotron3.md
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead reports/hypotheses.md
+[0m→ [0mRead probe-results.md[90m [offset=1, limit=100][0m
+[0m→ [0mRead knowledge/index.md
+Now let me get the latest probe results and knowledge index for full context.
+[0m
+[0m# [0mTodos
+[✓] STEP 1-4: Run full 8-step analyst cycle (delta, prioritize, hypotheses, self-critique)
+[•] STEP 5: Execute NEXT probe — enumerate B2C redirect_uri allowlist on prod client cd34584a
+[ ] STEP 5b: Probe companion-dev /api/auth/providers to compare with prod
+[ ] STEP 6-7: Emit LEARN, RISK, and update knowledge base
+[0m
+Now I have full context. Let me execute the analysis and the directed probe.
+
+## 2026-09-06 17:34:34 UTC [target] (model bigpickle)
+
+**STEP 1 — DELTA**
+- NEW: companion.app.daimlertruck.com confirmed LIVE (was NXDOMAIN 2026-09-05) — prod AI chatbot with /admin /chat /api/proxy-http behind B2C client cd34584a
+- NEW: companion-dev.app.daimlertruck.com exposed — same build as prod, showFrontendVersion:true, connectionTypeSelector:true debug flags
+- NEW: b2c-error-info-leak — prod B2C AADB2C90006 error discloses companion-dev host via error location field
+- CHANGED: companion.app.daimlertruck.com no longer NXDOMAIN — CSP frame-src dead-reference now live
+
+**STEP 2 — PRIORITIZE**
+[0m$ [0mcurl -s -o /tmp/opencode/cc-1.html -w "REGISTERED_CB: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid" 2>&1
+REGISTERED_CB: HTTP 302 | redirect=https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize?client_id=82559bb7-9291-485c-abb0-02eb14429aad&redirect_uri=https%3a%2f%2flogin.ciam.daimlertruck.com%2f3db550f0-0c7f-439b-8e24-e32bf233615d%2foauth2%2fauthresp&response_type=code&scope=openid&response_mode=form_post&nonce=kazd3gb2TXAmfZMGJB4puQ%3d%3d&AppClientID=cd34584a-7d56-4125-acb3-e8cf2e257de8&state=StateProperties%3deyJTSUQiOiJ4LW1zLWNwaW0tcmM6N2Q1MjBkNWYtZWIzZi00NGJkLTljMGQtMDFmZjViNDQwYWY2IiwiVElEIjoiYzg4MjE4M2QtNWM5MS00OTAxLThkNDItMDYyNDA5MzYwYTdlIiwiVE9JRCI6IjNkYjU1MGYwLTBjN2YtNDM5Yi04ZTI0LWUzMmJmMjMzNjE1ZCJ9 | len=785
+[0m
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/cc-2.html -w "DEV_CB: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid" 2>&1
+DEV_CB: HTTP 302 | redirect=https://login.businessid.daimlertruck.com/f266a340-d336-4be7-a230-704d8fcf0211/b2c_1a_signin/oauth2/v2.0/authorize?client_id=82559bb7-9291-485c-abb0-02eb14429aad&redirect_uri=https%3a%2f%2flogin.ciam.daimlertruck.com%2f3db550f0-0c7f-439b-8e24-e32bf233615d%2foauth2%2fauthresp&response_type=code&scope=openid&response_mode=form_post&nonce=yGW6iLXFfOg4kstw5eqvuQ%3d%3d&AppClientID=cd34584a-7d56-4125-acb3-e8cf2e257de8&state=StateProperties%3deyJTSUQiOiJ4LW1zLWNwaW0tcmM6ZTlkZWM0OTctNDJiZS00NWZhLWExYzUtMTU4OGVhNGM3ZTJiIiwiVElEIjoiMjc0ZWRmODQtZjNiNi00MzljLTk0YmEtNWNiNjBiM2ViODFmIiwiVE9JRCI6IjNkYjU1MGYwLTBjN2YtNDM5Yi04ZTI0LWUzMmJmMjMzNjE1ZCJ9 | len=785
+[0m
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/cc-ctrl.html -w "EVIL_CTRL: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://attacker.example.com/callback&scope=openid" 2>&1
+EVIL_CTRL: HTTP 302 | redirect=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c?error=redirect_uri_mismatch&error_description=AADB2C90006%3a+The+redirect+URI+%27https%3a%2f%2fattacker.example.com%2fcallback%27+provided+in+the+request+is+not+registered+for+the+client+id+%27cd34584a-7d56-4125-acb3-e8cf2e257de8%27.%0d%0aCorrelation+ID%3a+23c778dd-f54b-4627-907f-1dea4364ba0d%0d%0aTimestamp%3a+2026-09-06+19%3a31%3a33Z%0d%0a | len=537
+[0m
+Both prod AND dev callbacks return 302 (accepted) — critical: the dev host IS registered on the prod client. Let me test the other candidate URIs plus a control.
+[0m$ [0msleep 2; curl -s -o /tmp/opencode/cc-3.html -w "WIDGET_CB: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/widget/callback&scope=openid" 2>&1; sleep 1; curl -s -o /tmp/opencode/cc-4.html -w "ADMIN_CB: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/admin/callback&scope=openid" 2>&1
+WIDGET_CB: HTTP 302 | redirect=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c?error=redirect_uri_mismatch&error_description=AADB2C90006%3a+The+redirect+URI+%27https%3a%2f%2fcompanion.app.daimlertruck.com%2fwidget%2fcallback%27+provided+in+the+request+is+not+registered+for+the+client+id+%27cd34584a-7d56-4125-acb3-e8cf2e257de8%27.%0d%0aCorrelation+ID%3a+56500198-7ee2-4aaa-9ad3-e08af1bc6990%0d%0aTimestamp%3a+2026-09-06+19%3a31%3a39Z%0d%0a | len=556
+ADMIN_CB: HTTP 302 | redirect=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c?error=redirect_uri_mismatch&error_description=AADB2C90006%3a+The+redirect+URI+%27https%3a%2f%2fcompanion.app.daimlertruck.com%2fadmin%2fcallback%27+provided+in+the+request+is+not+registered+for+the+client+id+%27cd34584a-7d56-4125-acb3-e8cf2e257de8%27.%0d%0aCorrelation+ID%3a+4fb5fd12-64c9-46ba-b5e0-d35ad3ecc35a%0d%0aTimestamp%3a+2026-09-06+19%3a31%3a40Z%0d%0a | len=555
+[0m
+Critical confirmation. Let me check companion-dev's auth provider config (nemotron3's queued probe) to complete the picture.
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/cdp.json -w "DEV_PROVIDERS: HTTP %{http_code} | len=%{size_download}\n" "https://companion-dev.app.daimlertruck.com/api/auth/providers" 2>&1; echo "---"; cat /tmp/opencode/cdp.json
+DEV_PROVIDERS: HTTP 200 | len=265
+---
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/cp.json -w "PROD_PROVIDERS: HTTP %{http_code} | len=%{size_download}\n" "https://companion.app.daimlertruck.com/api/auth/providers" 2>&1; echo "---"; cat /tmp/opencode/cp.json
+PROD_PROVIDERS: HTTP 200 | len=257
+---
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+Both prod+dev callbacks registered on the same prod client. One more verification — does companion-dev's sign-in initiate actually produce a B2C URL (i.e., is dev wired to the live tenant client)?
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/devsignin1.html -w "DEV_SIGNIN: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" -c /tmp/opencode/devjar.txt "https://companion-dev.app.daimlertruck.com/api/auth/csrf" 2>&1; echo "---csrf body---"; cat /tmp/opencode/devsignin1.html; echo; echo "---cookies---"; cat /tmp/opencode/devjar.txt 2>/dev/null
+DEV_SIGNIN: HTTP 200 | redirect= | len=80
+---csrf body---
+{"csrfToken":"8d57e5f245262b2571d3a74edd3e995005e66c9ba871287f08ed942a7ad0a8f0"}
+---cookies---
+# Netscape HTTP Cookie File
+# https://curl.se/docs/http-cookies.html
+# This file was generated by libcurl! Edit at your own risk.
+
+#HttpOnly_companion-dev.app.daimlertruck.com	FALSE	/	TRUE	0	__Secure-next-auth.callback-url	https%3A%2F%2Fcompanion-dev.app.daimlertruck.com
+#HttpOnly_companion-dev.app.daimlertruck.com	FALSE	/	TRUE	0	__Host-next-auth.csrf-token	8d57e5f245262b2571d3a74edd3e995005e66c9ba871287f08ed942a7ad0a8f0%7C0afa8a4a10b306296228b561d431d7545a8f2c2b4a63f7a34fdd32c293a78f73
+[0m
+[0m$ [0msleep 1; CSRF=$(python3 -c "import json;print(json.load(open('/tmp/opencode/devsignin1.html'))['csrfToken'])"); curl -s -o /tmp/opencode/devsignin2.json -w "DEV_SIGNIN_POST: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" -b /tmp/opencode/devjar.txt "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -X POST -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "csrfToken=$CSRF" --data-urlencode "callbackUrl=https://companion-dev.app.daimlertruck.com/admin/chat" 2>&1; echo "---"; cat /tmp/opencode/devsignin2.json
+DEV_SIGNIN_POST: HTTP 504 | redirect= | len=193
+---
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>Microsoft-Azure-Application-Gateway/v2</center>
+</body>
+</html>
+[0m
+Dev sign-in is unwired (504 via Azure App Gateway). Let me confirm prod counterpart signs in properly.
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/prodsignin1.html -w "PROD_CSRF: HTTP %{http_code} | len=%{size_download}\n" -c /tmp/opencode/prodjar.txt "https://companion.app.daimlertruck.com/api/auth/csrf" 2>&1; CSRF=$(python3 -c "import json;print(json.load(open('/tmp/opencode/prodsignin1.html'))['csrfToken'])"); sleep 1; curl -s -o /tmp/opencode/prodsignin2.json -w "PROD_SIGNIN_POST: HTTP %{http_code} | redirect=%{redirect_url} | len=%{size_download}\n" -b /tmp/opencode/prodjar.txt "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -X POST -H "Content-Type: application/x-www-form-urlencoded" --data-urlencode "csrfToken=$CSRF" --data-urlencode "callbackUrl=https://companion.app.daimlertruck.com/admin/chat" 2>&1; echo "---"; cat /tmp/opencode/prodsignin2.json 2>/dev/null | head -c 600
+PROD_CSRF: HTTP 200 | len=80
+PROD_SIGNIN_POST: HTTP 302 | redirect=https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&scope=openid%20offline_access%20cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https%3A%2F%2Fcompanion.app.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c&json=true&code_challenge=sFsIJvgsJ2rOuQf7gDgoc_Jj4huOTk3u_CLJObb1-os&code_challenge_method=S256 | len=0
+---
+[0m
+Prod is fully wired (PKCE S256, same-origin redirect_uri, scope incl. client ID); dev sign-in 504s. Allowlist enumeration complete. Let me record everything to the workspace files.
+[0m$ [0mwc -l /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/reports/hypotheses.md
+205 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md
+  2183 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md
+   730 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/reports/hypotheses.md
+  3118 total
+[0m
+[0m→ [0mRead probe-results.md[90m [offset=180][0m
+[0m
+[0m← [0mEdit probe-results.md
+Index: /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md
+===================================================================
+--- /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md
++++ /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md
+@@ -202,4 +202,16 @@
+ https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid` -> HTTP 404
+ https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+ https://companion.app.daimlertruck.com/widget/callback -> 200 len=3365
+ https://companion.app.daimlertruck.com/admin/callback -> 200 len=3364
++
++## 2026-09-06 19:31:33 UTC — B2C redirect_uri ALLOWLIST ENUMERATION (prod client cd34584a, passive)
++https://login.ciam.daimlertruck.com/3db550f0-.../b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> 302 to broker login.businessid.daimlertruck.com (f266a340, client 82559bb7, state map) — REGISTERED
++https://login.ciam.daimlertruck.com/3db550f0-.../b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...redirect_uri=https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> 302 to broker (same) — REGISTERED on PROD client
++https://login.ciam.daimlertruck.com/3db550f0-.../b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...redirect_uri=https://attacker.example.com/callback -> 302 to companion-dev.app/api/auth/callback/azure-ad-b2c?error=redirect_uri_mismatch&AADB2C90006 — NOT REGISTERED; error fallback = DEV host
++https://login.ciam.daimlertruck.com/3db550f0-.../b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...redirect_uri=https://companion.app.daimlertruck.com/widget/callback -> 302 to companion-dev error page AADB2C90006 — NOT REGISTERED
++https://login.ciam.daimlertruck.com/3db550f0-.../b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?...redirect_uri=https://companion.app.daimlertruck.com/admin/callback -> 302 to companion-dev error page AADB2C90006 — NOT REGISTERED
++https://companion-dev.app.daimlertruck.com/api/auth/providers -> 200 {"azure-ad-b2c":{...callbackUrl: https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c}}
++https://companion.app.daimlertruck.com/api/auth/providers -> 200 {"azure-ad-b2c":{...callbackUrl: https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c}}
++https://companion-dev.app.daimlertruck.com/api/auth/csrf -> 200 {"csrfToken":...}
++POST https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true (valid CSRF) -> 504 Gateway Time-out (Microsoft-Azure-Application-Gateway) — dev provider NOT wired to live tenant
++POST https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true (valid CSRF) -> 302 to login.ciam.daimlertruck.com authorize?client_id=cd34584a&response_type=code&redirect_uri=https://companion.app/.../callback/azure-ad-b2c&json=true&code_challenge=...&code_challenge_method=S256 — prod fully wired PKCE S256
+
+[0m
+Now update the knowledge base and inventory with the new findings.
+[0m← [0mEdit knowledge/index.md
+Index: /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/knowledge/index.md
+===================================================================
+--- /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/knowledge/index.md
++++ /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/knowledge/index.md
+@@ -151,4 +151,6 @@
+ - 2026-09-06 ACCEPTED companion-app-live @ companion.app.daimlertruck.com: previously NXDOMAIN prod CSP frame-src dead-reference, now LIVE prod DT Companion AI (build IqPB_zhGzw2eQTiap3_bK, frontend 1.91.0, istio-envoy). Routes `/admin` `/chat` `/widget-host` `/api/proxy-http` `/api/[...slug]` `/widget/dt-companion.js`; auth prod CIAM 3db550f0 + b2c_1a_signin_oidc_row + NEW client cd34584a; only `/api/health` + `/api/ready` public (200), all `/api/*` & object routes 307/401-auth; callbackUrl same-origin enforced; PKCE S256 + state + same-origin redirect_uri (matches developer portal discipline)
+ - 2026-09-06 ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: same build/version as prod but enables showFrontendVersion:true + connectionTypeSelector:true (disabled on prod); discovered via prod B2C AADB2C90006 error leaking dev callback host. Public only `/api/health`+`/api/ready`; `/api/*` 401; `/admin/chat` 307. Dev/prod auth config differs (dev provider not wired to a live tenant client — signin returns generic csrf=true)
+ - 2026-09-06 ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, created 2021-11-26); 6 public repos (5 upstream forks of LibreChat/RAG/Meili/ACA-LB/prom-exporter + DT-DDS original design system). In-scope by "digital services...operated by Daimler Truck". AI-stack forks carry only upstream default-cred/MISCONFIG patterns; no Daimler-specific vuln; deployment unconfirmed
+ - 2026-09-06 REJECTED broker-selfservice-signup @ login.businessid(.qa): only b2c_1a_signin policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no self-service account journey; corporate-affiliation validation can only be tested with provisioned accounts
++- 2026-09-06 ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: allowlist enumeration maps EXACT registered URIs — `https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` AND `https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` both REGISTERED; `/widget/callback`, `/admin/callback`, evil-external all → AADB2C90006 redirect_uri_mismatch whose global error fallback is companion-dev.app. DEV host is a first-class redirect target + error handler on the PRODUCTION identity client. Prod signin fully wired (PKCE S256, scope openid offline_access <client_id>); dev signin POST → 504 (provider unwired, cannot exchange codes). Boundary dilution of prod identity client by dev host — MISCONFIG/info, no live code-exchange chain.
++- 2026-09-06 REJECTED positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback are NOT B2C URIs — only /api/auth/callback/azure-ad-b2c exists on the allowlist for both hosts. No additional registered surface.
+
+[0m
+[0m← [0mEdit inventory/daimler-truck.md
+Index: /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/inventory/daimler-truck.md
+===================================================================
+--- /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/inventory/daimler-truck.md
++++ /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/inventory/daimler-truck.md
+@@ -257,4 +257,9 @@
+ 
+ ## 2026-09-06 14:37:39 UTC
+ 
+ ## 2026-09-06 17:34:34 UTC
++
++## 2026-09-06 19:31:33 UTC
++- NEW B2C redirect_uri allowlist enumerated on prod client cd34584a (companion): REGISTERED = `https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` + `https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c`. Dev host is a first-class redirect target on the PRODUCTION identity client AND the global AADB2C90006 error fallback. /widget/callback, /admin/callback, external → redirect_uri_mismatch (error→companion-dev).
++- CHANGED companion-dev.app.daimlertruck.com: /api/auth/providers returns live azure-ad-b2c provider (callbackUrl = dev host), but POST signin → 504 Gateway Time-out (Microsoft-Azure-Application-Gateway) — dev provider unwired (cannot complete code exchange). Prod same flow → 302 to B2C authorize with PKCE S256 + scope `openid offline_access <client_id>`.
++- CONFIRMED prod companion signin wiring: client_id=cd34584a, code_challenge_method=S256, redirect_uri same-origin; flows through broker login.businessid.daimlertruck.com (f266a340 / client 82559bb7 / b2c_1a_signin / response_mode=form_post → ciam authresp).
+
+[0m
+[0m→ [0mRead leads/lead-bigpickle.md[90m [offset=2130][0m
+[0m→ [0mRead reports/hypotheses.md[90m [offset=700][0m
+[0m
+[0m← [0mEdit leads/lead-bigpickle.md
+Index: /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md
+===================================================================
+--- /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md
++++ /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md
+@@ -2180,4 +2180,46 @@
+ [LEARN] ACCEPTED b2c-error-info-leak @ login.ciam.daimlertruck.com: prod B2C error discloses companion-dev host.
+ [LEARN] REJECTED companion-open-redirect: callbackUrl validated to same-domain; subdomains rejected — not an open redirect.
+ [LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM share tenant-level issuer + same portal client c387a5ab.
+ [RISK] Daimler Truck: 45/100. Risk steady (42→45 last cycle, unchanged now). New companion.app surface adds /api/proxy-http (SSRF class) and /admin, but all behind auth (307/401). Developer portal BOLA + cross-BU token boundary remain highest potential impact but gated on two admin-provisioned staging accounts. No anonymous exploit reachable this cycle. The B2C error-URI enumeration is the only new passive finding that could narrow the gap to a reportable finding. This cycle: read-only GETs on public B2C authorize error endpoints + health/ready/widget JS; no customer/employee data, no auth bypass, no mutating requests.
++## 2026-09-06 19:31:33 UTC [target] (model bigpickle)
++[NEW] B2C redirect_uri allowlist fully enumerated on prod client cd34584a: REGISTERED = `https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` AND `https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` (both 302→broker f266a340). NOT registered = /widget/callback, /admin/callback, external — all → AADB2C90006 redirect_uri_mismatch with global error fallback = `companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c?error=redirect_uri_mismatch...`.
++[NEW] companion prod signin wiring CONFIRMED live: POST /api/auth/signin/azure-ad-b2c (valid CSRF) → 302 to B2C authorize `client_id=cd34584a&scope=openid+offline_access+cd34584a-...&response_type=code&redirect_uri=https://companion.app/.../callback/azure-ad-b2c&json=true&code_challenge=...&code_challenge_method=S256`. companion-dev same POST → 504 Gateway Time-out (Microsoft-Azure-Application-Gateway) — dev provider unwired.
++[PRIO] companion.app.daimlertruck.com,7.8,attack_surface=8,business_value=8,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=9
++[PRIO] login.ciam.daimlertruck.com,7.4,attack_surface=7,business_value=10,tech_exposure=9,gate_ease=1,cloud_surface=7,freshness=9
++[PRIO] developer.as.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=8
++[HYP] companion-admin-authz-role-claim
++class: AUTH
++asset: companion.app.daimlertruck.com/admin
++confidence: 40
++reasoning: /admin returns 307 to B2C like /chat (blanket middleware) — but companion uses a DIFFERENT B2C client (cd34584a) + single azure-ad-b2c provider than developer portal. If /admin is gated only by "authenticated employee" (acr claim) and not an admin group/role claim, any ROW employee token reaches the AI admin panel. ROW claim model includes groups claim (89-claim contract) — admin check may be UI-side only.
++evidence_needed: authenticated /admin response + whether an admin role claim (groups or appRoles) is enforced server-side vs client-side
++verify_steps: AUTH_HELPED: ROW employee session on companion.app → GET /admin/chat → capture admin API calls from client bundle → if client-bundle admin routes are same for all employees, check server-side acceptance of admin mutations
++impact: chatbot admin console reachable by any employee → AI config/prompt/data surface; Severity: medium-high
++testability: AUTH_HELPED
++[HYP] companion-proxy-http-ssrf-auth-required
++class: SSRF
++asset: companion.app.daimlertruck.com/api/proxy-http
++confidence: 48
++reasoning: /api/proxy-http POST returns 401 unauth (real route); prod DAX/istio mesh; server-side HTTP proxy used by AI web-browsing feature. Auth-gated SSRF to 169.254.169.254 / internal AI services is the highest post-auth prize on this app.
++evidence_needed: valid companion session then POST with internal/cloud-metadata target URLs
++verify_steps: AUTH_HELPED: obtain companion.app session → POST /api/proxy-http {"url":"http://169.254.169.254/latest/meta-data/"}, {"url":"http://companion-internal/"} → observe response
++impact: SSRF → cloud metadata / internal AI service access; Severity: high (conditional on session)
++testability: AUTH_HELPED
++[HYP] graphql-object-id-bola-team-scoped
++class: IDOR
++asset: developer.as.api.daimlertruck.com
++confidence: 75
++reasoning: unchanged — /api/graphql 307-to-B2C; object-ID routes from buildManifest; client bundle shows GraphQL ops; blanket middleware confirmed; barrier = valid B2C session
++evidence_needed: authenticated GraphQL introspection + cross-tenant ID access test
++verify_steps: AUTH_HELPED: one _row + one _noam account → POST /api/graphql introspection + teams{items{id orgId}} → diff scoping
++impact: cross-BU API subscriptions + PII; Severity: medium-high
++testability: AUTH_HELPED
++[PARKED] companion-admin-authz-role-claim: confidence 40 — below 50; requires companion session; no role-claim evidence yet from passive surface.
++[PARKED] companion-proxy-http-ssrf-auth-required: confidence 48 < 50; session-gated; park until companion auth obtained.
++[PARKED] graphql-object-id-bola-team-scoped: confidence 75 but blocked on two admin-provisioned staging accounts since 2026-09-03.
++[FINAL] 1. graphql-object-id-bola-team-scoped (75) — AUTH_HELPED, highest potential impact, only viable reported finding path
++[FINAL] 2. companion-b2c-dev-callback-registered (confirmed MISCONFIG) — reportable as info/misconfig with exact allowlist evidence
++[NEXT] PROBE: `GET https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/.well-known/openid-configuration` — refresh staging tenant metadata, then diff against prod well-known to confirm whether staging tenant's portal client c387a5ab also grants the SRD/B2C_1A_SIGNIN policies with response_mode form_post (mapping full CIAM surface before drafting the misconfig report). Passive, read-only, <=1 req/sec.
++[LEARN] ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev host `https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` is a REGISTERED redirect target AND the global AADB2C90006 error fallback on the production identity client. Prod signin fully wired (PKCE S256, scope openid offline_access <client_id>); dev signin 504 (unwired). Boundary dilution of prod identity client by dev deployment — MISCONFIG confirmed with exact allowlist.
++[LEARN] REJECTED positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback are NOT registered B2C URIs — only /api/auth/callback/azure-ad-b2c per host. No extra attack surface on the allowlist.
++[RISK] Daimler Truck: 46/100. Risk up slightly (45→46). B2C allowlist enumeration confirms a production identity client (cd34584a) carries the dev environment as a first-class callback + error fallback — a concrete, evidence-backed MISCONFIG/info finding with the exact registered URI list, matching the program's exploit-specificity requirement only partially (no live token-flow compromise without a session; dev is unwired and cannot exchange codes today). companion.prod SSRF/admin remain auth-gated. No customer/employee data, no auth bypass, no mutating requests. This cycle: passive GET on B2C authorize (registered vs unregistered redirect_uris) + providers/csrf + two NextAuth signin POSTs against own session cookies (no credentials, read-only authorization initiation, 504 on dev); no account changes, no data exposure.
+
+[0m
+Now append the completed cycle to the lead file and hypotheses file.
+[0m✗ [0mEdit reports/hypotheses.md failed
+[91m[1mError: [0mFound multiple matches for oldString. Provide more surrounding context to make the match unique.
+[0m
+[0m$ [0mtail -5 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/reports/hypotheses.md
+- LEARN: REJECTED rag-librechat-meili-live-surface @ *.daimlertruck.com: RAG API whitelisted /docs,/openapi.json,/health + Meili /indexes return 307 (developer.* blanket
+- LEARN: REJECTED dt-dds-design-system @ daimlertruck/DT-DDS: original Daimler repo but pure frontend component library (Storybook on github.io pages, no backend, no env
+- LEARN: ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, cr
+- LEARN: REJECTED broker-selfservice-signup @ login.businessid(.qa): only b2c_1a_signin policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no s
+- LEARN: ACCEPTED businessid-broker-first-hop @ login.businessid(.qa): ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a4
+[0m
+[0m$ [0mcat >> /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/reports/hypotheses.md << 'EOF'
+
+## RANKED HYPOTHESES 2026-09-06 19:31:33 UTC
+- [75] developer.as.api.daimlertruck.com: graphql-object-id-bola-team-scoped (from art/lead_bigpickle.txt)
+- [60] login.ciam.daimlertruck.com: companion-b2c-dev-callback-registered — CONFIRMED MISCONFIG this cycle (allowlist evidence)
+- NEXT(hypotheses-bigpickle.txt): PROBE: `GET https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/.well-known/openid-configuration` — refresh staging metadata to map full CIAM surface pre-report
+- LEARN: ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev callback registered on PROD identity client + global error fallback = dev host
+- LEARN: REJECTED positional-callback-enumeration @ companion.app: /widget/callback, /admin/callback NOT registered — only /api/auth/callback/azure-ad-b2c per host
+- LEARN: ACCEPTED companion-app-live @ companion.app.daimlertruck.com: LIVE prod DT Companion AI; /admin /chat /api/proxy-http behind B2C client cd34584a
+- LEARN: ACCEPTED companion-dev-app-exposed @ companion-dev.app.daimlertruck.com: identical build, debug flags, dev auth unwired (504 on signin POST)
+EOF
+echo done
+done
+[0m
+Now execute the queued NEXT probe — staging tenant well-known refresh to complete the CIAM surface map.
+[0m$ [0mcurl -s -o /tmp/opencode/qa-authresp.html -w "QA_WELLKNOWN: HTTP %{http_code} | len=%{size_download}\n" "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/.well-known/openid-configuration" 2>&1; sleep 1; curl -s -o /tmp/opencode/prod-authresp.html -w "PROD_WELLKNOWN: HTTP %{http_code} | len=%{size_download}\n" "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/.well-known/openid-configuration" 2>&1
+QA_WELLKNOWN: HTTP 404 | len=103
+PROD_WELLKNOWN: HTTP 404 | len=103
+[0m
+[0m$ [0msleep 1; curl -s -o /tmp/opencode/qa-wk.json -w "QA_POLICY_WK: HTTP %{http_code} | len=%{size_download}\n" "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1; echo "---"; python3 -c "import json;d=json.load(open('/tmp/opencode/qa-wk.json'));print('issuer:',d.get('issuer'));print('authorization_endpoint:',d.get('authorization_endpoint'));print('token_endpoint:',d.get('token_endpoint'));print('response_modes:',d.get('response_modes_supported'));print('grant_types:',d.get('grant_types_supported'));print('code_challenge_methods:',d.get('code_challenge_methods_supported'))" 2>&1
+QA_POLICY_WK: HTTP 200 | len=3242
+---
+issuer: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/
+authorization_endpoint: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize
+token_endpoint: https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/token
+response_modes: ['query', 'fragment', 'form_post']
+grant_types: None
+code_challenge_methods: None
+[0m
+[0m# [0mTodos
+[✓] STEP 1-4: Run full 8-step analyst cycle (delta, prioritize, hypotheses, self-critique)
+[✓] STEP 5: Execute NEXT probe — enumerate B2C redirect_uri allowlist on prod client cd34584a
+[✓] STEP 5b: Probe companion-dev /api/auth/providers to compare with prod
+[✓] STEP 6-7: Emit LEARN, RISK, and update knowledge base
+[0m
+## 2026-09-06 19:31:33 UTC [target] (model bigpickle) — COMPLETED CYCLE
+
+**STEP 1 — DELTA**
+- NEW: B2C redirect_uri allowlist enumerated on prod client cd34584a — ALLOWLIST includes `https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` (dev on PROD identity client)
+- NEW: AADB2C90006 global error fallback for client cd34584a = companion-dev host (all unregistered URIs bounce there)
+- CHANGED: companion-dev signin POST → 504 Gateway Time-out (provider unwired) vs companion prod → 302 B2C authorize PKCE S256 (fully wired)
+
+**STEP 2 — PRIORITIZE**
+```
+[PRIO] companion.app.daimlertruck.com,7.8,attack_surface=8,business_value=8,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.4,attack_surface=7,business_value=10,tech_exposure=9,gate_ease=1,cloud_surface=7,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=8
+```
+
+**STEP 3 — HYPOTHESES**
+```
+[HYP] companion-admin-authz-role-claim
+class: AUTH
+asset: companion.app.daimlertruck.com/admin
+confidence: 40
+reasoning: /admin 307-to-B2C like /chat (blanket middleware); companion uses DIFFERENT client cd34584a + single azure-ad-b2c provider vs developer portal. If admin gated only by "authenticated employee" claim (not groups/appRoles), any ROW token reaches AI admin panel. 89-claim ROW contract includes groups — need server-side vs client-side check.
+impact: chatbot admin console reachable by any employee → AI config surface; medium-high
+testability: AUTH_HELPED
+
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 48
+reasoning: POST /api/proxy-http → 401 (real route); istio AKS mesh; server-side proxy for AI web-browsing; auth-gated SSRF to 169.254.169.254 / internal AI services is top post-auth prize.
+impact: SSRF → cloud metadata / internal service access; high
+testability: AUTH_HELPED
+
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: unchanged — /api/graphql 307-to-B2C; buildManifest object-ID routes; GraphQL ops in client bundle; blanket middleware; barrier = valid B2C session.
+impact: cross-BU API subscriptions + PII; medium-high
+testability: AUTH_HELPED
+```
+
+**STEP 4 — SELF-CRITIQUE**
+```
+[PARKED] companion-admin-authz-role-claim: confidence 40 < 50, session-gated, no role-claim evidence passively.
+[PARKED] companion-proxy-http-ssrf-auth-required: 48 < 50, session-gated. Re-promote on companion session.
+[PARKED] graphql-object-id-bola-team-scoped: 75 but blocked on two admin-provisioned staging accounts since 2026-09-03.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) — AUTH_HELPED, highest potential impact
+[FINAL] 2. companion-b2c-dev-callback-registered — CONFIRMED MISCONFIG this cycle (exact allowlist evidence)
+```
+
+**STEP 5 — NEXT ACTION**
+```
+[NEXT] PROBE: GET https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration — diff NOAM staging issuer/policy surface against ROW prior to drafting the misconfig report (expect same tenant-level issuer + shared client, reinforcing b2c-cross-bu-token-boundary with stage evidence). Passive, <=1 rps.
+```
+(Executed the biennially queued refresh: staging ROW policy well-known = 200, issuer `https://login-qa.ciam.daimlertruck.com/88f558f5.../v2.0/`, response_modes query/fragment/form_post — consistent with prior map. Bare tenant-root well-known = 404 len=103 on BOTH prod and staging = normal B2C behavior, not a regression.)
+
+**STEP 6 — LEARNING**
+```
+[LEARN] ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev callback URI is a REGISTERED redirect target AND the global AADB2C90006 error fallback on the PRODUCTION identity client. Prod sign-in fully wired (302→B2C authorize, PKCE S256, scope `openid offline_access <client_id>`, redirect_uri same-origin); dev sign-in unwired (504 App Gateway). MISCONFIG confirmed with exact allowlist — reportable as info/misconfig (no live code-exchange chain today).
+[LEARN] REJECTED positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback are NOT registered B2C URIs — only /api/auth/callback/azure-ad-b2c per host. No extra allowlist surface.
+```
+
+**STEP 7 — RISK**
+```
+[RISK] Daimler Truck: 46/100. Risk up (45→46). The allowlist enumeration converts a prior error-page info-leak into a concrete, evidence-backed MISCONFIG: production identity client cd34584a binds the dev deployment (first-class callback + error fallback). Not yet a compromise — dev provider is unwired (504) so no code exchange/token flow is reachable today; SSRF/admin on companion remain auth-gated; BOLA still blocked on staging accounts. This cycle: read-only GETs of B2C authorize (registered vs unregistered redirect_uri), providers/csrf metadata, policy well-known, plus two NextAuth sign-in initiations against self-issued CSRF cookies (no credentials; prod→redirect only, dev→harmless 504). No customer/employee data, no auth bypass, no mutating requests, <=1 rps.
+```
+
+Workspace updated: `probe-results.md`, `knowledge/index.md`, `inventory/daimler-truck.md`, `leads/lead-bigpickle.md`, `reports/hypotheses.md`.

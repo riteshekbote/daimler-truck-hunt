@@ -728,3 +728,9 @@
 - LEARN: ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, cr
 - LEARN: REJECTED broker-selfservice-signup @ login.businessid(.qa): only b2c_1a_signin policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no s
 - LEARN: ACCEPTED businessid-broker-first-hop @ login.businessid(.qa): ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a4
+
+## RANKED HYPOTHESES 2026-09-06 19:50:34 UTC
+- [40] companion.app.daimlertruck.com/admin: companion-admin-authz-role-claim (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): PROBE: GET https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration — diff NOAM
+- LEARN: ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev callback URI is a REGISTERED redirect target AND the global AA
+- LEARN: REJECTED positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback are NOT registered B2C URIs — only /api/auth/callback/azure-ad-b2
