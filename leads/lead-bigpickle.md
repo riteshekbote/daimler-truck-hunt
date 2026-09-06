@@ -1857,3 +1857,46 @@ testability: AUTH_HELPED
 [LEARN] REJECTED broker-selfservice-signup @ login.businessid(.qa): only `b2c_1a_signin` policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no self-service account journey; corporate-affiliation validation can only be tested with provisioned accounts.
 [LEARN] ACCEPTED businessid-broker-first-hop @ login.businessid(.qa): ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a43f98c7, policy b2c_1a_signin, code form_post → ciam authresp); portal custom scope validated at first hop, only openid forwarded — full identity chain now passively mapped.
 [RISK] Daimler Truck: 44/100. This cycle passively mapped the corporate SSO broker first-hop end-to-end, falsified the self-service signup vector, and re-confirmed portal auth functional — surface remains hardening-positive with no new anonymous exploit reachable. All high-value returns (BOLA 75, cross-BU 64, broker-chain 45) still gated solely behind the two admin-provisioned staging B2C accounts. Read-only GETs only; no customer/employee data touched.
+## 2026-09-06 06:32:48 UTC [target] (model bigpickle)
+[PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] login.businessid.daimlertruck.com,6.5,attack_surface=3,business_value=10,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] login.businessid-qa.daimlertruck.com,6.1,attack_surface=2,business_value=9,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=8
+[PRIO] login-qa.ciam.daimlertruck.com,5.9,attack_surface=4,business_value=8,tech_exposure=9,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] {as,eu}.api.daimlertruck.com,3.1,attack_surface=2,tech_exposure=6,gate_ease=2,cloud_surface=7,freshness=8
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session
+evidence_needed: authenticated introspection on /api/graphql; foreign object-ID read under own valid session
+verify_steps: AUTH_HELPED: ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` → read-only foreign-ID swap → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + accessSecret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 67
+reasoning: FRESH this cycle: ROW+NOAM share identical `iss` (tenant-level, 88f558f5.../v2.0/) and same client c387a5ab on the portal app; only differentiation is per-policy `acr` + BU-shape org claims (89 vs 102 claims ROW vs NOAM); schema scoping (Team.orgId, UserCatalogList.catalogs) is org-claim-based; jwks per-policy but iss/aud collision means backend can't distinguish BU from iss/aud alone
+evidence_needed: NOAM token accepted by ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] businessid-corporate-sso-chain-misconfig
+class: OATH
+asset: login.businessid-qa.daimlertruck.com
+confidence: 42
+reasoning: broker→ciam handoff is form_post to /oauth2/authresp with state carriable from ciam; signup journey absent (b2c_1a_signin only) so affiliation validation is server-side; this cycle bare-path metadata on businessid-qa returns 404 (vs 200 prior), so anonymous broker OIDC/JWKS surface can no longer be passively re-verified — drops confidence below the 45 floor; only the two-hop nonce/state integrity check remains testable, requires a live code capture
+evidence_needed: ciam accepting a code minted under a different broker policy/flow, or NextAuth callback accepting tampered state/nonce
+verify_steps: AUTH_HELPED: full ROW login (staging) capturing code at ciam authresp; repeat broker authorize with response_mode=query vs form_post + alternate `p`; confirm NextAuth callback rejects tampered state/nonce
+impact: employee-SSO session confusion across broker hops; ATO of DT employees if integrity fails; Severity: high (conditional)
+testability: AUTH_HELPED
+[PARKED] businessid-corporate-sso-chain-misconfig: confidence 42 < 45 floor this cycle (broker anonymous metadata 404, cannot independently re-verify); also chained on full-journey code capture — keep dormant, no re-rank.
+[PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof (accessSecret/password resolvers) — re-promote only once hypothesis #1 reads a foreign subscription.
+[PARKED] apim-anonymous-op-exposure / implicit-flow chains / nextauth-open-redirect: falsified prior cycles, do not re-rank; valid-bugs.md stale "VALID" verdict contradicted by 4+ KB rejections.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67, +3 after fresh same-issuer proof)
+[NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6 `b2c_1a_signin`, full GUIDs supplied) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na.api.daimlertruck.com; complete login manually (authorize → broker → form_post authresp → NextAuth callback, PKCE S256); then AUTH_HELPED POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` on-org baseline → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row/noam tokens; capture broker-hop code+state to validate two-hop integrity.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM policies share tenant-level issuer + same portal client c387a5ab; only acr + org-shape claims differentiate BU — same-issuer collision confirmed anonymously this cycle.
+[LEARN] UNRESOLVED broker-oidc-surface @ login.businessid-qa.daimlertruck.com: bare / + well-known paths now 404 len=103 vs prior 200 metadata; full tenant GUID unknown so path-uncertainty, not a confirmed regression — do not claim change.
+[LEARN] REJECTED nextauth-broken-auth-flow / nextauth-callback-open-redirect @ developer.*: PKCE S256 + state + same-origin redirect_uri enforced; callbackUrl same-domain only, subdomains rejected — prior rejections stand; valid-bugs.md stale verdict to be cleaned.
+[RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth, CIAM tenants correct (confidential+PKCE, implicit disabled), businessid broker self-service falsified. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle added only read-only GETs on public OIDC metadata and endpoints; no customer/employee/auth data touched.

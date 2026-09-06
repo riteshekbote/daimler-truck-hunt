@@ -236,3 +236,19 @@ www.daimlertruck.com
 - CHANGED `/graphql` and `/api/graphql` return 307 on POST with introspection query (real endpoint) vs 200 SPA shell on GET — method-dependent behavior discrepancy
 - CHANGED OAuth misconfig @ authz.* rejection reinforced: 404s attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent no OAuth surface
 - CHANGED `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP
+
+## 2026-09-06 06:34:06 UTC
+- NEW `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP
+- NEW `/apis` (no trailing slash) returns 307 to Azure AD B2C on all 6 portals; `/apis/` (trailing slash) returns 308→200 SPA shell — trailing-slash routing quirk masks real auth-protected catalog endpoints
+- NEW `/apis/test123` returns 307 (31 bytes) on prod+test — object-ID routes from buildManifest (`/apis/[apiId]`) confirmed as real middleware-protected endpoints
+- NEW `/apps`, `/teams`, `/products`, `/subscriptions` (no trailing slash) return 307 to Azure AD B2C on all 6 portals — real middleware-protected catalog endpoints confirmed
+- NEW B2C claim contracts identical across prod (3db550f0) and staging (88f558f5) tenants — 89 claims ROW model (oid/adUpn/adDisplayName/emails/groups/tenantId/orgId/acr)
+- NEW Both B2C policies advertise implicit response_types (id_token, id_token token) but token_endpoint auth restricted to client_secret_basic/post (confidential client only)
+- NEW Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate regional tenants
+- NEW Build manifests from both prod (`JCvrnrykV_KYBk7pu0Npq`) and test (`JVF_tXHlhCfZQOkT-cULr`) reveal identical route structure including all object-ID routes
+- NEW CSP config drift confirmed: prod CSP includes `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`; test/dev CSP has literal `img-src 'self' data: un
+- CHANGED `/graphql` and `/api/graphql` return 307 on POST with introspection query (real endpoint) vs 200 SPA shell on GET — method-dependent behavior discrepancy confirmed
+- CHANGED OAuth misconfig @ authz.* rejection reinforced: 404s attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent no OAuth surface
+- CHANGED `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP
+- CHANGED Portal blanket auth middleware confirmed: `/api/*`, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery exhausted; only `/api/healt
+- CHANGED BusinessID broker first-hop mapped: ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a43f98c7, policy b2c_1a_signin, code form_post → ciam authresp); por

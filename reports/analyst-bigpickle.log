@@ -5933,3 +5933,185 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] Daimler Truck: 44/100. This cycle passively mapped the corporate SSO broker first-hop end-to-end, falsified the self-service signup vector, and re-confirmed portal auth functional — surface remains hardening-positive with no new anonymous exploit reachable. All high-value returns (BOLA 75, cross-BU 64, broker-chain 45) still gated solely behind the two admin-provisioned staging B2C accounts. Read-only GETs only; no customer/employee data touched.
+===== ANALYST bigpickle 2026-09-06 06:34:06 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m# [0mTodos
+[•] STEP 1 — DELTA: compare inventory+knowledge+last leads against current surface
+[ ] STEP 2 — PRIORITIZE: score assets and rank
+[ ] STEP 3 — HYPOTHESES: top 3 assets, max 1 hypothesis each
+[ ] STEP 4 — SELF-CRITIQUE: drop weak, finalize survivors
+[ ] STEP 5 — NEXT ACTION: one concrete [NEXT] action
+[ ] STEP 6 — LEARNING: accepted/rejected from prior cycles
+[ ] STEP 7 — RISK: program risk score
+[0m
+[0m$ [0mls -la && ls art/ 2>/dev/null; ls inventory/ 2>/dev/null
+total 236
+drwxr-xr-x 12 runner runner  4096 Sep  6 06:30 .
+drwxr-xr-x  3 runner runner  4096 Sep  6 06:30 ..
+drwxr-xr-x  7 runner runner  4096 Sep  6 06:30 .git
+drwxr-xr-x  3 runner runner  4096 Sep  6 06:30 .github
+-rw-r--r--  1 runner runner  1715 Sep  6 06:30 README.md
+-rw-r--r--  1 runner runner   468 Sep  6 06:31 analyst-out.txt
+-rw-r--r--  1 runner runner 73039 Sep  6 06:30 analyst-prompt.txt
+-rw-r--r--  1 runner runner 69270 Sep  6 06:30 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 leads
+-rw-r--r--  1 runner runner  9603 Sep  6 06:30 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 reports
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  6 06:30 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 scripts
+-rw-r--r--  1 runner runner    33 Sep  6 06:30 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  6 06:30 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  6 06:30 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  6 06:30 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  6 06:30 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  6 06:30 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  6 06:30 triage
+daimler-truck.md
+[0m
+[0m✱ [0mGlob "**/*.yml"[90m 1 match[0m
+[0m→ [0mRead scope.yml
+[0m→ [0mRead probe-results.md
+[0m→ [0mRead analyst-out.txt
+[0m→ [0mRead state_bigpickle.json
+[0m
+[0m$ [0mls leads/ knowledge/ reports/ 2>/dev/null
+knowledge/:
+index.md
+
+leads/:
+lead-bigpickle.md
+lead-laguna.md
+lead-ling3.md
+lead-longcat.md
+lead-mimo.md
+lead-nemotron3.md
+reposcan-daimler-truck.md
+
+reports/:
+analyst-bigpickle.log
+analyst-laguna.log
+analyst-ling3.log
+analyst-longcat.log
+analyst-nemotron3.log
+hypotheses-bigpickle.txt
+hypotheses-laguna.txt
+hypotheses-ling3.txt
+hypotheses-longcat.txt
+hypotheses-nemotron3.txt
+hypotheses.md
+valid-bugs.md
+[0m
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead knowledge/index.md
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "as-root %{http_code} len=%{size_download}\n" -m 15 https://developer.as.api.daimlertruck.com/; sleep 1; curl -s -o /dev/null -w "tstna-health %{http_code} len=%{size_download}\n" -m 15 https://developer.tst.na.api.daimlertruck.com/api/healthcheck; sleep 1; curl -s -o /dev/null -w "businessid-qa-oidc %{http_code} len=%{size_download}\n" -m 15 https://login.businessid-qa.daimlertruck.com/.well-known/openid-configuration
+as-root 200 len=196649
+tstna-health 200 len=70
+businessid-qa-oidc 404 len=103
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "broker-metadata-policy %{http_code} len=%{size_download}\n" -m 15 "https://login.businessid-qa.daimlertruck.com/.well-known/openid-configuration?p=b2c_1a_signin"; sleep 1; curl -s -m 15 "https://login.businessid-qa.daimlertruck.com/.well-known/openid-configuration?p=b2c_1a_signin" | head -c 600
+broker-metadata-policy 404 len=103
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mfor p in "/" "/oidc/.well-known/openid-configuration" "/.well-known/openid-configuration" "/oauth2/v2.0/.well-known/openid-configuration"; do curl -s -o /dev/null -w "businessid-qa$p %{http_code} len=%{size_download}\n" -m 15 "https://login.businessid-qa.daimlertruck.com$p"; sleep 1; done
+businessid-qa/ 404 len=103
+businessid-qa/oidc/.well-known/openid-configuration 404 len=103
+businessid-qa/.well-known/openid-configuration 404 len=103
+businessid-qa/oauth2/v2.0/.well-known/openid-configuration 404 len=103
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "ciam-stg-row %{http_code} len=%{size_download}\n" -m 15 "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration"; sleep 1; curl -s -o /dev/null -w "ciam-stg-noam %{http_code} len=%{size_download}\n" -m 15 "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration"; sleep 1; curl -s -o /dev/null -w "ciam-stg-broker-tenant %{http_code} len=%{size_download}\n" -m 15 "https://login-qa.ciam.daimlertruck.com/e39fd9b6-1111-1111-1111-111111111111/b2c_1a_signin/v2.0/.well-known/openid-configuration"
+ciam-stg-row 200 len=3242
+ciam-stg-noam 200 len=3655
+ciam-stg-broker-tenant 404 len=103
+[0m
+[0m$ [0mcurl -s -m 15 "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" | python3 -c "import json,sys; d=json.load(sys.stdin); print('ROW iss=',d['issuer']); print('ROW jwks=',d['jwks_uri']); print('ROW authz=',d['authorization_endpoint']); print('ROW token=',d['token_endpoint']); print('ROW response_types=',d['response_types_supported']); print('ROW grant=',d['grant_types_supported']); print('ROW response_modes=',d.get('response_modes_supported')); print('ROW scopes=',d['scopes_supported'])"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+KeyError: 'grant_types_supported'
+ROW iss= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/
+ROW jwks= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/discovery/v2.0/keys
+ROW authz= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize
+ROW token= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/token
+ROW response_types= ['code', 'code id_token', 'code token', 'code id_token token', 'id_token', 'id_token token', 'token', 'token id_token']
+[0m
+[0m$ [0mcurl -s -m 15 "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration" | python3 -c "import json,sys; d=json.load(sys.stdin); print('NOAM iss=',d['issuer']); print('NOAM jwks=',d['jwks_uri']); print('NOAM authz=',d['authorization_endpoint']); print('NOAM scopes=',d['scopes_supported'])"
+NOAM iss= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/
+NOAM jwks= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/discovery/v2.0/keys
+NOAM authz= https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize
+NOAM scopes= ['openid']
+[0m
+[0m# [0mTodos
+[✓] STEP 1 — DELTA: compare inventory+knowledge+last leads against current surface
+[✓] STEP 2 — PRIORITIZE: score assets and rank
+[✓] STEP 3 — HYPOTHESES: top 3 assets, max 1 hypothesis each
+[✓] STEP 4 — SELF-CRITIQUE: drop weak, finalize survivors
+[✓] STEP 5 — NEXT ACTION: one concrete [NEXT] action
+[✓] STEP 6 — LEARNING: accepted/rejected from prior cycles
+[✓] STEP 7 — RISK: program risk score
+[0m
+STEP 1 — DELTA
+- NO_DELTA developer.* portals: developer.as root still 200 len=196649; /api/healthcheck on tst.na still 200 len=70; prod/test build-ID split stable (JCvrnrykV... / JVF_tXHlh...)
+- CONFIRMED ciam staging tenant 88f558f5 live: ROW policy meta 200 len=3242 + NOAM policy meta 200 len=3655 — identical shared issuer `https://login-qa.ciam.daimlertruck.com/88f558f5-.../v2.0/`, per-policy JWKS (`/b2c_1a_signin_oidc_{row,noam}/discovery/v2.0/keys`), both advertise implicit id_token/id_token_token but token endpoint confidential-client only — same-issuer cross-BU token risk re-verified
+- CHANGED @ login.businessid-qa.daimlertruck.com: `/`, `/oidc/`, `/.well-known/openid-configuration` (bare + `?p=b2c_1a_signin`) all return 404 len=103 (IIS/Azure default) this cycle vs prior-cycle broker policy metadata 200 — UNRESOLVED (broker metadata path requires full tenant GUID unknown to me; could not re-verify vs 200, not regressed)
+- STALE-ARTIFACT reports/valid-bugs.md: "NEXT NextAuth.js Open Redirect VALID 6.1" (2026-09-04 20:01) contradicts 4+ KB REJECTED learnings (callbackUrl same-domain only, subdomains rejected, PKCE S256+state enforced) — do not report; needs cleanup
+
+STEP 2 — PRIORITIZE
+[PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+[PRIO] login.businessid.daimlertruck.com,6.5,attack_surface=3,business_value=10,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] login.businessid-qa.daimlertruck.com,6.1,attack_surface=2,business_value=9,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=8
+[PRIO] login-qa.ciam.daimlertruck.com,5.9,attack_surface=4,business_value=8,tech_exposure=9,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] {as,eu}.api.daimlertruck.com,3.1,attack_surface=2,tech_exposure=6,gate_ease=2,cloud_surface=7,freshness=8
+
+STEP 3 — HYPOTHESES
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session
+evidence_needed: authenticated introspection on /api/graphql; foreign object-ID read under own valid session
+verify_steps: AUTH_HELPED: ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` → read-only foreign-ID swap → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + accessSecret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 67
+reasoning: FRESH this cycle: ROW+NOAM share identical `iss` (tenant-level, 88f558f5.../v2.0/) and same client c387a5ab on the portal app; only differentiation is per-policy `acr` + BU-shape org claims (89 vs 102 claims ROW vs NOAM); schema scoping (Team.orgId, UserCatalogList.catalogs) is org-claim-based; jwks per-policy but iss/aud collision means backend can't distinguish BU from iss/aud alone
+evidence_needed: NOAM token accepted by ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] businessid-corporate-sso-chain-misconfig
+class: OATH
+asset: login.businessid-qa.daimlertruck.com
+confidence: 42
+reasoning: broker→ciam handoff is form_post to /oauth2/authresp with state carriable from ciam; signup journey absent (b2c_1a_signin only) so affiliation validation is server-side; this cycle bare-path metadata on businessid-qa returns 404 (vs 200 prior), so anonymous broker OIDC/JWKS surface can no longer be passively re-verified — drops confidence below the 45 floor; only the two-hop nonce/state integrity check remains testable, requires a live code capture
+evidence_needed: ciam accepting a code minted under a different broker policy/flow, or NextAuth callback accepting tampered state/nonce
+verify_steps: AUTH_HELPED: full ROW login (staging) capturing code at ciam authresp; repeat broker authorize with response_mode=query vs form_post + alternate `p`; confirm NextAuth callback rejects tampered state/nonce
+impact: employee-SSO session confusion across broker hops; ATO of DT employees if integrity fails; Severity: high (conditional)
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] businessid-corporate-sso-chain-misconfig: confidence 42 < 45 floor this cycle (broker anonymous metadata 404, cannot independently re-verify); also chained on full-journey code capture — keep dormant, no re-rank.
+[PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof (accessSecret/password resolvers) — re-promote only once hypothesis #1 reads a foreign subscription.
+[PARKED] apim-anonymous-op-exposure / implicit-flow chains / nextauth-open-redirect: falsified prior cycles, do not re-rank; valid-bugs.md stale "VALID" verdict contradicted by 4+ KB rejections.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67, +3 after fresh same-issuer proof)
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6 `b2c_1a_signin`, full GUIDs supplied) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na.api.daimlertruck.com; complete login manually (authorize → broker → form_post authresp → NextAuth callback, PKCE S256); then AUTH_HELPED POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` on-org baseline → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row/noam tokens; capture broker-hop code+state to validate two-hop integrity.
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM policies share tenant-level issuer + same portal client c387a5ab; only acr + org-shape claims differentiate BU — same-issuer collision confirmed anonymously this cycle.
+[LEARN] UNRESOLVED broker-oidc-surface @ login.businessid-qa.daimlertruck.com: bare / + well-known paths now 404 len=103 vs prior 200 metadata; full tenant GUID unknown so path-uncertainty, not a confirmed regression — do not claim change.
+[LEARN] REJECTED nextauth-broken-auth-flow / nextauth-callback-open-redirect @ developer.*: PKCE S256 + state + same-origin redirect_uri enforced; callbackUrl same-domain only, subdomains rejected — prior rejections stand; valid-bugs.md stale verdict to be cleaned.
+
+STEP 7 — RISK
+[RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth, CIAM tenants correct (confidential+PKCE, implicit disabled), businessid broker self-service falsified. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle added only read-only GETs on public OIDC metadata and endpoints; no customer/employee/auth data touched.
