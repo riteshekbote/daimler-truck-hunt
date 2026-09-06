@@ -9052,3 +9052,365 @@ testability: AUTH_HELPED
 ```
 
 Workspace updated: `probe-results.md`, `knowledge/index.md`, `inventory/daimler-truck.md`, `leads/lead-bigpickle.md`, `reports/hypotheses.md`.
+===== ANALYST bigpickle 2026-09-06 21:45:27 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -sS --max-time 20 -w '\nHTTP %{http_code} | len=%{size_download}\n' 'https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration'
+{
+  "issuer": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/",
+  "authorization_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/logout",
+  "jwks_uri": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "sub",
+    "IdentityType",
+    "isXOrg",
+    "issuerUserId",
+    "signinname",
+    "TokenProvider",
+    "tid",
+    "OIDCScopes",
+    "idp",
+    "amr",
+    "email",
+    "mobile",
+    "otherMails",
+    "UserAppRoles",
+    "city",
+    "phone_number",
+    "address",
+    "given_name",
+    "family_name",
+    "name",
+    "middle_name",
+    "UserID",
+    "uid",
+    "SM_USER",
+    "PrimaryOrgCode",
+    "AdditionalBusinessRoles",
+    "PrimaryBusinessRole",
+    "Zipcode",
+    "State",
+    "c",
+    "UserVisibilities",
+    "business_roles",
+    "visibilities",
+    "UserType",
+    "corptbUpn",
+    "organizationUnit",
+    "companyCode",
+    "departmentName",
+    "companyName",
+    "Plant1",
+    "departmentAbbreviation",
+    "Plant2",
+    "mobilePhone",
+    "managementLevel",
+    "globalCostCenter",
+    "employeeType",
+    "AppRoles",
+    "cn_Org",
+    "createTimeStamp_Org",
+    "FTLOrgAlternateWarrantyCode",
+    "FTLOrgCAN_Org",
+    "FTLOrgDCVCM",
+    "FTLOrgDDCID",
+    "FTLOrgDMSType_Org",
+    "FTLOrgDWCSOC",
+    "FTLOrgGSSNCompanyID",
+    "FTLOrgGSSNOutletID",
+    "FTLOrgIsActive",
+    "FTLOrgIsDealerSponsored_Org",
+    "FTLOrgIsDelegated",
+    "FTLOrgIsExport_Org",
+    "FTLOrgIsITAR_Org",
+    "FTLOrgIsMexico_Org",
+    "FTLOrgIsOwnershipGroup",
+    "FTLOrgIsPDIcenter",
+    "FTLOrgIsWhollyOwned_Org",
+    "FTLOrgJustification",
+    "FTLOrgLocation_Org",
+    "FTLOrgParent",
+    "FTLOrgPCAN_Org",
+    "FTLOrgPrimaryContactEmail",
+    "FTLOrgPrimaryContactName",
+    "FTLOrgSapCode",
+    "FTLOrgSOC",
+    "FTLOrgTBB",
+    "FTLOrgTSSOC",
+    "modifyTimeStamp_Org",
+    "FTLOrgType_Org",
+    "FTLOrgDescription",
+    "FTLOrgAlternateCBCode",
+    "FTLOrgAlternatePCAN",
+    "FTLOrgBrands_Org",
+    "FTLOrgCertifications",
+    "FTLOrgChildren",
+    "FTLOrgCustomerPrograms_Org",
+    "FTLOrgDealerPrograms_Org",
+    "FTLOrgDealerTypes_Org",
+    "FTLOrgDistributorPrograms_Org",
+    "FTLOrgPilotPrograms_Org",
+    "FTLOrgVehicleOwners",
+    "FTLUserVisibilities_Org",
+    "l_Org",
+    "objectClass_Org",
+    "street_Org",
+    "telephoneNumber_Org",
+    "iss",
+    "iat",
+    "exp",
+    "aud",
+    "acr",
+    "nonce",
+    "auth_time"
+  ]
+}
+HTTP 200 | len=3655
+[0m
+[0m$ [0mcurl -sS --max-time 20 -w '\nHTTP %{http_code} | len=%{size_download}\n' 'https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration'
+{
+  "issuer": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/v2.0/",
+  "authorization_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/oauth2/v2.0/logout",
+  "jwks_uri": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "sub",
+    "IdentityType",
+    "isXOrg",
+    "issuerUserId",
+    "signinname",
+    "TokenProvider",
+    "tid",
+    "OIDCScopes",
+    "idp",
+    "amr",
+    "email",
+    "mobile",
+    "otherMails",
+    "UserAppRoles",
+    "city",
+    "phone_number",
+    "address",
+    "given_name",
+    "family_name",
+    "name",
+    "middle_name",
+    "UserID",
+    "uid",
+    "SM_USER",
+    "PrimaryOrgCode",
+    "AdditionalBusinessRoles",
+    "PrimaryBusinessRole",
+    "Zipcode",
+    "State",
+    "c",
+    "UserVisibilities",
+    "business_roles",
+    "visibilities",
+    "UserType",
+    "corptbUpn",
+    "organizationUnit",
+    "companyCode",
+    "departmentName",
+    "companyName",
+    "Plant1",
+    "departmentAbbreviation",
+    "Plant2",
+    "mobilePhone",
+    "managementLevel",
+    "globalCostCenter",
+    "employeeType",
+    "AppRoles",
+    "cn_Org",
+    "createTimeStamp_Org",
+    "FTLOrgAlternateWarrantyCode",
+    "FTLOrgCAN_Org",
+    "FTLOrgDCVCM",
+    "FTLOrgDDCID",
+    "FTLOrgDMSType_Org",
+    "FTLOrgDWCSOC",
+    "FTLOrgGSSNCompanyID",
+    "FTLOrgGSSNOutletID",
+    "FTLOrgIsActive",
+    "FTLOrgIsDealerSponsored_Org",
+    "FTLOrgIsDelegated",
+    "FTLOrgIsExport_Org",
+    "FTLOrgIsITAR_Org",
+    "FTLOrgIsMexico_Org",
+    "FTLOrgIsOwnershipGroup",
+    "FTLOrgIsPDIcenter",
+    "FTLOrgIsWhollyOwned_Org",
+    "FTLOrgJustification",
+    "FTLOrgLocation_Org",
+    "FTLOrgParent",
+    "FTLOrgPCAN_Org",
+    "FTLOrgPrimaryContactEmail",
+    "FTLOrgPrimaryContactName",
+    "FTLOrgSapCode",
+    "FTLOrgSOC",
+    "FTLOrgTBB",
+    "FTLOrgTSSOC",
+    "modifyTimeStamp_Org",
+    "FTLOrgType_Org",
+    "FTLOrgDescription",
+    "FTLOrgAlternateCBCode",
+    "FTLOrgAlternatePCAN",
+    "FTLOrgBrands_Org",
+    "FTLOrgCertifications",
+    "FTLOrgChildren",
+    "FTLOrgCustomerPrograms_Org",
+    "FTLOrgDealerPrograms_Org",
+    "FTLOrgDealerTypes_Org",
+    "FTLOrgDistributorPrograms_Org",
+    "FTLOrgPilotPrograms_Org",
+    "FTLOrgVehicleOwners",
+    "FTLUserVisibilities_Org",
+    "l_Org",
+    "objectClass_Org",
+    "street_Org",
+    "telephoneNumber_Org",
+    "iss",
+    "iat",
+    "exp",
+    "aud",
+    "acr",
+    "nonce",
+    "auth_time"
+  ]
+}
+HTTP 200 | len=3637
+[0m
+Both NOAM discovery docs fetched — staging and prod are byte-identical in claim contract (issuer `…/{tenant}/v2.0/`, token auth restricted to client_secret, only `openid` advertised). NOAM claims set is a superset of ROW: includes the full `FTLOrg*` dealer-network family (SAP codes, dealer contacts, ITAR/export/delegated flags) plus `UserAppRoles`/`AppRoles`. Let me check the public companion widget JS for client-side token/role handling while that's fresh.
+[0m$ [0mcurl -sS --max-time 25 -o /tmp/opencode/dt-companion.js -w 'HTTP %{http_code} | len=%{size_download}\n' 'https://companion.app.daimlertruck.com/widget/dt-companion.js' && wc -c /tmp/opencode/dt-companion.js
+HTTP 200 | len=9985
+9985 /tmp/opencode/dt-companion.js
+[0m
+[0m→ [0mRead /tmp/opencode/dt-companion.js
+[0m
+[0m$ [0mgrep -oE 'https?://[a-zA-Z0-9./?=&_:-]+' /tmp/opencode/dt-companion.js | sort -u; echo '---ENDPOINTS/KEYS---'; grep -oE '"(/api/[a-zA-Z0-9/._?=&{}$[\]-]+|/[a-z][a-zA-Z0-9/_-]*)"' /tmp/opencode/dt-companion.js | sort -u | head -50
+https://companion.app.daimlertruck.com/?externalDomain=
+---ENDPOINTS/KEYS---
+[0m
+[0m$ [0mgrep -oiE 'key|token|secret|role|admin|authorization|bearer|fetch\(|XMLHttpRequest|postMessage|localStorage' /tmp/opencode/dt-companion.js | sort | uniq -c | sort -rn
+3 localStorage
+[0m
+Widget JS is inert: pure iframe launcher with a `?externalDomain=true|false` flag, localStorage drag state, clipboard-read/write iframe allow. No API calls, no tokens, no role logic. Cycle data gathered — emitting analysis.
+
+STEP 1 — DELTA
+- NEW NOAM openid-configuration @ login-qa.ciam + login.ciam: both 200, len 3655/3637, byte-identical claim contract to each other and to ROW per tenant; NOAM = superset carrying full `FTLOrg*` dealer-network family (SAP codes, dealer primary-contact PII, ITAR/export/delegated/wholly-owned flags, `cn_Org`/`street_Org`/`telephoneNumber_Org`) plus `UserAppRoles`/`AppRoles`/`isXOrg`/`business_roles`; token_endpoint confidential-client-only; same tenant-level issuer across ROW+NOAM (per-tenant, not per-policy).
+- NEW companion widget fully mapped @ companion.app/widget/dt-companion.js (9985 B): single iframe embedder, `?externalDomain={{bool}}` passed to app, no fetch/XHR, no /api refs, no role/token logic — external-embed surface inert.
+
+STEP 2 — PRIORITIZE
+[PRIO] companion.app.daimlertruck.com,7.8,attack_surface=8,business_value=8,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.4,attack_surface=7,business_value=10,tech_exposure=9,gate_ease=1,cloud_surface=7,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=8
+
+STEP 3 — HYPOTHESES
+[HYP] companion-admin-authz-role-claim
+class: AUTH
+asset: companion.app.daimlertruck.com/admin
+confidence: 42
+reasoning: NOAM+ROW claim contracts now machine-verified to carry `UserAppRoles`+`AppRoles`+`isXOrg` in token space; /admin is behind same blanket 307 as /chat; whether adminz is a server-side token-claim check vs client-side flag is undetermined; single azure-ad-b2c provider (client cd34584a) on companion vs dual-provider portal.
+evidence_needed: authenticated companion token with/without Admin appRole claim reaching /admin vs /chat
+verify_steps: AUTH_HELPED: any valid ROW session → GET /admin and GET /chat; diff status/redirect; then inspect JWT appRoles claim presence
+impact: any employee ROW token reaching AI admin console; medium-high
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 48
+reasoning: POST /api/proxy-http → 401 (real route); istio-AKS mesh; server-side proxy for AI web-browsing; 169.254.169.254 metadata + internal AI services gated only by companion session.
+evidence_needed: valid companion session then POST with internal URLs
+verify_steps: AUTH_HELPED: `POST /api/proxy-http` {"url":"http://169.254.169.254/latest/meta-data/"} and {"url":"http://companion-service.internal/"} with session cookie
+impact: cloud-metadata keys / internal AI service access; high (conditional)
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: unchanged — /api/graphql 307-to-B2C; buildManifest object-ID routes; GraphQL ops in client bundle; blanket middleware; barrier = valid B2C session.
+evidence_needed: authenticated introspection + cross-tenant ID diff
+verify_steps: AUTH_HELPED: `_row` + `_noam` accounts → POST /api/graphql `{__schema{types{name}}}` then `teams{items{id orgId}}` from both; diff scoping
+impact: cross-BU API subscriptions + dealer PII; medium-high
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+[PARKED] companion-admin-authz-role-claim: 42 < 50, session-gated, no server-side role-claim evidence passively; claim contract shows roles ride in tokens but cannot prove server enforcement.
+[PARKED] companion-proxy-http-ssrf-auth-required: 48 < 50, session-gated; no listener evidence beyond 401.
+[PARKED] graphql-object-id-bola-team-scoped: 75 but blocked on two admin-provisioned staging accounts since 2026-09-03; no new evidence this cycle.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) — AUTH_HELPED, highest impact
+[FINAL] 2. companion-b2c-dev-callback-registered — CONFIRMED MISCONFIG (exact allowlist, both envs)
+[FINAL] 3. b2c-cross-bu-token-boundary — now extended to NOAM staging; claim superset incl. FTLOrg* dealer PII
+
+STEP 5 — NEXT ACTION
+[NEXT] PROBE: `GET https://companion.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js` — enumerate exact companion route/page structure (admin/*, widget-host/*, callback pages, rewrites) to complete the new-surface route map and pin widget-host/callback positions against the B2C allowlist. Passive GET, <=1 rps.
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam + login.ciam: NOAM openid-configuration same shape as ROW per tenant (issuer …/v2.0/), token endpoint confidential-only; NOAM claim set = superset incl. FTLOrg* dealer-network PII (SAP codes, primary-contact names/emails, street/telephone) + UserAppRoles/AppRoles — same-issuer cross-BU collision extended with staging NOAM evidence.
+[LEARN] ACCEPTED companion-widget-inert @ companion.app/widget/dt-companion.js: iframe launcher only (`?externalDomain={{bool}}`), localStorage drag state, clipboard-read/write allow; no /api refs, no tokens, no role logic — no anonymous attack surface in the embedder.
+[LEARN] REJECTED widget-embed-auth-bypass @ companion iframe: external-domain embedding still routes all app pages through B2C 307 + same-origin callbackUrl; clipboard allow + drag position offer no demonstrated exploit (clickjacking class).
+
+STEP 7 — RISK
+[RISK] Daimler Truck: 46/100. Risk steady (unchanged). NOAM discovery documents a richer dealer-PII claim surface (FTLOrg* superset) under the same per-tenant issuer — reinforces the cross-BU boundary finding but adds no reachable exposure; companion widget is inert; all companion/dev/admin/SSRF paths remain B2C-gated. Only reportable item remains the confirmed dev-callback MISCONFIG on prod client cd34584a (info-level; dev provider unwired). This cycle: two read-only discovery GETs on B2C openid-configuration + one public widget JS fetch. No customer/employee data, no auth bypass, no mutating requests, <=1 rps.

@@ -260,3 +260,17 @@ www.daimlertruck.com
 ## 2026-09-06 17:34:34 UTC
 
 ## 2026-09-06 19:50:34 UTC
+
+## 2026-09-06 21:45:27 UTC
+- NEW companion.app.daimlertruck.com now LIVE (was NXDOMAIN): HTTP 200 len=3330, Next.js build IqPB_zhGzw2eQTiap3_bK, frontend 1.91.0, istio-envoy; routes /admin /chat /widget-host /api/proxy-http /api/[...
+- NEW companion-dev.app.daimlertruck.com exposed: identical build/version as prod but showFrontendVersion:true + connectionTypeSelector:true (disabled on prod); dev auth provider not wired to live tenant (s
+- NEW b2c-error-info-leak @ login.ciam.daimlertruck.com client cd34584a: unregistered redirect_uri → AADB2C90006 error discloses companion-dev.app.daimlertruck.com as callback location — production client e
+- NEW companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev callback URI (companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c) is REGISTERED redirect target 
+- NEW positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback return 200 (SPA shell) but are NOT registered B2C URIs — only /api/auth/callback/azure-ad-b2c per host
+- CHANGED developer.* portals: /graphql and /api/graphql return 307 to Azure AD B2C on POST with introspection query (real endpoints behind auth), 200 SPA shell on GET — method-dependent behavior confirmed
+- CHANGED Portal blanket auth middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (tested with fabricated + dot/case/%2f variants) — passive route discovery exhausted; only /api/health
+- CHANGED Trailing-slash routing quirk confirmed across all catalog roots: /apis /apps /teams /products /subscriptions (no slash) → 307 B2C; trailing-slash variants → 308→200 SPA catch-all
+- CHANGED Build manifests identical across prod (JCvrnrykV_KYBk7pu0Npq) and test (JVF_tXHlhCfZQOkT-cULr) — same route structure including all object-ID routes
+- CHANGED CSP config drift: prod includes frame-src https://companion.app.daimlertruck.com (now live); test/dev has literal "undefined" in img-src
+- CHANGED B2C cross-BU token boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; only acr+org claims differentiate — same-issuer collision confirmed anonymously
+- CHANGED businessid-broker-first-hop mapped: login.businessid(.qa) ROW authorize renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a43f98c7, policy b2c_1a_signin, code form_post → ciam authresp

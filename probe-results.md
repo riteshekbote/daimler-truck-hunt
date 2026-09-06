@@ -206,3 +206,14 @@ https://companion.app.daimlertruck.com/admin/callback -> 200 len=3364
 
 ## 2026-09-06 19:50:36 UTC
 https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration -> HTTP 404
+
+## 2026-09-06 21:45:51 UTC
+https://companion.app.daimlertruck.com -> 200 len=3330
+https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid` -> HTTP 404
+https://companion.app.daimlertruck.com/api/proxy-http` -> HTTP 401
+https://developer.as.api.daimlertruck.com/graphql` -> 200 len=196649
+https://companion-dev.app.daimlertruck.com/api/auth/providers` -> ERR The read operation timed out
+https://companion-dev.app.daimlertruck.com/api/auth/session` -> HTTP 400
+https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true` -> HTTP 400
+https://attacker.daimlertruck.com -> ERR <urlopen error [Errno -2] Name or service not know
+https://companion.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js` -> HTTP 404

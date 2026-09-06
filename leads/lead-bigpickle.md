@@ -2215,3 +2215,45 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED companion-b2c-dev-callback-registered @ login.ciam.daimlertruck.com client cd34584a: dev callback URI is a REGISTERED redirect target AND the global AADB2C90006 error fallback on the PRODUCTION identity client. Prod sign-in fully wired (302→B2C authorize, PKCE S256, scope `openid offline_access <client_id>`, redirect_uri same-origin); dev sign-in unwired (504 App Gateway). MISCONFIG confirmed with exact allowlist — reportable as info/misconfig (no live code-exchange chain today).
 [LEARN] REJECTED positional-callback-enumeration @ companion.app: /widget/callback and /admin/callback are NOT registered B2C URIs — only /api/auth/callback/azure-ad-b2c per host. No extra allowlist surface.
 [RISK] Daimler Truck: 46/100. Risk up (45→46). The allowlist enumeration converts a prior error-page info-leak into a concrete, evidence-backed MISCONFIG: production identity client cd34584a binds the dev deployment (first-class callback + error fallback). Not yet a compromise — dev provider is unwired (504) so no code exchange/token flow is reachable today; SSRF/admin on companion remain auth-gated; BOLA still blocked on staging accounts. This cycle: read-only GETs of B2C authorize (registered vs unregistered redirect_uri), providers/csrf metadata, policy well-known, plus two NextAuth sign-in initiations against self-issued CSRF cookies (no credentials; prod→redirect only, dev→harmless 504). No customer/employee data, no auth bypass, no mutating requests, <=1 rps.
+## 2026-09-06 21:43:30 UTC [target] (model bigpickle)
+[PRIO] companion.app.daimlertruck.com,7.8,attack_surface=8,business_value=8,tech_exposure=9,gate_ease=2,cloud_surface=8,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.4,attack_surface=7,business_value=10,tech_exposure=9,gate_ease=1,cloud_surface=7,freshness=9
+[PRIO] developer.as.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=8
+[HYP] companion-admin-authz-role-claim
+class: AUTH
+asset: companion.app.daimlertruck.com/admin
+confidence: 42
+reasoning: NOAM+ROW claim contracts now machine-verified to carry `UserAppRoles`+`AppRoles`+`isXOrg` in token space; /admin is behind same blanket 307 as /chat; whether adminz is a server-side token-claim check vs client-side flag is undetermined; single azure-ad-b2c provider (client cd34584a) on companion vs dual-provider portal.
+evidence_needed: authenticated companion token with/without Admin appRole claim reaching /admin vs /chat
+verify_steps: AUTH_HELPED: any valid ROW session → GET /admin and GET /chat; diff status/redirect; then inspect JWT appRoles claim presence
+impact: any employee ROW token reaching AI admin console; medium-high
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 48
+reasoning: POST /api/proxy-http → 401 (real route); istio-AKS mesh; server-side proxy for AI web-browsing; 169.254.169.254 metadata + internal AI services gated only by companion session.
+evidence_needed: valid companion session then POST with internal URLs
+verify_steps: AUTH_HELPED: `POST /api/proxy-http` {"url":"http://169.254.169.254/latest/meta-data/"} and {"url":"http://companion-service.internal/"} with session cookie
+impact: cloud-metadata keys / internal AI service access; high (conditional)
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: unchanged — /api/graphql 307-to-B2C; buildManifest object-ID routes; GraphQL ops in client bundle; blanket middleware; barrier = valid B2C session.
+evidence_needed: authenticated introspection + cross-tenant ID diff
+verify_steps: AUTH_HELPED: `_row` + `_noam` accounts → POST /api/graphql `{__schema{types{name}}}` then `teams{items{id orgId}}` from both; diff scoping
+impact: cross-BU API subscriptions + dealer PII; medium-high
+testability: AUTH_HELPED
+[PARKED] companion-admin-authz-role-claim: 42 < 50, session-gated, no server-side role-claim evidence passively; claim contract shows roles ride in tokens but cannot prove server enforcement.
+[PARKED] companion-proxy-http-ssrf-auth-required: 48 < 50, session-gated; no listener evidence beyond 401.
+[PARKED] graphql-object-id-bola-team-scoped: 75 but blocked on two admin-provisioned staging accounts since 2026-09-03; no new evidence this cycle.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) — AUTH_HELPED, highest impact
+[FINAL] 2. companion-b2c-dev-callback-registered — CONFIRMED MISCONFIG (exact allowlist, both envs)
+[FINAL] 3. b2c-cross-bu-token-boundary — now extended to NOAM staging; claim superset incl. FTLOrg* dealer PII
+[NEXT] PROBE: `GET https://companion.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js` — enumerate exact companion route/page structure (admin/*, widget-host/*, callback pages, rewrites) to complete the new-surface route map and pin widget-host/callback positions against the B2C allowlist. Passive GET, <=1 rps.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam + login.ciam: NOAM openid-configuration same shape as ROW per tenant (issuer …/v2.0/), token endpoint confidential-only; NOAM claim set = superset incl. FTLOrg* dealer-network PII (SAP codes, primary-contact names/emails, street/telephone) + UserAppRoles/AppRoles — same-issuer cross-BU collision extended with staging NOAM evidence.
+[LEARN] ACCEPTED companion-widget-inert @ companion.app/widget/dt-companion.js: iframe launcher only (`?externalDomain={{bool}}`), localStorage drag state, clipboard-read/write allow; no /api refs, no tokens, no role logic — no anonymous attack surface in the embedder.
+[LEARN] REJECTED widget-embed-auth-bypass @ companion iframe: external-domain embedding still routes all app pages through B2C 307 + same-origin callbackUrl; clipboard allow + drag position offer no demonstrated exploit (clickjacking class).
+[RISK] Daimler Truck: 46/100. Risk steady (unchanged). NOAM discovery documents a richer dealer-PII claim surface (FTLOrg* superset) under the same per-tenant issuer — reinforces the cross-BU boundary finding but adds no reachable exposure; companion widget is inert; all companion/dev/admin/SSRF paths remain B2C-gated. Only reportable item remains the confirmed dev-callback MISCONFIG on prod client cd34584a (info-level; dev provider unwired). This cycle: two read-only discovery GETs on B2C openid-configuration + one public widget JS fetch. No customer/employee data, no auth bypass, no mutating requests, <=1 rps.
