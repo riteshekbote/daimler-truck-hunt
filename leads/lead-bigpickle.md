@@ -1900,3 +1900,206 @@ testability: AUTH_HELPED
 [LEARN] UNRESOLVED broker-oidc-surface @ login.businessid-qa.daimlertruck.com: bare / + well-known paths now 404 len=103 vs prior 200 metadata; full tenant GUID unknown so path-uncertainty, not a confirmed regression — do not claim change.
 [LEARN] REJECTED nextauth-broken-auth-flow / nextauth-callback-open-redirect @ developer.*: PKCE S256 + state + same-origin redirect_uri enforced; callbackUrl same-domain only, subdomains rejected — prior rejections stand; valid-bugs.md stale verdict to be cleaned.
 [RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth, CIAM tenants correct (confidential+PKCE, implicit disabled), businessid broker self-service falsified. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle added only read-only GETs on public OIDC metadata and endpoints; no customer/employee/auth data touched.
+## 2026-09-06 11:21:54 UTC [target] (model bigpickle)
+verify_steps: AUTH_HELPED: ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` → read-only foreign-ID swap → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + accessSecret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 67
+reasoning: FRESH this cycle: ROW+NOAM share identical `iss` (tenant-level, 88f558f5.../v2.0/) and same client c387a5ab on the portal app; only differentiation is per-policy `acr` + BU-shape org claims (89 vs 102 claims ROW vs NOAM); schema scoping (Team.orgId, UserCatalogList.catalogs) is org-claim-based; jwks per-policy but iss/aud collision means backend can't distinguish BU from iss/aud alone
+evidence_needed: NOAM token accepted by ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] businessid-corporate-sso-chain-misconfig
+class: OATH
+asset: login.businessid-qa.daimlertruck.com
+confidence: 42
+reasoning: broker→ciam handoff is form_post to /oauth2/authresp with state carriable from ciam; signup journey absent (b2c_1a_signin only) so affiliation validation is server-side; this cycle bare-path metadata on businessid-qa returns 404 (vs 200 prior), so anonymous broker OIDC/JWKS surface can no longer be passively re-verified — drops confidence below the 45 floor; only the two-hop nonce/state integrity check remains testable, requires a live code capture
+evidence_needed: ciam accepting a code minted under a different broker policy/flow, or NextAuth callback accepting tampered state/nonce
+verify_steps: AUTH_HELPED: full ROW login (staging) capturing code at ciam authresp; repeat broker authorize with response_mode=query vs form_post + alternate `p`; confirm NextAuth callback rejects tampered state/nonce
+impact: employee-SSO session confusion across broker hops; ATO of DT employees if integrity fails; Severity: high (conditional)
+testability: AUTH_HELPED
+[PARKED] businessid-corporate-sso-chain-misconfig: confidence 42 < 45 floor this cycle (broker anonymous metadata 404, cannot independently re-verify); also chained on full-journey code capture — keep dormant, no re-rank.
+[PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof (accessSecret/password resolvers) — re-promote only once hypothesis #1 reads a foreign subscription.
+[PARKED] apim-anonymous-op-exposure / implicit-flow chains / nextauth-open-redirect: falsified prior cycles, do not re-rank; valid-bugs.md stale "VALID" verdict contradicted by 4+ KB rejections.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67, +3 after fresh same-issuer proof)
+[NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6 `b2c_1a_signin`, full GUIDs supplied) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na.api.daimlertruck.com; complete login manually (authorize → broker → form_post authresp → NextAuth callback, PKCE S256); then AUTH_HELPED POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` on-org baseline → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row/noam tokens; capture broker-hop code+state to validate two-hop integrity.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM policies share tenant-level issuer + same portal client c387a5ab; only acr + org-shape claims differentiate BU — same-issuer collision confirmed anonymously this cycle.
+[LEARN] UNRESOLVED broker-oidc-surface @ login.businessid-qa.daimlertruck.com: bare / + well-known paths now 404 len=103 vs prior 200 metadata; full tenant GUID unknown so path-uncertainty, not a confirmed regression — do not claim change.
+[LEARN] REJECTED nextauth-broken-auth-flow / nextauth-callback-open-redirect @ developer.*: PKCE S256 + state + same-origin redirect_uri enforced; callbackUrl same-domain only, subdomains rejected — prior rejections stand; valid-bugs.md stale verdict to be cleaned.
+[RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth, CIAM tenants correct (confidential+PKCE, implicit disabled), businessid broker self-service falsified. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle added only read-only GETs on public OIDC metadata and endpoints; no customer/employee/auth data touched.
+evidence_needed: Valid B2C token from one tenant (e.g., ROW) accepted by API resolver in different tenant (e.g., NA) without claim validation; evidence that acr/org claims are not checked on object-ID routes
+verify_steps: AUTH_HELPED: Obtain valid ROW token (azure-ad-b2c-dt provider); replay token against NA-scoped endpoint (developer.na.api.daimlertruck.com/apis/<na-apiId>); test with NA token (azure-ad-b2c-dtna) against ROW endpoint
+impact: Cross-business-unit API access, subscription data leakage, tenant isolation bypass → High
+testability: AUTH_HELPED
+[PARKED] CIAM Secret Return in Plaintext — AccessSecret/Password Fields in GraphQL Resolvers: confidence 65 but evidence relies on client bundle analysis not yet verified against live resolvers; requires valid B2C session + authenticated introspection; speculative without direct schema confirmation — keep for post-auth phase
+[FINAL] 1. GraphQL Mutation BOLA Across Tenant Boundaries (75)
+[FINAL] 2. Object-ID REST Routes BOLA/IDOR on Tenant-Scoped Resources (70)
+[FINAL] 3. B2C Cross-Tenant Token Boundary Bypass via Shared Issuer/Audience (65)
+[NEXT] PROBE: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}` — verify real GraphQL endpoint responds with schema (not SPA shell) and confirm 307 redirect behavior vs introspection response; this resolves the GET-vs-POST discrepancy in current probe results.
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+[LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential config differences
+[LEARN] ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) — high-value BOLA probing surface post-auth
+[LEARN] ACCEPTED /api/healthcheck-live: 200 JSON with uptime on both prod and test — real server route; informational only (not a vuln alone)
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive
+[LEARN] REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin; subdomains rejected — not an open redirect
+[LEARN] REJECTED nextauth-broken-auth-flow: POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, and same-origin redirect_uri — auth flow works correctly on all 6 portals
+[LEARN] REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+[LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQL ops with these IDs
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
+[LEARN] ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
+[LEARN] ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery on portals exhausted; only /api/healthcheck public
+[LEARN] ACCEPTED businessid-broker-surface: login.businessid(.qa).daimlertruck.com DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82559bb7 / a43f98c7, IdP corptbbid.onmicrosoft.com) behind CIAM ROW flow; OIDC+JWKS public; highest-sensitivity identity surface
+[RISK] daimler-truck: 74 — 6 live developer portals with GraphQL + object-ID REST routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) behind Azure AD B2C; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk (/apis/ vs /apis) masks real endpoints; capacitor-admin and authz surfaces remain dark (000/404); B2C cross-tenant token boundary relies solely on acr/org claim validation; companion.app.daimlertruck.com NXDOMAIN in prod CSP frame-src indicates dead reference
+[HYP] Hardcoded MeiliSearch Master Key in DevContainer Config
+class: SECRET
+asset: daimlertruck/SRC-LibreChat/.devcontainer/docker-compose.yml:60
+confidence: 85
+reasoning: Real SHA-256 hex key `5c71cf56d672d009e36070b5bc5e47b743535ae55c818ae3b735bb6ebfb4ba63` hardcoded in devcontainer. Devcontainer configs are frequently copy-pasted into production docker-compose. MeiliSearch master key grants full search index read/write/admin access. Daimler Truck's developer.*.api.daimlertruck.com portals likely use search infrastructure.
+impact: High – admin access to MeiliSearch instance if key reused in prod; data exfil or index poisoning
+verify_steps: 1) Check if any production docker-compose/deploy-compose files reference this same key or value. 2) Passively check if any *.api.daimlertruck.com or internal subdomain exposes MeiliSearch on port 7700 or /indexes endpoint.
+[HYP] Wildcard CORS with Credentials on RAG API
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:76
+confidence: 80
+reasoning: `allow_origins=["*"]` combined with `allow_credentials=True` violates the CORS spec (browsers reject this combo) but signals intent to allow all origins. If the middleware is misconfigured or overridden, this enables CSRF/exfil against authenticated users. RAG API is AI infrastructure – likely used by Daimler Truck's developer portal or internal AI tooling.
+impact: Medium – potential for cross-origin data theft if CORS enforcement is bypassed; credential leakage from AI search/RAG endpoints
+verify_steps: 1) Check if RAG API is deployed on any *.api.daimlertruck.com subdomain. 2) Passively observe CORS headers on live endpoints.
+[HYP] Default Database Credentials in RAG API Config
+class: SECRET
+asset: daimlertruck/SRC-rag_api/app/config.py:57-58
+confidence: 65
+reasoning: `POSTGRES_USER = "myuser"` and `POSTGRES_PASSWORD = "mypassword"` are default values if env vars are unset. If deployment omits these env vars (common in quick-start setups), the database is accessible with known credentials. RAG API stores vector embeddings and document chunks – sensitive corporate data.
+impact: Medium – unauthorized access to vector database containing corporate document embeddings if defaults are used in production
+verify_steps: 1) Check if the RAG API docker-compose or k8s manifest properly sets POSTGRES_PASSWORD. 2) Passively check if the database port (5432) is exposed on any daimlertruck.com subdomain.
+[HYP] Unrestricted Default CORS on LibreChat API
+class: MISCONFIG
+asset: daimlertruck/SRC-LibreChat/api/server/index.js:322
+confidence: 55
+reasoning: `app.use(cors())` with no origin restrictions means all origins are allowed. LibreChat API handles authentication (JWT, OpenID Connect), chat sessions, and AI model API keys. If this instance is deployed internally, any malicious webpage visited by an employee could exfiltrate session tokens or chat data via cross-origin requests.
+impact: Medium – session hijacking, chat data exfiltration via CSRF from any origin if deployed without additional reverse-proxy CORS
+verify_steps: 1) Check if LibreChat is deployed on any *.daimlertruck.com domain or internal network. 2) Passively observe if Access-Control-Allow-Origin header reflects requesting origin.
+[HYP] Conditional Debug Route Exposure in RAG API
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:93-94
+confidence: 50
+reasoning: `if debug_mode: app.include_router(router=pgvector_routes.router)` – pgvector admin routes (likely CRUD on vector collections) are exposed when `DEBUG_RAG_API=True`. The config reads from env var, but if set in production (e.g., during troubleshooting and left on), it exposes administrative vector DB routes.
+impact: Medium – admin-level access to vector database management if debug mode accidentally enabled in production
+verify_steps: 1) Check if any production deployment has DEBUG_RAG_API=true. 2) Passively check if pgvector admin endpoints respond on the live RAG API.
+class: SECRET
+asset: SRC-rag_api/docker-compose.yaml:5-7, SRC-rag_api/db-compose.yaml:7-9,
+confidence: 85
+reasoning: |
+impact: HIGH — database compromise leads to exfiltration of RAG-indexed
+verify_steps: |
+class: MISCONFIG
+asset: SRC-LibreChat/docker-compose.yml:63, SRC-LibreChat/deploy-compose.yml:80,
+confidence: 90
+reasoning: |
+impact: HIGH — unauthenticated access to MongoDB containing user data,
+verify_steps: |
+class: MISCONFIG
+asset: SRC-rag_api/main.py:76-79
+confidence: 80
+reasoning: |
+impact: MEDIUM — enables cross-origin data exfiltration from RAG endpoints
+verify_steps: |
+class: MISCONFIG
+asset: SRC-rag_api/app/middleware.py:18-22
+confidence: 85
+reasoning: |
+impact: HIGH — unauthenticated access to all RAG API endpoints including
+verify_steps: |
+class: OTHER
+asset: SRC-rag_api/main.py:93, SRC-rag_api/app/routes/pgvector_routes.py:1-70
+confidence: 75
+reasoning: |
+impact: MEDIUM — full database schema enumeration and data dump if debug
+verify_steps: |
+class: MISCONFIG
+asset: SRC-openai-aca-lb/src/appsettings.json:8
+confidence: 60
+reasoning: |
+impact: LOW — host-header injection possible if behind a reverse proxy;
+verify_steps: |
+class: SECRET
+asset: `daimlertruck/SRC-rag_api/app/config.py:59`
+confidence: 90
+reasoning: `POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD", "mypassword")` — if the env var is unset, the RAG API connects to PostgreSQL with the hardcoded password `mypassword`. The username `myuser` and database `mydatabase` follow the same pattern (lines 58-59).
+impact: HIGH — Default credentials on a database holding document embeddings could allow unauthorized data access if deployed without overriding env vars.
+verify_steps: Check whether any live deployment of `SRC-rag_api` omits `POSTGRES_PASSWORD` from its environment. If the container starts and connects to a real Postgres instance with `mypassword`, the finding is confirmed.
+class: MISCONFIG
+asset: `daimlertruck/SRC-rag_api/app/middleware.py:18-21`
+confidence: 85
+reasoning: When `JWT_SECRET` is unset, the middleware logs a warning and calls `next_middleware_call()` without validating any token. Every protected endpoint becomes unauthenticated.
+impact: HIGH — If deployed without `JWT_SECRET`, the RAG API is fully open. An attacker can access all document endpoints without credentials.
+verify_steps: Deploy SRC-rag_api without setting `JWT_SECRET`. Confirm that requests to `/documents` etc. return 200 without a valid bearer token.
+class: MISCONFIG
+asset: `daimlertruck/SRC-rag_api/main.py:72-77`
+confidence: 80
+reasoning: `allow_origins=["*"]` combined with `allow_credentials=True` allows any origin to make credentialed cross-origin requests to the API. This is a textbook CORS misconfiguration.
+impact: MEDIUM — Enables CSRF-like attacks against authenticated endpoints if the API uses cookie-based auth. Combined with finding #2, any origin can access the open API.
+verify_steps: Send an `Origin: https://evil.com` request with `credentials: include` to an authenticated endpoint. If the response includes `Access-Control-Allow-Origin: https://evil.com` and `Access-Control-Allow-Credentials: true`, the finding is confirmed.
+class: MISCONFIG
+asset: `daimlertruck/SRC-openai-aca-lb/infra/core/database/sql/sql-server.bicep` (firewall resource)
+confidence: 75
+reasoning: The SQL Server firewall rule is defined with `startIpAddress: '0.0.0.1'` and `endIpAddress: '255.255.255.254'`, allowing connections from any public IP. The comment notes this is for "debugging purposes" but the template is committed as-is.
+impact: MEDIUM — If deployed to a real Azure subscription, the SQL Server is exposed to the entire internet. The `@secure()` parameter for the password is correct, but the network perimeter is wide open.
+verify_steps: Deploy the Bicep template and inspect the SQL Server's firewall rules in the Azure portal. Confirm the rule covers `0.0.0.1-255.255.255.254`.
+class: MISCONFIG
+asset: `daimlertruck/SRC-openai-aca-lb/infra/core/host/container-registry.bicep:24`
+confidence: 60
+reasoning: `publicNetworkAccess string = 'Enabled'` is the default. Combined with the SQL firewall above, this defaults to a posture where container images and the database are both publicly reachable.
+impact: LOW — Standard for dev/test templates. `adminUserEnabled` and `anonymousPullEnabled` default to false, so the direct risk is limited.
+verify_steps: Deploy and verify the ACR's public network access setting in the Azure portal.
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session
+evidence_needed: authenticated introspection on /api/graphql; foreign object-ID read under own valid session
+verify_steps: AUTH_HELPED: ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` → read-only foreign-ID swap → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + accessSecret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 67
+reasoning: FRESH this cycle: ROW+NOAM share identical `iss` (tenant-level, 88f558f5.../v2.0/) and same client c387a5ab on the portal app; only differentiation is per-policy `acr` + BU-shape org claims (89 vs 102 claims ROW vs NOAM); schema scoping (Team.orgId, UserCatalogList.catalogs) is org-claim-based; jwks per-policy but iss/aud collision means backend can't distinguish BU from iss/aud alone
+evidence_needed: NOAM token accepted by ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] rag-meilisearch-default-cred-sourceonly
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api (daimlertruck GitHub org, verified owner)
+confidence: 40
+reasoning: org confirmed verified "Daimler Truck AG", 6 public repos; SRC-rag_api main.py:72-77 sets allow_origins=["*"]+allow_credentials=True; app/middleware.py:18-22 skips JWT validation when JWT_SECRET unset; config.py:59 POSTGRES_PASSWORD default "mypassword". BUT ALL AI repos (SRC-rag_api, SRC-LibreChat, SRC-meilisearch, SRC-openai-aca-lb, SRC-librechat-prom-exporter) are upstream OSS forks (fork:true) — no Daimler-specific changes to the vuln code; live deployment UNCONFIRMED: RAG whitelisted /docs,/openapi.json,/health + Meili /indexes on all scoped hosts return 307-guarded or 404/OperationNotFound (as.api,eu.api,developer.*) — no reachable instance on scoped hostname surface
+evidence_needed: a scoped host serving SRC-rag_api or MeiliSearch without JWT_SECRET/master key set (would return 200 on /openapi.json or /indexes anonymously)
+verify_steps: PASSIVE: `GET https://<scoped-host>/openapi.json` / `/health` (RAG whitelist) and `/indexes` (Meili) — confirmed 307/404 on as.api,eu.api,developer.* ; no live surface found
+impact: IF deployed without secret → unauth RAG doc access (internal AI embeddings/PII); Severity: high (conditional on deployment); currently source-only
+testability: PASSIVE
+[PARKED] rag-meilisearch-default-cred-sourceonly: confidence 40 == floor; source-only (upstream fork defaults, no Daimler-specific vuln code) + NO confirmed live deployment on any scoped host — RAG/Meili endpoints 307/404 everywhere probed. Non-actionable per program "known-vulnerable without program-specific exploit". Hold dormant, re-probe only if a new scoped host surfaces.
+[PARKED] b2c-cross-bu-token-boundary: unchanged 67, still gated on two provisioned staging accounts.
+[PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof — re-promote only once hypothesis #1 reads a foreign subscription.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67)
+[NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6 `b2c_1a_signin`) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na.api.daimlertruck.com; complete manual login (authorize → broker → form_post authresp → NextAuth callback, PKCE S256); then AUTH_HELPED POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` on-org baseline → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row/noam tokens.
+[LEARN] ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, created 2021-11-26); 6 public repos (5 upsteam forks of LibreChat/RAG/Meili/ACA-LB/prom-exporter + DT-DDS original design system). In-scope by "digital services...operated by Daimler Truck". AI-stack forks carry only upstream default-cred/MISCONFIG patterns; no Daimler-specific vuln; deployment unconfirmed.
+[LEARN] REJECTED rag-librechat-meili-live-surface @ *.daimlertruck.com: RAG API whitelisted /docs,/openapi.json,/health + Meili /indexes return 307 (developer.* blanket auth) or 404/OperationNotFound (as.api,eu.api APIM gateways) — no RAG/LibreChat/Meili instance reachable on scoped hostname surface. reposcan SECRET/MISCONFIG remain source-only, non-actionable per program exploit-specificity rule.
+[LEARN] REJECTED dt-dds-design-system @ daimlertruck/DT-DDS: original Daimler repo but pure frontend component library (Storybook on github.io pages, no backend, no env/secrets/config leaks in repo tree) — no reachable vulnerability.
+[RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth; CIAM correct (confidential+PKCE, implicit disabled); businessid broker self-service falsified; GitHub org confirmed owned but AI-stack forks not live-reachable on scoped hosts. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle: read-only GETs on public GitHub metadata + scoped-host RAG/Meili/health paths; no customer/employee/auth data touched.
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session

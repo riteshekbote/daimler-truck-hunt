@@ -1,18 +1,4 @@
-## 2026-09-06 06:33:58 UTC [target] (model nemotron3)
-[NEW] `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP
-[NEW] `/apis` (no trailing slash) returns 307 to Azure AD B2C on all 6 portals; `/apis/` (trailing slash) returns 308→200 SPA shell — trailing-slash routing quirk masks real auth-protected catalog endpoints
-[NEW] `/apis/test123` returns 307 (31 bytes) on prod+test — object-ID routes from buildManifest (`/apis/[apiId]`) confirmed as real middleware-protected endpoints
-[NEW] `/apps`, `/teams`, `/products`, `/subscriptions` (no trailing slash) return 307 to Azure AD B2C on all 6 portals — real middleware-protected catalog endpoints confirmed
-[NEW] B2C claim contracts identical across prod (3db550f0) and staging (88f558f5) tenants — 89 claims ROW model (oid/adUpn/adDisplayName/emails/groups/tenantId/orgId/acr)
-[NEW] Both B2C policies advertise implicit response_types (id_token, id_token token) but token_endpoint auth restricted to client_secret_basic/post (confidential client only)
-[NEW] Two B2C providers per portal: `azure-ad-b2c-dt` (ROW, policy `b2c_1a_signin_oidc_row`) + `azure-ad-b2c-dtna` (NA, policy `b2c_1a_signin_oidc_noam`) — separate regional tenants
-[NEW] Build manifests from both prod (`JCvrnrykV_KYBk7pu0Npq`) and test (`JVF_tXHlhCfZQOkT-cULr`) reveal identical route structure including all object-ID routes
-[NEW] CSP config drift confirmed: prod CSP includes `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`; test/dev CSP has literal `img-src 'self' data: undefined` + empty frame-src
-[CHANGED] `/graphql` and `/api/graphql` return 307 on POST with introspection query (real endpoint) vs 200 SPA shell on GET — method-dependent behavior discrepancy confirmed
-[CHANGED] OAuth misconfig @ authz.* rejection reinforced: 404s attributed to APIM OperationNotFound (same class as as.api/eu.api) — consistent no OAuth surface
-[CHANGED] `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP
-[CHANGED] Portal blanket auth middleware confirmed: `/api/*`, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery exhausted; only `/api/healthcheck` public
-[CHANGED] BusinessID broker first-hop mapped: ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a43f98c7, policy b2c_1a_signin, code form_post → ciam authresp); portal custom scope validated at first hop, only openid forwarded
+## 2026-09-06 11:26:35 UTC [target] (model nemotron3)
 [PRIO] developer.as.api.daimlertruck.com,8.5,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
 [PRIO] developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
 [PRIO] developer.eu.api.daimlertruck.com,8.0,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
@@ -24,7 +10,7 @@
 class: OTHER
 asset: developer.as.api.daimlertruck.com
 confidence: 75
-reasoning: 6 portals expose GraphQL at /graphql behind Azure AD B2C (307 on POST); portal markets "single source of truth for APIs" with Subscribe card implying mutations (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C per region (as/eu/na) suggests tenant isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential config drift in authorization logic; /apis/[apiId] confirmed real endpoint behind auth; identical build manifests across prod/test suggest same GraphQL schema
+reasoning: 6 portals expose GraphQL at /graphql behind Azure AD B2C (307 on POST with introspection query); portal markets "single source of truth for APIs" with Subscribe card implying mutations (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C per region (as/eu/na) suggests tenant isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential config drift in authorization logic; /apis/[apiId] confirmed real endpoint behind auth; identical build manifests across prod/test suggest same GraphQL schema
 evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId, webhookId); evidence of missing authorization checks on mutation resolvers when using cross-tenant IDs
 verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session; POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}`; test mutations with cross-tenant IDs (AS vs EU vs NA apiId values)
 impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High

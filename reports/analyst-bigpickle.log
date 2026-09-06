@@ -6115,3 +6115,950 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth, CIAM tenants correct (confidential+PKCE, implicit disabled), businessid broker self-service falsified. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle added only read-only GETs on public OIDC metadata and endpoints; no customer/employee/auth data touched.
+===== ANALYST bigpickle 2026-09-06 11:26:44 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls -la && cat scope.yml 2>/dev/null | head -50
+total 244
+drwxr-xr-x 12 runner runner  4096 Sep  6 11:20 .
+drwxr-xr-x  3 runner runner  4096 Sep  6 11:20 ..
+drwxr-xr-x  7 runner runner  4096 Sep  6 11:20 .git
+drwxr-xr-x  3 runner runner  4096 Sep  6 11:20 .github
+-rw-r--r--  1 runner runner  1715 Sep  6 11:20 README.md
+-rw-r--r--  1 runner runner    32 Sep  6 11:20 analyst-out.txt
+-rw-r--r--  1 runner runner 75303 Sep  6 11:20 analyst-prompt.txt
+-rw-r--r--  1 runner runner 71534 Sep  6 11:20 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 leads
+-rw-r--r--  1 runner runner  9886 Sep  6 11:20 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 reports
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  6 11:20 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 scripts
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 triage
+programs:
+  daimler-truck:
+    name: Daimler Truck Holding AG Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "All infrastructure, digital services, brands and subsidiaries operated by Daimler Truck Holding AG"
+        priority: In
+    out_of_scope:
+- "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+  passive_first: false          # deep-hunt agent: active probes allowed when scoped
+  max_requests_per_second: 1    # never hammer live infra
+  no_doom: true                 # no DoS/DDoS, no account-lockout attacks
+  account_creation: restricted  # only on test/sandbox assets, never live customer data
+  no_data_modification: true    # no writes/deletes on live customer data
+  no_pre_disclosure: true       # never disclose before program response
+  poc_required: true            # scanner output alone is REJECTED
+  redact_secrets_in_commits: true
+
+models:
+[0m
+I'll continue the investigation following the 8-step methodology. Let me check the current state and look for passive anomalies within scope.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls art/ 2>/dev/null; cat art/lead_bigpickle.txt 2>/dev/null | head -40; cat art/lead_nemotron3.txt 2>/dev/null | head -40
+(no output)
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat state_bigpickle.json; echo "---"; cat analyst-out.txt; echo "---LEADS---"; ls leads/; echo "---"; cat leads/*.txt 2>/dev/null | head -60
+{"phase": "POC", "target": "api"}---
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls -la && cat scope.yml 2>/dev/null | head -50
+total 244
+drwxr-xr-x 12 runner runner  4096 Sep  6 11:20 .
+drwxr-xr-x  3 runner runner  4096 Sep  6 11:20 ..
+drwxr-xr-x  7 runner runner  4096 Sep  6 11:20 .git
+drwxr-xr-x  3 runner runner  4096 Sep  6 11:20 .github
+-rw-r--r--  1 runner runner  1715 Sep  6 11:20 README.md
+-rw-r--r--  1 runner runner    32 Sep  6 11:20 analyst-out.txt
+-rw-r--r--  1 runner runner 75303 Sep  6 11:20 analyst-prompt.txt
+-rw-r--r--  1 runner runner 71534 Sep  6 11:20 ctx.txt
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 inventory
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 knowledge
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 leads
+-rw-r--r--  1 runner runner  9886 Sep  6 11:20 probe-results.md
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 recon-notes
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 reports
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 reposcan-raw
+-rw-r--r--  1 runner runner  3182 Sep  6 11:20 scope.yml
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 scripts
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_bigpickle.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_laguna.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_ling3.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_longcat.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_mimo.json
+-rw-r--r--  1 runner runner    33 Sep  6 11:20 state_nemotron3.json
+drwxr-xr-x  2 runner runner  4096 Sep  6 11:20 triage
+programs:
+  daimler-truck:
+    name: Daimler Truck Holding AG Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "All infrastructure, digital services, brands and subsidiaries operated by Daimler Truck Holding AG"
+        priority: In
+    out_of_scope:
+- "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+  passive_first: false          # deep-hunt agent: active probes allowed when scoped
+  max_requests_per_second: 1    # never hammer live infra
+  no_doom: true                 # no DoS/DDoS, no account-lockout attacks
+  account_creation: restricted  # only on test/sandbox assets, never live customer data
+  no_data_modification: true    # no writes/deletes on live customer data
+  no_pre_disclosure: true       # never disclose before program response
+  poc_required: true            # scanner output alone is REJECTED
+  redact_secrets_in_commits: true
+
+models:
+[0m
+I'll continue the investigation following the 8-step methodology. Let me check the current state and look for passive anomalies within scope.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls art/ 2>/dev/null; cat art/lead_bigpickle.txt 2>/dev/null | head -40; cat art/lead_nemotron3.txt 2>/dev/null | head -40
+(no output)
+[0m
+---LEADS---
+lead-bigpickle.md
+lead-laguna.md
+lead-ling3.md
+lead-longcat.md
+lead-mimo.md
+lead-nemotron3.md
+reposcan-daimler-truck.md
+---
+[0m
+Let me look at the current state files and leads.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls knowledge/ reports/ triage/ recon-notes/ scripts/ inventory/ 2>/dev/null
+inventory/:
+daimler-truck.md
+
+knowledge/:
+index.md
+
+recon-notes/:
+CORPUS-DAIMLER.md
+DEDICATED-DEEP.md
+DEEPER-FINDINGS.md
+LOCKDOWN-ASSESSMENT.md
+SCOPE-CONFIRMATION.md
+
+reports/:
+analyst-bigpickle.log
+analyst-laguna.log
+analyst-ling3.log
+analyst-longcat.log
+analyst-nemotron3.log
+hypotheses-bigpickle.txt
+hypotheses-laguna.txt
+hypotheses-ling3.txt
+hypotheses-longcat.txt
+hypotheses-nemotron3.txt
+hypotheses.md
+valid-bugs.md
+
+scripts/:
+sync-issues.py
+
+triage/:
+run-2026-09-02-21-28.md
+run-2026-09-02-23-32.md
+run-2026-09-03-01-24.md
+run-2026-09-03-06-26.md
+run-2026-09-03-11-40.md
+run-2026-09-03-15-10.md
+run-2026-09-03-18-41.md
+run-2026-09-03-21-29.md
+run-2026-09-03-23-30.md
+run-2026-09-04-01-18.md
+run-2026-09-04-05-58.md
+run-2026-09-04-10-36.md
+run-2026-09-04-14-31.md
+run-2026-09-04-17-46.md
+run-2026-09-04-20-01.md
+run-2026-09-04-22-12.md
+run-2026-09-05-00-07.md
+run-2026-09-05-04-31.md
+run-2026-09-05-08-33.md
+run-2026-09-05-12-00.md
+run-2026-09-05-14-47.md
+run-2026-09-05-16-59.md
+run-2026-09-05-18-48.md
+run-2026-09-05-20-48.md
+run-2026-09-05-22-27.md
+run-2026-09-06-00-11.md
+run-2026-09-06-04-41.md
+run-2026-09-06-09-05.md
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat reports/hypotheses-bigpickle.txt | tail -30; echo "===NEMO==="; cat reports/hypotheses-nemotron3.txt | tail -30
+verify_steps: AUTH_HELPED: ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` → read-only foreign-ID swap → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + accessSecret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 67
+reasoning: FRESH this cycle: ROW+NOAM share identical `iss` (tenant-level, 88f558f5.../v2.0/) and same client c387a5ab on the portal app; only differentiation is per-policy `acr` + BU-shape org claims (89 vs 102 claims ROW vs NOAM); schema scoping (Team.orgId, UserCatalogList.catalogs) is org-claim-based; jwks per-policy but iss/aud collision means backend can't distinguish BU from iss/aud alone
+evidence_needed: NOAM token accepted by ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] businessid-corporate-sso-chain-misconfig
+class: OATH
+asset: login.businessid-qa.daimlertruck.com
+confidence: 42
+reasoning: broker→ciam handoff is form_post to /oauth2/authresp with state carriable from ciam; signup journey absent (b2c_1a_signin only) so affiliation validation is server-side; this cycle bare-path metadata on businessid-qa returns 404 (vs 200 prior), so anonymous broker OIDC/JWKS surface can no longer be passively re-verified — drops confidence below the 45 floor; only the two-hop nonce/state integrity check remains testable, requires a live code capture
+evidence_needed: ciam accepting a code minted under a different broker policy/flow, or NextAuth callback accepting tampered state/nonce
+verify_steps: AUTH_HELPED: full ROW login (staging) capturing code at ciam authresp; repeat broker authorize with response_mode=query vs form_post + alternate `p`; confirm NextAuth callback rejects tampered state/nonce
+impact: employee-SSO session confusion across broker hops; ATO of DT employees if integrity fails; Severity: high (conditional)
+testability: AUTH_HELPED
+[PARKED] businessid-corporate-sso-chain-misconfig: confidence 42 < 45 floor this cycle (broker anonymous metadata 404, cannot independently re-verify); also chained on full-journey code capture — keep dormant, no re-rank.
+[PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof (accessSecret/password resolvers) — re-promote only once hypothesis #1 reads a foreign subscription.
+[PARKED] apim-anonymous-op-exposure / implicit-flow chains / nextauth-open-redirect: falsified prior cycles, do not re-rank; valid-bugs.md stale "VALID" verdict contradicted by 4+ KB rejections.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67, +3 after fresh same-issuer proof)
+[NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6 `b2c_1a_signin`, full GUIDs supplied) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na.api.daimlertruck.com; complete login manually (authorize → broker → form_post authresp → NextAuth callback, PKCE S256); then AUTH_HELPED POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` on-org baseline → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row/noam tokens; capture broker-hop code+state to validate two-hop integrity.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM policies share tenant-level issuer + same portal client c387a5ab; only acr + org-shape claims differentiate BU — same-issuer collision confirmed anonymously this cycle.
+[LEARN] UNRESOLVED broker-oidc-surface @ login.businessid-qa.daimlertruck.com: bare / + well-known paths now 404 len=103 vs prior 200 metadata; full tenant GUID unknown so path-uncertainty, not a confirmed regression — do not claim change.
+[LEARN] REJECTED nextauth-broken-auth-flow / nextauth-callback-open-redirect @ developer.*: PKCE S256 + state + same-origin redirect_uri enforced; callbackUrl same-domain only, subdomains rejected — prior rejections stand; valid-bugs.md stale verdict to be cleaned.
+[RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth, CIAM tenants correct (confidential+PKCE, implicit disabled), businessid broker self-service falsified. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle added only read-only GETs on public OIDC metadata and endpoints; no customer/employee/auth data touched.
+===NEMO===
+evidence_needed: Valid B2C token from one tenant (e.g., ROW) accepted by API resolver in different tenant (e.g., NA) without claim validation; evidence that acr/org claims are not checked on object-ID routes
+verify_steps: AUTH_HELPED: Obtain valid ROW token (azure-ad-b2c-dt provider); replay token against NA-scoped endpoint (developer.na.api.daimlertruck.com/apis/<na-apiId>); test with NA token (azure-ad-b2c-dtna) against ROW endpoint
+impact: Cross-business-unit API access, subscription data leakage, tenant isolation bypass → High
+testability: AUTH_HELPED
+[PARKED] CIAM Secret Return in Plaintext — AccessSecret/Password Fields in GraphQL Resolvers: confidence 65 but evidence relies on client bundle analysis not yet verified against live resolvers; requires valid B2C session + authenticated introspection; speculative without direct schema confirmation — keep for post-auth phase
+[FINAL] 1. GraphQL Mutation BOLA Across Tenant Boundaries (75)
+[FINAL] 2. Object-ID REST Routes BOLA/IDOR on Tenant-Scoped Resources (70)
+[FINAL] 3. B2C Cross-Tenant Token Boundary Bypass via Shared Issuer/Audience (65)
+[NEXT] PROBE: POST https://developer.as.api.daimlertruck.com/graphql with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}` — verify real GraphQL endpoint responds with schema (not SPA shell) and confirm 307 redirect behavior vs introspection response; this resolves the GET-vs-POST discrepancy in current probe results.
+[LEARN] ACCEPTED graphql-behind-azure-ad-b2c: /graphql and /api/graphql return 307 to Azure AD B2C on all 6 portals — real GraphQL endpoint behind auth confirmed
+[LEARN] ACCEPTED nextauth-endpoints-exposed: /api/auth/csrf, /api/auth/session, /api/auth/providers, /api/auth/signin/* accessible without auth on all 6 developer portals — NextAuth.js attack surface confirmed
+[LEARN] ACCEPTED test-dev-portal-config-drift: Distinct build IDs (prod JCvrnrykV_KYBk7pu0Npq vs test/dev JVF_tXHlhCfZQOkT-cULr) — separate deployments with potential config differences
+[LEARN] ACCEPTED buildmanifest-route-reveals-authz-surface: buildManifest shows object-ID routes (/apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) — high-value BOLA probing surface post-auth
+[LEARN] ACCEPTED /api/healthcheck-live: 200 JSON with uptime on both prod and test — real server route; informational only (not a vuln alone)
+[LEARN] REJECTED developer-portal-graphql-introspection: SPA catch-all returns HTTP 200 for all paths — OVERRULED: /graphql now returns 307, real endpoint behind auth
+[LEARN] REJECTED developer-portal-exposed-swagger: SPA catch-all returns HTTP 200 for /swagger.json, /api-docs — false positive
+[LEARN] REJECTED nextauth-callback-open-redirect: callbackUrl parameter validated to same-domain only; external domains rejected and replaced with current origin; subdomains rejected — not an open redirect
+[LEARN] REJECTED nextauth-broken-auth-flow: POST /api/auth/signin/azure-ad-b2c-dt with valid CSRF returns 302 to Azure AD B2C authorize endpoint with PKCE S256, state, and same-origin redirect_uri — auth flow works correctly on all 6 portals
+[LEARN] REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test are intentional env segregation, not a defect
+[LEARN] REJECTED OAuth misconfig @ authz.*: 7 authz subdomains all return 404 on root and well-known endpoints — no OAuth surface exposed
+[LEARN] REJECTED Admin panel discovery @ capacitor-admin.*: 6 subdomains all return 000 (connection failed) — no live HTTP surface to assess
+[LEARN] REJECTED network DoS @ all assets: program explicitly excludes DoS/DDoS and account-lockout
+[LEARN] REJECTED SSL/TLS best practices @ www.daimlertruck.com: out of scope per policy
+[LEARN] REJECTED Clickjacking @ www.daimlertruck.com: requires demonstrated exploit per policy
+[LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQL ops with these IDs
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
+[LEARN] ACCEPTED ciam-secret-return-in-plaintext: client bundle indicates accessSecret and password fields returned by resolvers
+[LEARN] ACCEPTED portal-blanket-auth-middleware: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery on portals exhausted; only /api/healthcheck public
+[LEARN] ACCEPTED businessid-broker-surface: login.businessid(.qa).daimlertruck.com DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 82559bb7 / a43f98c7, IdP corptbbid.onmicrosoft.com) behind CIAM ROW flow; OIDC+JWKS public; highest-sensitivity identity surface
+[RISK] daimler-truck: 74 — 6 live developer portals with GraphQL + object-ID REST routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) behind Azure AD B2C; NextAuth.js callbackUrl validation prevents open redirect but auth flow works correctly; "single source of truth for APIs" implies high-value mutation surface post-auth; 2 distinct build IDs confirm separate deployments with config drift risk (CSP divergence, literal "undefined" in test CSP); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk (/apis/ vs /apis) masks real endpoints; capacitor-admin and authz surfaces remain dark (000/404); B2C cross-tenant token boundary relies solely on acr/org claim validation; companion.app.daimlertruck.com NXDOMAIN in prod CSP frame-src indicates dead reference
+[0m
+Let me read the hypotheses files and the latest analysis to understand the current state and what's been done.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat reports/valid-bugs.md; echo "===LATEST TRIAGE==="; cat triage/run-2026-09-06-09-05.md
+# Validated findings (running count 0)
+
+- 2 lead(s) marked VALID at 2026-09-04 20:01:12 UTC
+  - **Verdict: VALID**
+  - | NextAuth.js Open Redirect | **VALID** | 6.1 | Report to bugs.olivermaicher.eu |
+
+- 3 lead(s) marked VALID at 2026-09-06 09:05:03 UTC
+  - | Q2 Attacker reachable? | **NO** — requires valid Azure AD B2C session (307 redirect confirmed) |
+  - **Verdict: HOLD** — Requires AUTH_HELPED (valid B2C test account) to confirm. Cannot verify without authentication.
+  - | Q2 Attacker reachable? | **NO** — requires valid session (307 redirect confirmed) |
+===LATEST TRIAGE===
+
+===== TRIAGE 2026-09-06 09:05:03 UTC =====
+[0m
+> build · mimo-v2.5-free
+[0m
+[0m• [0mExplore workspace structure[90m Explore Agent[0m
+[0m✓ [0mExplore workspace structure[90m Explore Agent[0m
+[0m→ [0mRead triage-prompt.txt
+[0m→ [0mRead probe-results.md
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead leads/lead-nemotron3.md
+[0m→ [0mRead leads/reposcan-daimler-truck.md
+[0m→ [0mRead leads/lead-bigpickle.md[90m [offset=479][0m
+[0m→ [0mRead leads/lead-nemotron3.md[90m [offset=361][0m
+[0m→ [0mRead knowledge/index.md
+[0m→ [0mRead reports/valid-bugs.md
+Based on my analysis of the workspace, I can see the triage prompt template ends with "LEADS:" but no leads were provided in your message. However, I have access to all existing leads from the hunt bot files. Let me triage the consolidated unique hypotheses using the 7-Question Gate.
+
+---
+
+## TRIAGE REPORT — Daimler Truck Holding AG Bug Bounty
+
+### LEAD 1: GraphQL Mutation BOLA via Tenant-Scoped Mutations
+**Asset:** `developer.{as,eu,na}.api.daimlertruck.com` /graphql
+**Confidence:** 75 | **Testability:** AUTH_HELPED
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **YES** — `developer.*.api.daimlertruck.com` in scope.yml + inventory |
+| Q2 Attacker reachable? | **NO** — requires valid Azure AD B2C session (307 redirect confirmed) |
+| Q3 Real impact? | **YES** — cross-tenant API subscription takeover, key rotation, webhook hijacking → Critical |
+| Q4 Provable non-invasively? | **YES** — GraphQL introspection is read-only; mutation testing with own account is authorized |
+| Q5 Novel? | **YES** — buildManifest reveals `/apis/[apiId]`, `/subscriptions/[subscriptionId]`, `/teams/[teamId]` object-ID routes; two separate B2C tenants (ROW/NOAM) under same issuer |
+| Q6 Not always-rejected? | **YES** — not on DoS, SSL/TLS, clickjacking list |
+| Q7 Reasonable triager? | **YES** — high-value post-auth finding with clear exploitation path |
+
+**Verdict: HOLD** — Requires AUTH_HELPED (valid B2C test account) to confirm. Cannot verify without authentication.
+
+**Minimal proof steps (if AUTH_HELPED available):**
+1. Obtain valid session on developer.as.api.daimlertruck.com
+2. POST /graphql with `{"query":"{__schema{types{name,fields{name,args{name,type}}}}}"}` 
+3. Test mutations with cross-tenant IDs (AS→EU→NA)
+
+**Impact:** Critical — cross-tenant data access, subscription takeover
+**CVSS 3.1:** 8.8 (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H)
+**Channel:** bugs.olivermaicher.eu
+
+---
+
+### LEAD 2: Object-ID Routes BOLA/IDOR on Tenant-Scoped Resources
+**Asset:** `developer.tst.na.api.daimlertruck.com`
+**Confidence:** 70 | **Testability:** AUTH_HELPED
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **YES** — in inventory |
+| Q2 Attacker reachable? | **NO** — requires valid session (307 redirect confirmed) |
+| Q3 Real impact? | **YES** — cross-tenant API catalog enumeration, subscription takeover |
+| Q4 Provable non-invasively? | **YES** — read-only GET with own session |
+| Q5 Novel? | **YES** — buildManifest confirms object-ID routes behind auth |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **YES** — strong post-auth BOLA candidate |
+
+**Verdict: HOLD** — Same AUTH_HELPED requirement as Lead 1.
+
+---
+
+### LEAD 3: B2C Cross-BU Token Boundary
+**Asset:** `login-qa.ciam.daimlertruck.com`
+**Confidence:** ACCEPTED | **Testability:** PASSIVE (confirmed)
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **YES** — CIAM infrastructure |
+| Q2 Attacker reachable? | **YES** — OIDC metadata publicly accessible |
+| Q3 Real impact? | **MEDIUM** — same-issuer collision between ROW/NOAM BU tokens |
+| Q4 Provable non-invasively? | **YES** — OIDC metadata and JWKS publicly queryable |
+| Q5 Novel? | **YES** — confirmed same issuer/aud for both B2C tenants |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **YES** — but impact depends on acr/org claim validation |
+
+**Verdict: HOLD** — Needs authenticated verification to confirm BU separation relies on acr/org claims (not token audience).
+
+---
+
+### LEAD 4: CIAM Secret Return in Plaintext (Reposcan)
+**Asset:** `SRC-rag_api` (public GitHub repo)
+**Confidence:** 85 | **Testability:** PASSIVE
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **NO** — public GitHub source code, not deployed infrastructure |
+| Q2 Attacker reachable? | **YES** — public repo |
+| Q3 Real impact? | **YES** — if key reused in prod, full MeiliSearch admin access |
+| Q4 Provable non-invasively? | **YES** — source code inspection only |
+| Q5 Novel? | **YES** — not previously reported |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **YES** — but scope question is critical |
+
+**Verdict: HOLD** — Source code findings may be out-of-scope unless the deployed instance uses the same key. Need to verify against live MeiliSearch on port 7700.
+
+---
+
+### LEAD 5: Hardcoded MeiliSearch Master Key (Reposcan)
+**Asset:** `SRC-LibreChat/.devcontainer/docker-compose.yml`
+**Confidence:** 85 | **Testability:** PASSIVE
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **NO** — devcontainer config in public repo, not production |
+| Q2 Attacker reachable? | **YES** — public repo |
+| Q3 Real impact? | **YES** — if key reused in prod |
+| Q4 Provable non-invasively? | **YES** — source code inspection |
+| Q5 Novel? | **YES** |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **NO** — devcontainer configs are not production; finding is informational |
+
+**Verdict: INVALID** — DevContainer config is not production infrastructure. Key reuse in prod is speculative without evidence.
+
+---
+
+### LEAD 6: RAG API Wildcard CORS with Credentials (Reposcan)
+**Asset:** `SRC-rag_api/main.py:76`
+**Confidence:** 80 | **Testability:** PASSIVE
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **MAYBE** — if RAG API deployed on *.api.daimlertruck.com |
+| Q2 Attacker reachable? | **UNKNOWN** — need to verify live deployment |
+| Q3 Real impact? | **YES** — cross-origin data exfiltration from AI endpoints |
+| Q4 Provable non-invasively? | **YES** — CORS header observation |
+| Q5 Novel? | **YES** |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **YES** — but only if deployed |
+
+**Verdict: HOLD** — Need to verify if RAG API is deployed on any *.api.daimlertruck.com subdomain. Passively check CORS headers.
+
+---
+
+### LEAD 7: LibreChat MongoDB Default Credentials (Reposcan)
+**Asset:** `SRC-LibreChat/docker-compose.yml:63`
+**Confidence:** 90 | **Testability:** PASSIVE
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **MAYBE** — if LibreChat deployed internally |
+| Q2 Attacker reachable? | **UNKNOWN** — need to verify deployment |
+| Q3 Real impact? | **YES** — unauth access to MongoDB with user data |
+| Q4 Provable non-invasively? | **YES** — if MongoDB port exposed |
+| Q5 Novel? | **YES** |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **YES** — but only if deployed |
+
+**Verdict: HOLD** — Need to verify LibreChat deployment on *.daimlertruck.com. Check MongoDB port exposure.
+
+---
+
+### LEAD 8: RAG API Auth Middleware Bypass (Reposcan)
+**Asset:** `SRC-rag_api/app/middleware.py:18-22`
+**Confidence:** 85 | **Testability:** PASSIVE
+
+| Q | Answer |
+|---|--------|
+| Q1 In scope? | **MAYBE** — if RAG API deployed |
+| Q2 Attacker reachable? | **UNKNOWN** |
+| Q3 Real impact? | **YES** — unauthenticated access to all RAG endpoints |
+| Q4 Provable non-invasively? | **YES** — HTTP request observation |
+| Q5 Novel? | **YES** |
+| Q6 Not always-rejected? | **YES** |
+| Q7 Reasonable triager? | **YES** — but only if deployed |
+
+**Verdict: HOLD** — Same as Lead 6/7. Requires live verification.
+
+---
+
+## SUMMARY
+
+| Lead | Verdict | Blocker |
+|------|---------|---------|
+| GraphQL Mutation BOLA | **HOLD** | AUTH_HELPED required |
+| Object-ID Routes BOLA | **HOLD** | AUTH_HELPED required |
+| B2C Cross-BU Token Boundary | **HOLD** | Authenticated BU claim verification needed |
+| CIAM Secret Return | **HOLD** | Verify against live deployment |
+| MeiliSearch Hardcoded Key | **INVALID** | DevContainer, not production |
+| RAG API CORS | **HOLD** | Verify live deployment |
+| LibreChat MongoDB | **HOLD** | Verify live deployment |
+| RAG API Auth Middleware | **HOLD** | Verify live deployment |
+
+**No VALID findings.** All actionable leads require either AUTH_HELPED accounts or live deployment verification that cannot be completed passively. The reposcan findings are high-confidence but exist in public source code repos, not confirmed deployed infrastructure.
+
+**Recommended next steps:**
+1. Obtain 2 Azure AD B2C test accounts (ROW + NOAM policies) to verify GraphQL BOLA
+2. Passively check `*.api.daimlertruck.com:7700` for MeiliSearch exposure
+3. Passively check CORS headers on any live RAG API endpoints
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat leads/reposcan-daimler-truck.md
+## REPOSCAN 2026-09-03 16:58:15 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-03 19:43:03 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-03 22:24:07 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 00:32:29 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 05:04:56 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 09:45:08 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 14:08:31 UTC
+[HYP] Hardcoded MeiliSearch Master Key in DevContainer Config
+class: SECRET
+asset: daimlertruck/SRC-LibreChat/.devcontainer/docker-compose.yml:60
+confidence: 85
+reasoning: Real SHA-256 hex key `5c71cf56d672d009e36070b5bc5e47b743535ae55c818ae3b735bb6ebfb4ba63` hardcoded in devcontainer. Devcontainer configs are frequently copy-pasted into production docker-compose. MeiliSearch master key grants full search index read/write/admin access. Daimler Truck's developer.*.api.daimlertruck.com portals likely use search infrastructure.
+impact: High – admin access to MeiliSearch instance if key reused in prod; data exfil or index poisoning
+verify_steps: 1) Check if any production docker-compose/deploy-compose files reference this same key or value. 2) Passively check if any *.api.daimlertruck.com or internal subdomain exposes MeiliSearch on port 7700 or /indexes endpoint.
+[HYP] Wildcard CORS with Credentials on RAG API
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:76
+confidence: 80
+reasoning: `allow_origins=["*"]` combined with `allow_credentials=True` violates the CORS spec (browsers reject this combo) but signals intent to allow all origins. If the middleware is misconfigured or overridden, this enables CSRF/exfil against authenticated users. RAG API is AI infrastructure – likely used by Daimler Truck's developer portal or internal AI tooling.
+impact: Medium – potential for cross-origin data theft if CORS enforcement is bypassed; credential leakage from AI search/RAG endpoints
+verify_steps: 1) Check if RAG API is deployed on any *.api.daimlertruck.com subdomain. 2) Passively observe CORS headers on live endpoints.
+[HYP] Default Database Credentials in RAG API Config
+class: SECRET
+asset: daimlertruck/SRC-rag_api/app/config.py:57-58
+confidence: 65
+reasoning: `POSTGRES_USER = "myuser"` and `POSTGRES_PASSWORD = "mypassword"` are default values if env vars are unset. If deployment omits these env vars (common in quick-start setups), the database is accessible with known credentials. RAG API stores vector embeddings and document chunks – sensitive corporate data.
+impact: Medium – unauthorized access to vector database containing corporate document embeddings if defaults are used in production
+verify_steps: 1) Check if the RAG API docker-compose or k8s manifest properly sets POSTGRES_PASSWORD. 2) Passively check if the database port (5432) is exposed on any daimlertruck.com subdomain.
+[HYP] Unrestricted Default CORS on LibreChat API
+class: MISCONFIG
+asset: daimlertruck/SRC-LibreChat/api/server/index.js:322
+confidence: 55
+reasoning: `app.use(cors())` with no origin restrictions means all origins are allowed. LibreChat API handles authentication (JWT, OpenID Connect), chat sessions, and AI model API keys. If this instance is deployed internally, any malicious webpage visited by an employee could exfiltrate session tokens or chat data via cross-origin requests.
+impact: Medium – session hijacking, chat data exfiltration via CSRF from any origin if deployed without additional reverse-proxy CORS
+verify_steps: 1) Check if LibreChat is deployed on any *.daimlertruck.com domain or internal network. 2) Passively observe if Access-Control-Allow-Origin header reflects requesting origin.
+[HYP] Conditional Debug Route Exposure in RAG API
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:93-94
+confidence: 50
+reasoning: `if debug_mode: app.include_router(router=pgvector_routes.router)` – pgvector admin routes (likely CRUD on vector collections) are exposed when `DEBUG_RAG_API=True`. The config reads from env var, but if set in production (e.g., during troubleshooting and left on), it exposes administrative vector DB routes.
+impact: Medium – admin-level access to vector database management if debug mode accidentally enabled in production
+verify_steps: 1) Check if any production deployment has DEBUG_RAG_API=true. 2) Passively check if pgvector admin endpoints respond on the live RAG API.
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 17:39:36 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 19:55:05 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-04 22:17:48 UTC
+class: SECRET
+asset: SRC-rag_api/docker-compose.yaml:5-7, SRC-rag_api/db-compose.yaml:7-9,
+confidence: 85
+reasoning: |
+impact: HIGH — database compromise leads to exfiltration of RAG-indexed
+verify_steps: |
+class: MISCONFIG
+asset: SRC-LibreChat/docker-compose.yml:63, SRC-LibreChat/deploy-compose.yml:80,
+confidence: 90
+reasoning: |
+impact: HIGH — unauthenticated access to MongoDB containing user data,
+verify_steps: |
+class: MISCONFIG
+asset: SRC-rag_api/main.py:76-79
+confidence: 80
+reasoning: |
+impact: MEDIUM — enables cross-origin data exfiltration from RAG endpoints
+verify_steps: |
+class: MISCONFIG
+asset: SRC-rag_api/app/middleware.py:18-22
+confidence: 85
+reasoning: |
+impact: HIGH — unauthenticated access to all RAG API endpoints including
+verify_steps: |
+class: OTHER
+asset: SRC-rag_api/main.py:93, SRC-rag_api/app/routes/pgvector_routes.py:1-70
+confidence: 75
+reasoning: |
+impact: MEDIUM — full database schema enumeration and data dump if debug
+verify_steps: |
+class: MISCONFIG
+asset: SRC-openai-aca-lb/src/appsettings.json:8
+confidence: 60
+reasoning: |
+impact: LOW — host-header injection possible if behind a reverse proxy;
+verify_steps: |
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 00:11:34 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 04:39:12 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 08:37:07 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 12:06:10 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 15:20:30 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 17:36:53 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 19:29:42 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 21:41:35 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-05 23:37:21 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-06 01:20:13 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-06 06:07:59 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-06 11:09:12 UTC
+class: SECRET
+asset: `daimlertruck/SRC-rag_api/app/config.py:59`
+confidence: 90
+reasoning: `POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD", "mypassword")` — if the env var is unset, the RAG API connects to PostgreSQL with the hardcoded password `mypassword`. The username `myuser` and database `mydatabase` follow the same pattern (lines 58-59).
+impact: HIGH — Default credentials on a database holding document embeddings could allow unauthorized data access if deployed without overriding env vars.
+verify_steps: Check whether any live deployment of `SRC-rag_api` omits `POSTGRES_PASSWORD` from its environment. If the container starts and connects to a real Postgres instance with `mypassword`, the finding is confirmed.
+class: MISCONFIG
+asset: `daimlertruck/SRC-rag_api/app/middleware.py:18-21`
+confidence: 85
+reasoning: When `JWT_SECRET` is unset, the middleware logs a warning and calls `next_middleware_call()` without validating any token. Every protected endpoint becomes unauthenticated.
+impact: HIGH — If deployed without `JWT_SECRET`, the RAG API is fully open. An attacker can access all document endpoints without credentials.
+verify_steps: Deploy SRC-rag_api without setting `JWT_SECRET`. Confirm that requests to `/documents` etc. return 200 without a valid bearer token.
+class: MISCONFIG
+asset: `daimlertruck/SRC-rag_api/main.py:72-77`
+confidence: 80
+reasoning: `allow_origins=["*"]` combined with `allow_credentials=True` allows any origin to make credentialed cross-origin requests to the API. This is a textbook CORS misconfiguration.
+impact: MEDIUM — Enables CSRF-like attacks against authenticated endpoints if the API uses cookie-based auth. Combined with finding #2, any origin can access the open API.
+verify_steps: Send an `Origin: https://evil.com` request with `credentials: include` to an authenticated endpoint. If the response includes `Access-Control-Allow-Origin: https://evil.com` and `Access-Control-Allow-Credentials: true`, the finding is confirmed.
+class: MISCONFIG
+asset: `daimlertruck/SRC-openai-aca-lb/infra/core/database/sql/sql-server.bicep` (firewall resource)
+confidence: 75
+reasoning: The SQL Server firewall rule is defined with `startIpAddress: '0.0.0.1'` and `endIpAddress: '255.255.255.254'`, allowing connections from any public IP. The comment notes this is for "debugging purposes" but the template is committed as-is.
+impact: MEDIUM — If deployed to a real Azure subscription, the SQL Server is exposed to the entire internet. The `@secure()` parameter for the password is correct, but the network perimeter is wide open.
+verify_steps: Deploy the Bicep template and inspect the SQL Server's firewall rules in the Azure portal. Confirm the rule covers `0.0.0.1-255.255.255.254`.
+class: MISCONFIG
+asset: `daimlertruck/SRC-openai-aca-lb/infra/core/host/container-registry.bicep:24`
+confidence: 60
+reasoning: `publicNetworkAccess string = 'Enabled'` is the default. Combined with the SQL firewall above, this defaults to a posture where container images and the database are both publicly reachable.
+impact: LOW — Standard for dev/test templates. `adminUserEnabled` and `anonymousPullEnabled` default to false, so the direct risk is limited.
+verify_steps: Deploy and verify the ACR's public network access setting in the Azure portal.
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+[0m
+I have a comprehensive picture. The reposcan findings about RAG API / LibreChat are interesting new leads that haven't been deeply pursued — they relate to source code repos (SRC-rag_api, SRC-LibreChat). Let me examine these reposcan leads more since they represent a potentially new surface within scope.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls reposcan-raw/ && cat reposcan-raw/*.md 2>/dev/null | head -80
+summary.txt
+[0m
+[0m$ [0mcd /tmp/opencode && ls 2>/dev/null | head; echo "---"; cat /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/reposcan-raw/summary.txt 2>/dev/null | head -60
+---
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+[0m
+The reposcan findings are about public GitHub repos (`daimlertruck/SRC-rag_api`, `SRC-LibreChat`, `SRC-openai-aca-lb`). These reference the `daimlertruck` GitHub org. Let me check if those repos actually exist and whether the code is genuinely Daimler's — this is a potentially significant new surface. Let me verify the repos exist and look at the actual source.
+[0m% [0mWebFetch https://api.github.com/orgs/daimlertruck
+The `daimlertruck` GitHub org is real and verified ("Daimler Truck AG"). It has 6 public repos. The reposcan findings reference `SRC-rag_api`, `SRC-LibreChat`, `SRC-openai-aca-lb`. Let me verify these repos exist in the org and check for live deployments. This is a genuinely in-scope surface (operated by Daimler Truck) that has not been deeply explored yet. Let me list the repos.
+[0m% [0mWebFetch https://api.github.com/orgs/daimlertruck/repos?per_page=100
+[0m% [0mWebFetch https://raw.githubusercontent.com/daimlertruck/SRC-rag_api/main/app/middleware.py
+Confirmed: the `daimlertruck` GitHub org (verified "Daimler Truck AG") hosts 6 public repos, and this is explicitly in-scope ("digital services, brands and subsidiaries operated by Daimler Truck Holding AG"). The repos `SRC-rag_api`, `SRC-LibreChat`, `SRC-librechat-prom-exporter`, and `SRC-meilisearch` are all forks of upstream OSS (LibreChat, RAG FastAPI, MeiliSearch). 
+
+Key insight: these are **forks** (all `"fork": true`). The finding that Daimler vendors/forks these into their org and the Nov 2024 fork date (2024-11-28) indicates they are actively standing up a corporate AI/chat stack (LibreChat + RAG API + MeiliSearch + Prom exporter + ACA load balancer). The developer portal uses this stack ("TruckAPI | API Hub"). 
+
+The reposcan hypotheses are real code-level findings (default credentials `mypassword`, `allow_origins=["*"]`, `JWT_SECRET` unset bypass). The critical question is **deployment**: are these RAG/LibreChat/MeiliSearch services actually reachable on the live inventory? Let me check the SRC-rag_api code for deployment hints and the developer portal for any reference to this AI stack. Let me look at the actual source code and probe for live deployment of these services.
+
+Let me check the RAG API source and whether these services are reachable on scoped hosts. First, let me examine the actual code in the repos, and probe live hosts for the RAG/MeiliSearch surface.
+[0m% [0mWebFetch https://raw.githubusercontent.com/daimlertruck/SRC-rag_api/main/main.py
+These are real code-level findings in Daimler's own org. But the crucial gate is **live deployment** — is the RAG API actually reachable on a scoped *.daimlertruck.com host? The RAG API exposes `/docs`, `/openapi.json`, `/health` publicly (whitelisted in the middleware regardless of auth). And the whole API is open if `JWT_SECRET` is unset.
+
+Let me check the developer portal's client bundle to see if it references this RAG/AI stack (e.g., an AI assistant endpoint), and probe scoped hosts for the RAG API surface. First let me examine what the developer portal actually references. Let me check the portal's JS bundle for any AI/RAG/chat endpoints.
+
+The key question: is there a live deployment? Let me probe carefully (GET, <=1rps) on the scoped hosts for telltale RAG API endpoints (`/health`, `/openapi.json`, `/docs`) and MeiliSearch (`/indexes`, port 7700). But the RAG API whitelists `/docs`, `/openapi.json`, `/health` — meaning even if deployed *behind* the portal's blanket auth middleware, those specific paths could leak. Let me first confirm the portal is the same Next.js app and check what API endpoints it calls. Let me examine the portal client bundle.
+
+Let me look at the latest analysis of what endpoints the portal calls and whether the RAG API is integrated.
+[0m
+[0m$ [0mcd /tmp/opencode && curl -s -L --max-time 20 "https://developer.as.api.daimlertruck.com/_next/static/JCvrnrykV_KYBk7pu0Npq/_buildManifest.js" -o bm.js 2>/dev/null; wc -c bm.js 2>/dev/null; echo "---HEALTH---"; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 "https://developer.as.api.daimlertruck.com/health"; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 "https://developer.as.api.daimlertruck.com/openapi.json"; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 "https://developer.as.api.daimlertruck.com/docs"
+2999 bm.js
+---HEALTH---
+307 23
+307 29
+307 21
+[0m
+[0m$ [0mcd /tmp/opencode && for h in developer.as.api developer.tst.na.api dev.na.api; do echo "=== $h ==="; timeout 15 curl -s -o /dev/null -w "%{http_code} %{size_download} loc:%{redirect_url}\n" "https://$h.daimlertruck.com/api/rag"; sleep 1; done
+=== developer.as.api ===
+307 26 loc:https://developer.as.api.daimlertruck.com/?callbackUrl=%2Fapi%2Frag
+=== developer.tst.na.api ===
+307 26 loc:https://developer.tst.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Frag
+=== dev.na.api ===
+404 442 loc:
+[0m
+The portal's blanket auth middleware returns 307 for `/api/rag` too, and `/health`, `/openapi.json`, `/docs` on the portal all return 307 (auth protected) — so the RAG API is NOT deployed on the developer portal hosts themselves. The RAG API would be a separate service.
+
+Let me search the portal client bundle for AI/RAG/chat references to determine what backend service the portal calls, and whether there's a separate RAG/LibreChat deployment host. Let me get the portal JS bundle and grep it.
+[0m$ [0mcd /tmp/opencode && timeout 30 curl -s -L --max-time 25 "https://developer.as.api.daimlertruck.com" -o portal.html 2>/dev/null; wc -c portal.html; grep -oE '/_next/static/[^"]*\.js' portal.html | sort -u | head -40
+196649 portal.html
+/_next/static/JCvrnrykV_KYBk7pu0Npq/_buildManifest.js
+/_next/static/JCvrnrykV_KYBk7pu0Npq/_clientMiddlewareManifest.js
+/_next/static/JCvrnrykV_KYBk7pu0Npq/_ssgManifest.js
+/_next/static/chunks/0mx-myaaq4s7h.js
+/_next/static/chunks/0qxdtaywcjipf.js
+/_next/static/chunks/0w-qqtuzq6y8-.js
+/_next/static/chunks/1d8dyizehftn2.js
+/_next/static/chunks/1jri6hbjnia5s.js
+/_next/static/chunks/1xk6m7rn4oq2i.js
+/_next/static/chunks/234fu09v95p7y.js
+/_next/static/chunks/2fhdliwvke743.js
+/_next/static/chunks/2l42crwecbmyh.js
+/_next/static/chunks/2n7g2qwa7m79h.js
+/_next/static/chunks/35ltm6wzma54k.js
+/_next/static/chunks/3_3denz40x4zz.js
+/_next/static/chunks/3gmmea5-vr1oz.js
+/_next/static/chunks/turbopack-1a3t4qjc3wsbh.js
+/_next/static/chunks/turbopack-3_bunzo10oc_f.js
+[0m
+Let me download the main app bundle chunks and grep for RAG/AI/LibreChat/MeiliSearch/api endpoint references to understand the backend services the portal integrates with.
+[0m$ [0mcd /tmp/opencode && mkdir -p chunks && for c in 0mx-myaaq4s7h 0qxdtaywcjipf 1d8dyizehftn2 234fu09v95p7y; do timeout 20 curl -s --max-time 18 "https://developer.as.api.daimlertruck.com/_next/static/chunks/$c.js" -o "chunks/$c.js" 2>/dev/null; done; ls -la chunks/; grep -olE 'rag|RAG|librechat|LibreChat|meili|Meili' chunks/*.js 2>/dev/null
+total 8132
+drwxr-xr-x 2 runner runner    4096 Sep  6 11:21 .
+drwxr-xr-x 3 runner runner    4096 Sep  6 11:21 ..
+-rw-r--r-- 1 runner runner 8038262 Sep  6 11:21 0mx-myaaq4s7h.js
+-rw-r--r-- 1 runner runner   36086 Sep  6 11:21 0qxdtaywcjipf.js
+-rw-r--r-- 1 runner runner   37438 Sep  6 11:21 1d8dyizehftn2.js
+-rw-r--r-- 1 runner runner  197186 Sep  6 11:21 234fu09v95p7y.js
+chunks/0mx-myaaq4s7h.js
+chunks/0qxdtaywcjipf.js
+chunks/1d8dyizehftn2.js
+chunks/234fu09v95p7y.js
+[0m
+The main app bundle (8MB) contains references to rag/meili keywords. Let me grep the largest bundle for endpoint URLs and AI/RAG service references.
+[0m$ [0mcd /tmp/opencode/chunks && grep -oE 'https?://[a-zA-Z0-9._-]+\.daimlertruck\.com[^"]*' 0mx-myaaq4s7h.js 2>/dev/null | sort -u | head -40; echo "===RAG/meili mentions==="; grep -oiE '.{40}(rag|meili|librechat).{40}' 0mx-myaaq4s7h.js 2>/dev/null | head -20
+===RAG/meili mentions===
+t.maybe)(function(){return navigator.userAgent.indexOf("jsdom")>=0})||!1,l=(A||n)&&
+t.portal"):60106,a=r?Symbol.for("react.fragment"):60107,A=r?Symbol.for("react.stric
+rovider=l,n.Element=i,n.ForwardRef=d,n.Fragment=a,n.Lazy=b,n.Memo=p,n.Portal=o,n.Pr
+rdRef=function(e){return E(e)===d},n.isFragment=function(e){return E(e)===a},n.isLa
+=r,u.className=c,(0,t.createElement)(t.Fragment,null,(0,t.createElement)(y,{cache:n
+n(d);return a=!0,(0,t.createElement)(t.Fragment,null,(0,t.createElement)(u,{cache:o
+on(t){function n(t){try{if(!e.g.localStorage)return!1}catch(e){return!1}var n=e.g.l
+,n)=>{function r(t){try{if(!e.g.localStorage)return!1}catch(e){return!1}var n=e.g.l
+bFonts:t=[],children:n})=>(0,D.jsxs)(D.Fragment,{children:[(0,D.jsx)(v.Global,{styl
+Picture|disableRemotePlayback|download|draggable|encType|enterKeyHint|fetchpriority
+sName=a,n&&(E.ref=n),c.createElement(c.Fragment,null,c.createElement(h,{cache:t,ser
+bFonts:t=[],children:n})=>(0,D.jsxs)(D.Fragment,{children:[(0,D.jsx)(y.Global,{styl
+({icon:o,message:a}):L.createElement(L.Fragment,null,o,a))}),el=e.r(742037),ec=c(e.
+i)}};return window.addEventListener("storage",n),function(){return window.removeEve
+ion(t){if("u">typeof window)try{localStorage.setItem(e,JSON.stringify(s(s({},t),{},
+turn e.next=46,x._getSession({event:"storage"});case 46:return e.abrupt("return",{e
+turn e.next=25,x._getSession({event:"storage"});case 25:return e.abrupt("return",s)
+==r[0]?r[0]:{}).event,e.prev=1,!((n="storage"===t)||void 0===x._session)){e.next=10
+ction(){return x._getSession({event:"storage"})});return function(){return e()}},[]
+named '".concat(e.name.value,"'"):"");"FragmentDefinition"===e.kind&&o.push(e)}),vo
+[0m
+The "rag/meili" grep matched mostly substrings of React internals ("Fragment", "storage") - false matches. The portal bundle doesn't reference an integrated RAG/LibreChat service. The developer portal is a pure API-hub app. The RAG/LibreChat/MeiliSearch repos are forks in the org but their **deployment is unconfirmed** — likely internal AI infrastructure not exposed to the scoped hostname surface.
+
+This is the key gating fact: the reposcan SECRET/MISCONFIG findings (default `mypassword`, `allow_origins=["*"]`, `JWT_SECRET` unset bypass) exist in the source code, but without a confirmed live deployable instance on a scoped host, they can't be validated as reachable vulnerabilities. Per the program's `poc_required` and the gate "known-vulnerable library without program-specific exploit", these source-only findings hold as source-level observations, not live findings.
+
+Let me do a focused check: is there any scoped host that could host a non-NextJS RAG/LibreChat service? The `{as,eu}.api.daimlertruck.com` region gateways are Azure APIM. Let me check if the APIM gateway exposes any AI/RAG operations that would point to a live deployment. Also let me check whether any subdomain beyond the documented inventory resolves to a RAG/LibreChat service. Let me probe a couple of plausible hostnames lightly (passive DNS is not available, so I'll rely on resolution probes sparingly).
+
+Actually, let me be disciplined. The knowledge base already established the inventory surface comprehensively. The RAG/LibreChat/Meili repos are forks, not Daimler-authored. Their deployment is internal/unknown. This is a genuine *source-level* observation but not a confirmed live vulnerability. Given the extensive prior cycles, this cycle's delta is: the GitHub org confirmed as owned by Daimler Truck with 6 public repos including the RAG/LibreChat AI stack forks — a real, in-scope source-only lead, but no reachable live service confirmed.
+
+Let me do one clean, low-rate read-only probe to test whether the RAG API's whitelisted public endpoints (`/health`, `/openapi.json`) are reachable on the scoped hosts that are NOT the Next.js portal — e.g., the APIM region gateways and the developer portal subdomains. This directly tests the highest-value reposcan chain (RAG API public surface).
+[0m$ [0mcd /tmp/opencode && for h in as.api eu.api api; do for p in health openapi.json docs; do timeout 12 curl -s -o /dev/null -w "$h/$p => %{http_code} %{size_download}\n" "https://$h.daimlertruck.com/$p" 2>/dev/null; sleep 1; done; done
+as.api/health => 404 442
+as.api/openapi.json => 404 442
+as.api/docs => 404 442
+eu.api/health => 404 442
+eu.api/openapi.json => 404 442
+eu.api/docs => 404 442
+api/health => 000 0
+api/openapi.json => 000 0
+api/docs => 000 0
+[0m
+[0m% [0mWebFetch https://raw.githubusercontent.com/daimlertruck/SRC-rag_api/main/app/config.py
+The APIM gateways return OperationNotFound (404) for these paths — no RAG API deployed there. The RAG/LibreChat/MeiliSearch AI stack is **not confirmed reachable** on any scoped host. Deployment is internal/unknown.
+
+Let me check whether the developer portal's own `/api/healthcheck` or any Next.js route reveals which backend services it proxies to (it might proxy to a RAG service post-auth). But we've exhausted the portal's public surface (blanket auth). The key conclusion: the reposcan SECRET/MISCONFIG findings are **source-level only**, not live-reachable, on the scoped hostname inventory.
+
+Let me verify the actual Daimler-authored changes in these forks vs upstream, since Daimler may have introduced Daimler-specific misconfigs. Let me check the fork point and any Daimler-specific config (e.g., a docker-compose with real credentials). Let me look at the RAG api docker-compose and any Daimler-specific files.
+[0m% [0mWebFetch https://raw.githubusercontent.com/daimlertruck/SRC-rag_api/main/docker-compose.yaml
+These are upstream LibreChat/RAG forks — the Docker defaults (`mypassword`, `myuser`) and the `JWT_SECRET` bypass are **upstream OSS patterns**, not Daimler-specific changes. These are all `"fork": true`. Daimler forked them into their org but did not author the vulnerable code. Per the scope rule ("known-vulnerable library without an exploit specific to our implementation"), and without a confirmed live deployment on a scoped host, these reposcan findings are low-value / non-actionable.
+
+The genuinely Daimler-authored repo is `DT-DDS` (Daimler Truck Digital Design System, `"fork": false`, github.io pages). Let me quickly examine that since it's Daimler-original code in-scope. It has a public GitHub Pages site at daimlertruck.github.io/DT-DDS. Let me check for any misconfig there, but this is a design-system (frontend components) — low security value. Let me check it briefly for secrets/credentials in the original repo.
+
+Let me check DT-DDS for any sensitive content (frontend design system, likely low-value but it's the only Daimler-authored public code).
+[0m
+[0m$ [0mcd /tmp/opencode && timeout 20 curl -s --max-time 18 "https://raw.githubusercontent.com/daimlertruck/DT-DDS/main/README.md" 2>/dev/null | head -40; echo "===packages==="; timeout 20 curl -s --max-time 18 "https://api.github.com/repos/daimlertruck/DT-DDS/git/trees/main?recursive=1" 2>/dev/null | grep -oE '"path": "[^"]*"' | grep -iE 'env|secret|\.env|config|token|key' | head -20
+<div align="center">
+<img src="dt-dds-banner.png" width="100%" style="vertical-align: middle;" />
+</div>
+
+<br/>
+
+<div align="center">Component library for Daimler Truck Digital Design System.<br>
+It contains UI components, brand themes, examples and documentation.</div>
+
+#
+
+#### **DT-DDS provides:**
+
+- A unified group of utility functions commonly used, and spread across different projects
+- A unified group of reusable UI components commonly used, and spread across different projects
+- W3C standards, common tooling, and high quality through CI/CD lifecycle
+- Accessibility meeting WCAG 2.1 AA standards
+- Faster developments and implementations
+- Easy collaboration and Maintenance
+- Versioning and changelogs
+- Documentation
+
+#### **Documentation via:**
+
+- [Storybook/Developer documentation](https://daimlertruck.github.io/DT-DDS/)
+- [Figma (private design files)](https://www.figma.com/file/RdxGI4OUcKDRfBRPmBJXbW/DT_UI-Design-System)
+
+## 📦 Installation
+
+`@dt-dds/react` uses CSS-IN-JS behind the scenes. You'll also need to add Emotion as a project dependency.
+
+```bash
+yarn add @dt-dds/react @emotion/css @emotion/react @emotion/styled
+```
+
+## 🔨 Usage
+
+Import the DT-DDS global styles in the root component.
+
+```tsx
+===packages===
+"path": ".changeset/config.json"
+"path": "apps/docs/eslint.config.js"
+"path": "apps/docs/tsconfig.json"
+"path": "apps/docs/vite.config.ts"
+"path": "commitlint.config.js"
+"path": "eslint.config.js"
+"path": "examples/with-nextjs-pages-router/eslint.config.mjs"
+"path": "examples/with-nextjs-pages-router/next.config.ts"
+"path": "examples/with-nextjs-pages-router/tsconfig.json"
+"path": "packages/changeset-conventional-commits/babel.config.js"
+"path": "packages/changeset-conventional-commits/eslint.config.js"
+"path": "packages/changeset-conventional-commits/jest.config.ts"
+"path": "packages/changeset-conventional-commits/tsconfig.json"
+"path": "packages/changeset-conventional-commits/tsup.config.ts"
+"path": "packages/dt-dds-react/babel.config.js"
+"path": "packages/dt-dds-react/eslint.config.js"
+"path": "packages/dt-dds-react/react-app-env.d.ts"
+"path": "packages/dt-dds-react/tsconfig.json"
+"path": "packages/dt-dds-react/tsup.config.ts"
+"path": "packages/eslint-config-custom"
+[0m
+DT-DDS is a pure frontend component library (no backend, no env/secrets exposed). Low security value — this is a consumer package for internal apps, no reachable vulnerability.
+
+My analysis is complete. The GitHub org investigation confirms: the `daimlertruck` org is Daimler's, and the AI-stack repos are upstream forks with upstream-known default-credential patterns, but there is **no confirmed live deployment reachable on any scoped host** (all RAG/Meili/docs/health paths on scoped hosts return 307-guarded or 404/OperationNotFound). The reposcan SECRET/MISCONFIG findings remain source-level and non-actionable per the program's specific-exploit requirement. This is a DELTA: the GitHub org surface was confirmed owned + enumerated (6 repos), but no new reachable vulnerability.
+
+Let me record this analysis. The hypotheses remain unchanged (gated on AUTH_HELPED accounts). I'll write the analysis output.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat > reports/hypotheses-bigpickle.txt <<'EOF'
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session
+evidence_needed: authenticated introspection on /api/graphql; foreign object-ID read under own valid session
+verify_steps: AUTH_HELPED: ROW session on developer.tst.na → POST /api/graphql `{"query":"{__schema{types{name fields{name} args{name}}}}"}` → on-org `query{subscription(teamId,appId,subscriptionId){name state product{name}}}` → read-only foreign-ID swap → diff `UserCatalogList{catalogs{id name}}` + `teams{items{id orgId}}`
+impact: cross-tenant subscription read/modify, system-user password + accessSecret theft, team PII dump; Severity: high
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary
+class: OATH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 67
+reasoning: FRESH this cycle: ROW+NOAM share identical `iss` (tenant-level, 88f558f5.../v2.0/) and same client c387a5ab on the portal app; only differentiation is per-policy `acr` + BU-shape org claims (89 vs 102 claims ROW vs NOAM); schema scoping (Team.orgId, UserCatalogList.catalogs) is org-claim-based; jwks per-policy but iss/aud collision means backend can't distinguish BU from iss/aud alone
+evidence_needed: NOAM token accepted by ROW-scoped resolver returning different orgId catalogs than same-principal ROW token (and vice versa)
+verify_steps: AUTH_HELPED: one `_row` + one `_noam` account → POST /api/graphql `query UserCatalogList{userCatalogList{catalogs{id name}}}` + `teams{items{id orgId}}` from each token; diff scoping
+impact: DT/DTNA BU-boundary collapse → cross-BU API subscriptions + PII; Severity: medium-high
+testability: AUTH_HELPED
+[HYP] rag-meilisearch-default-cred-sourceonly
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api (daimlertruck GitHub org, verified owner)
+confidence: 40
+reasoning: org confirmed verified "Daimler Truck AG", 6 public repos; SRC-rag_api main.py:72-77 sets allow_origins=["*"]+allow_credentials=True; app/middleware.py:18-22 skips JWT validation when JWT_SECRET unset; config.py:59 POSTGRES_PASSWORD default "mypassword". BUT ALL AI repos (SRC-rag_api, SRC-LibreChat, SRC-meilisearch, SRC-openai-aca-lb, SRC-librechat-prom-exporter) are upstream OSS forks (fork:true) — no Daimler-specific changes to the vuln code; live deployment UNCONFIRMED: RAG whitelisted /docs,/openapi.json,/health + Meili /indexes on all scoped hosts return 307-guarded or 404/OperationNotFound (as.api,eu.api,developer.*) — no reachable instance on scoped hostname surface
+evidence_needed: a scoped host serving SRC-rag_api or MeiliSearch without JWT_SECRET/master key set (would return 200 on /openapi.json or /indexes anonymously)
+verify_steps: PASSIVE: `GET https://<scoped-host>/openapi.json` / `/health` (RAG whitelist) and `/indexes` (Meili) — confirmed 307/404 on as.api,eu.api,developer.* ; no live surface found
+impact: IF deployed without secret → unauth RAG doc access (internal AI embeddings/PII); Severity: high (conditional on deployment); currently source-only
+testability: PASSIVE
+[PARKED] rag-meilisearch-default-cred-sourceonly: confidence 40 == floor; source-only (upstream fork defaults, no Daimler-specific vuln code) + NO confirmed live deployment on any scoped host — RAG/Meili endpoints 307/404 everywhere probed. Non-actionable per program "known-vulnerable without program-specific exploit". Hold dormant, re-probe only if a new scoped host surfaces.
+[PARKED] b2c-cross-bu-token-boundary: unchanged 67, still gated on two provisioned staging accounts.
+[PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof — re-promote only once hypothesis #1 reads a foreign subscription.
+[FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67)
+[NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6 `b2c_1a_signin`) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na.api.daimlertruck.com; complete manual login (authorize → broker → form_post authresp → NextAuth callback, PKCE S256); then AUTH_HELPED POST /api/graphql `{__schema{types{name fields{name} args{name}}}}` on-org baseline → read-only foreign-ID swap → diff `UserCatalogList` + `teams{orgId}` across row/noam tokens.
+[LEARN] ACCEPTED daimlertruck-github-org-verified @ github.com/daimlertruck: org confirmed verified "Daimler Truck AG" (blog daimlertruck.com, foss@daimlertruck.com, created 2021-11-26); 6 public repos (5 upsteam forks of LibreChat/RAG/Meili/ACA-LB/prom-exporter + DT-DDS original design system). In-scope by "digital services...operated by Daimler Truck". AI-stack forks carry only upstream default-cred/MISCONFIG patterns; no Daimler-specific vuln; deployment unconfirmed.
+[LEARN] REJECTED rag-librechat-meili-live-surface @ *.daimlertruck.com: RAG API whitelisted /docs,/openapi.json,/health + Meili /indexes return 307 (developer.* blanket auth) or 404/OperationNotFound (as.api,eu.api APIM gateways) — no RAG/LibreChat/Meili instance reachable on scoped hostname surface. reposcan SECRET/MISCONFIG remain source-only, non-actionable per program exploit-specificity rule.
+[LEARN] REJECTED dt-dds-design-system @ daimlertruck/DT-DDS: original Daimler repo but pure frontend component library (Storybook on github.io pages, no backend, no env/secrets/config leaks in repo tree) — no reachable vulnerability.
+[RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive: portals stable behind wildcard auth; CIAM correct (confidential+PKCE, implicit disabled); businessid broker self-service falsified; GitHub org confirmed owned but AI-stack forks not live-reachable on scoped hosts. No new anonymous exploit reachable — all returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts. This cycle: read-only GETs on public GitHub metadata + scoped-host RAG/Meili/health paths; no customer/employee/auth data touched.
+EOF
+echo "written"; cat reports/hypotheses-bigpickle.txt | head -5
+written
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com
+confidence: 75
+reasoning: buildManifest object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle GraphQL ops take teamId/appId/subscriptionId; /api/graphql blanket-307 behind wildcard middleware; auth chain viable on staging tenant 88f558f5 (ROW+NOAM policies, same-issuer), broker first-hop mapped, PKCE+state preserved to same-origin callback — only missing step is a valid staged session
+[0m
+The analysis is recorded. Here is my output following the 8-step methodology.
+
+---
+
+STEP 1 — DELTA
+- [NEW] `github.com/daimlertruck` org confirmed verified *"Daimler Truck AG"* (blog daimlertruck.com, foss@daimlertruck.com, `"is_verified":true`), 6 public repos — in-scope per "digital services...operated by Daimler Truck". 5 are upstream OSS forks (SRC-rag_api, SRC-LibreChat, SRC-meilisearch, SRC-openai-aca-lb, SRC-librechat-prom-exporter) + DT-DDS (original design system, fork:false).
+- [NEW] RAG AI-stack is NOT live-reachable on any scoped host: RAG whitelisted `/docs`,`/openapi.json`,`/health` + Meili `/indexes` return 307 (developer.* blanket auth) or 404/OperationNotFound (as.api,eu.api APIM) — reposcan SECRET/MISCONFIG findings are source-only.
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.{as,eu,na}.api.daimlertruck.com,8.8,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+- [PRIO] developer.{dev.na,tst.eu,tst.na}.api.daimlertruck.com,8.0,attack_surface=8,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
+- [PRIO] github.com/daimlertruck (DT AI-stack forks),4.1,attack_surface=2,business_value=6,tech_exposure=7,gate_ease=0,cloud_surface=5,freshness=10
+
+STEP 3 — HYPOTHESES
+- graphql-object-id-bola-team-scoped (75, IDOR, AUTH_HELPED) — unchanged, still the top return.
+- b2c-cross-bu-token-boundary (67, OATH, AUTH_HELPED) — unchanged, same-issuer collision.
+- rag-meilisearch-default-cred-sourceonly (40, MISCONFIG, PASSIVE) — see detail in hypotheses file; dropped to the floor: upstream fork defaults + no confirmed live deployment.
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] rag-meilisearch: confidence 40 == floor; source-only (upstream fork defaults, no Daimler-specific vuln) + `/docs`,`/openapi.json`,`/health`,`/indexes` all 307/404 on scoped hosts — non-actionable per exploit-specificity rule. Re-probe only if a new host surfaces.
+- [PARKED] ciam-secret-return-in-plaintext: chained on BOLA proof.
+- [FINAL] 1. graphql-object-id-bola-team-scoped (75) 2. b2c-cross-bu-token-boundary (67)
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: obtain two admin-provisioned staging accounts on login-qa.ciam tenant 88f558f5 — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6) + one `b2c_1a_signin_oidc_noam` for developer.tst.na.api.daimlertruck.com; complete manual login (authorize → broker → form_post authresp → NextAuth callback, PKCE S256), then AUTH_HELPED POST /api/graphql introspection + read-only foreign-ID swap to prove BOLA.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED daimlertruck-github-org-verified: org confirmed Daimler-owned with 6 public repos; AI repos are upstream forks (no Daimler-specific vuln code); DT-DDS is original but pure frontend.
+- [LEARN] REJECTED rag-librechat-meili-live-surface: no RAG/LibreChat/Meili instance reachable on scoped hosts (307-guarded/404/OperationNotFound on all probed paths).
+- [LEARN] REJECTED dt-dds-design-system: original repo but frontend component library only, no backend/secrets/reachable vuln.
+
+STEP 7 — RISK
+- [RISK] Daimler Truck: 42/100. Surface unchanged and hardening-positive; all high-value returns (BOLA 75, cross-BU 67) gated solely on two admin-provisioned staging accounts; this cycle used only read-only GETs on public GitHub metadata and scoped-host health/endpoint paths; no customer/employee/auth data touched.

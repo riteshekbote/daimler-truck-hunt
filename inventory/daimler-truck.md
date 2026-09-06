@@ -252,3 +252,5 @@ www.daimlertruck.com
 - CHANGED `companion.app.daimlertruck.com` resolves to NXDOMAIN (referenced in prod CSP frame-src) — dead reference in production CSP
 - CHANGED Portal blanket auth middleware confirmed: `/api/*`, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — passive route discovery exhausted; only `/api/healt
 - CHANGED BusinessID broker first-hop mapped: ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a43f98c7, policy b2c_1a_signin, code form_post → ciam authresp); por
+
+## 2026-09-06 11:26:44 UTC
