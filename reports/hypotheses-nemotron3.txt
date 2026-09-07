@@ -1,4 +1,4 @@
-## 2026-09-07 21:39:06 UTC [target] (model nemotron3)
+## 2026-09-07 23:49:00 UTC [target] (model nemotron3)
 [NEW] companion.app.daimlertruck.com now LIVE (was NXDOMAIN): HTTP 200 len=3330, Next.js build `IqPB_zhGzw2eQTiap3_bK`, frontend 1.91.0, istio-envoy; routes `/admin` `/chat` `/widget-host` `/api/proxy-http` `/api/[...slug]` `/widget/dt-companion.js`
 [NEW] companion-dev.app.daimlertruck.com exposed: identical build/version as prod, `showFrontendVersion:true` + `connectionTypeSelector:true` (disabled on prod); discovered via prod B2C AADB2C90006 error leaking dev callback host
 [NEW] b2c-error-info-leak @ login.ciam.daimlertruck.com client `cd34584a`: unregistered redirect_uri → AADB2C90006 error discloses `companion-dev.app.daimlertruck.com` as callback location

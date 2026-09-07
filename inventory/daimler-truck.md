@@ -337,3 +337,12 @@ www.daimlertruck.com
 - CHANGED companion-dev.app auth now wired to **PROD B2C** (tenant `3db550f0`, client `cd34584a`, policy `b2c_1a_signin_oidc_row`) with PKCE S256 + state + same-origin redirect_uri (since 2026-09-07 06:24)
 - CHANGED companion-dev.app `/api/proxy-http` returns **401** (was 405) — auth middleware active on this route
 - CHANGED companion-dev.app `/admin`, `/chat` now 307 → B2C via locale (was SPA shell) — auth middleware active on object routes
+
+## 2026-09-07 23:49:10 UTC
+- NEW companion.app.daimlertruck.com now LIVE (was NXDOMAIN): HTTP 200 len=3330, Next.js build `IqPB_zhGzw2eQTiap3_bK`, frontend 1.91.0, istio-envoy; routes `/admin` `/chat` `/widget-host` `/api/proxy-http`
+- NEW companion-dev.app.daimlertruck.com exposed: identical build/version as prod, `showFrontendVersion:true` + `connectionTypeSelector:true` (disabled on prod); discovered via prod B2C AADB2C90006 error le
+- NEW b2c-error-info-leak @ login.ciam.daimlertruck.com client `cd34584a`: unregistered redirect_uri → AADB2C90006 error discloses `companion-dev.app.daimlertruck.com` as callback location
+- NEW companion-dev-callback-in-prod-allowlist @ login.ciam.daimlertruck.com client `cd34584a`: dev callback URI registered in prod B2C client — misconfig confirmed
+- CHANGED companion-dev.app auth now wired to **PROD B2C** (tenant `3db550f0`, client `cd34584a`, policy `b2c_1a_signin_oidc_row`) with PKCE S256 + state + same-origin redirect_uri (since 2026-09-07 06:24)
+- CHANGED companion-dev.app `/api/proxy-http` returns **401** (was 405) — auth middleware active on this route
+- CHANGED companion-dev.app `/admin`, `/chat` now 307 → B2C via locale (was SPA shell) — auth middleware active on object routes
