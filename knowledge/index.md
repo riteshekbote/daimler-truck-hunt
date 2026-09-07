@@ -168,3 +168,9 @@
 - 2026-09-06 REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale redirect before auth check); `/api/proxy-http` returns 405 not 200 — no confirmed auth bypass yet
 - 2026-09-06 ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via `/api/auth/providers`
 - 2026-09-06 REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)
+- 2026-09-07 ACCEPTED companion-dev-auth-config-drift @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` (no NA tenant), signin redirects to SPA not B2C, object routes return locale SPA not B2C, `/api/proxy-http` returns 405 — dev auth middleware disabled/unwired
+- 2026-09-07 ACCEPTED companion-shared-build-identical @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: identical build ID `IqPB_zhGzw2eQTiap3_bK`, identical buildManifest routes — config-only drift
+- 2026-09-07 ACCEPTED companion-dev-callback-in-prod-allowlist @ login.ciam.daimlertruck.com client cd34584a: dev callback URI registered in prod B2C client — misconfig confirmed
+- 2026-09-07 REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale redirect before auth check); `/api/proxy-http` returns 405 not 200 — no confirmed auth bypass yet
+- 2026-09-07 ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via `/api/auth/providers`
+- 2026-09-07 REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)

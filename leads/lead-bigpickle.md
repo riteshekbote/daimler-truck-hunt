@@ -2292,3 +2292,33 @@ testability: AUTH_HELPED
 [LEARN] INFO force-logout @ companion.app(+dev): /api/auth/force-logout 302→/ unauth — logout-CSRF class, program out-of-scope; no hypothesis spawned.
 [LEARN] ACCEPTED companion-health-no-leak @ companion.app: health/ready = static {"status":...}, no uptime/build disclosure (dev+prod identical) vs developer /api/healthcheck uptime leak.
 [RISK] Daimler Truck: 46/100. Risk steady. New cycle evidence strengthens the companion proxy surface (real 405-listener, both envs) but stays strictly B2C-gated; force-logout is out-of-scope class; dev auth remains unwired (no token flow reachable). Only reportable item is still the dev-callback MISCONFIG on prod client cd34584a (info-level). This cycle: 2 manifest/providers fetches + 11 chunk GETs + 6 status-code probes on companion (prod+dev), all read-only, <=1 rps. No customer/employee data, no auth bypass, no mutating requests.
+## 2026-09-07 01:22:10 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: /api/graphql 307-to-B2C on POST; buildManifest exposes object-ID routes (/apis/[apiId], teams/[teamId]/system-users/associate); client bundle carries GraphQL ops with these IDs; blanket middleware; barrier = valid B2C session. Blocked on two staging accounts since 09-03.
+evidence_needed: authenticated introspection + cross-tenant ID diff between _row and _noam scopes.
+verify_steps: AUTH_HELPED: `_row` + `_noam` sessions → POST /api/graphql `{__schema{types{name}}}` then `teams{items{id orgId}}` from each; diff scoping.
+impact: cross-BU API subscriptions + dealer-network PII (FTLOrg* claims); medium-high
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B proves registered POST-only handler exempt from blanket wildcard (all 8 other /api/* → 401 catch-all this cycle); server-side proxy for AI web-browsing on istio-AKS mesh; identical listener on dev.
+evidence_needed: valid companion session then POST `{"url":"http://169.254.169.254/latest/meta-data/"}` and internal AI-service URL; diff status/body.
+verify_steps: AUTH_HELPED: `POST /api/proxy-http` with session cookie vs without; then internal/metadata URLs.
+impact: cloud-metadata keys / internal AI-service access; high (conditional)
+testability: AUTH_HELPED
+[HYP] noam-token-cross-bu-acceptance
+class: AUTH
+asset: developer.na.api.daimlertruck.com/api/graphql
+confidence: 55
+reasoning: per-tenant issuer shared by ROW+NOAM policies + single portal client (c387a5ab staging); NOAM claim set is a superset incl. FTLOrg* dealer PII; server-side BU gating (acr/org) unproven — same client may accept NOAM token on ROW-scoped data.
+evidence_needed: NOAM session token accepted by ROW-scoped portal API vs ROW token; diff on org-scoped fields.
+verify_steps: AUTH_HELPED: valid _noam session → POST /api/graphql `teams{items{orgId}}`; same with _row; if org separation fails → cross-BU PII.
+impact: NOAM-acquired token reaching ROW tenant data / dealer PII; medium-high
+testability: AUTH_HELPED
+[NEXT] HUMAN: request two admin-provisioned staging identities (_row + _noam) from bugs.olivermaicher.eu — unblocks both FINAL #1 and #3 (GraphQL clipboard-introspection + cross-BU acceptance on developer.NA, POST /api/graphql with session). All anonymous surface on companion + developer portals is now exhausted (401-catch-all, 405-proxy, 307-B2C confirmed).
+[RISK] Daimler Truck: 46/100. Risk steady. This cycle: four clean read-only GETs (buildManifest, proxy-http, providers on both companion hosts), no mutating requests, <=1 rps. All prior backtick-artifact anomalies resolved — no new reachable surface. Companion stays fully B2C-gated with a single same-origin callback; only reportable item remains the dev-callback-inside-prod-B2C-allowlist MISCONFIG (info-level, no live code-exchange chain). Deep-hunt remains blocked on provisioned staging accounts (FINAL #1/#3) — escalating to HUMAN next.

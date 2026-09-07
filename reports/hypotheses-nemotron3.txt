@@ -1,16 +1,15 @@
-## 2026-09-06 23:42:13 UTC [target] (model nemotron3)
+## 2026-09-07 01:21:25 UTC [target] (model nemotron3)
 [NEW] companion-dev.app.daimlertruck.com/api/auth/providers returns single provider `azure-ad-b2c` (vs developer portals' two: `azure-ad-b2c-dt` + `azure-ad-b2c-dtna`) — dev uses single B2C client, no NA tenant separation
 [NEW] companion-dev.app signin flow: POST /api/auth/signin/azure-ad-b2c?json=true → 302 to `/api/auth/signin?csrf=true` (SPA shell), NOT to B2C authorize endpoint — dev provider unwired from live tenant
 [NEW] companion-dev.app object routes `/admin`, `/chat` return 307 to locale-prefixed `/en/admin`, `/en/chat` (SPA catch-all), not 307 to B2C — no auth middleware enforcement on dev
 [NEW] companion-dev.app `/api/proxy-http` returns 405 Method Not Allowed (not 307/401) — API route exists but no auth guard
 [CHANGED] Both companion apps share identical build ID `IqPB_zhGzw2eQTiap3_bK` and buildManifest — same codebase, config-only drift
 [CHANGED] Dev companion CSP: `frame-ancestors https://*.daimlertruck.com ...` (no companion.app frame-src); Prod CSP includes `https://corptb.sharepoint.com` additional frame-ancestor
-[PRIO] companion-dev.app.daimlertruck.com,8.6,attack_surface=9,business_value=7,tech_exposure=9,gate_ease=5,cloud_surface=8,freshness=10
-[PRIO] companion.app.daimlertruck.com,8.3,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
-[PRIO] developer.as.api.daimlertruck.com,8.1,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
-[PRIO] developer.tst.na.api.daimlertruck.com,7.8,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
-[PRIO] developer.eu.api.daimlertruck.com,7.8,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
-[PRIO] login.ciam.daimlertruck.com,7.2,attack_surface=8,business_value=8,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+[PRIO] companion-dev.app.daimlertruck.com,7.9,attack_surface=9,business_value=7,tech_exposure=9,gate_ease=5,cloud_surface=8,freshness=10
+[PRIO] companion.app.daimlertruck.com,7.95,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
+[PRIO] developer.as.api.daimlertruck.com,7.75,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.1,attack_surface=8,business_value=8,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+[PRIO] login-qa.ciam.daimlertruck.com,6.9,attack_surface=8,business_value=7,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
 [HYP] Companion Dev Auth Bypass via Unwired B2C Provider
 class: MISCONFIG
 asset: companion-dev.app.daimlertruck.com

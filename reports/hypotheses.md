@@ -769,3 +769,15 @@
 - LEARN: REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale r
 - LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via 
 - LEARN: REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)
+
+## RANKED HYPOTHESES 2026-09-07 01:22:21 UTC
+- [80] companion-dev.app.daimlertruck.com: Companion Dev Auth Bypass via Unwired B2C Provider (from art/lead_nemotron3.txt)
+- [75] developer.as.api.daimlertruck.com/api/graphql: graphql-object-id-bola-team-scoped (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: request two admin-provisioned staging identities (_row + _noam) from bugs.olivermaicher.eu — unblocks both FINAL #1 and #3 (GraphQL clipboard-introspecti
+- NEXT(hypotheses-nemotron3.txt): PROBE: GET `https://companion-dev.app.daimlertruck.com/admin` with `Accept: text/html` — confirm 307 to `/en/admin` (locale SPA) vs 200 if auth middleware disab
+- LEARN: ACCEPTED companion-dev-auth-config-drift @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` (no NA tenant), signin redirects to SPA not B2C, o
+- LEARN: ACCEPTED companion-shared-build-identical @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: identical build ID `IqPB_zhGzw2eQTiap3_bK`, ide
+- LEARN: ACCEPTED companion-dev-callback-in-prod-allowlist @ login.ciam.daimlertruck.com client cd34584a: dev callback URI registered in prod B2C client — misconfig conf
+- LEARN: REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale r
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via 
+- LEARN: REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)

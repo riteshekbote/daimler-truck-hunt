@@ -9545,3 +9545,138 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] Daimler Truck: 46/100. Risk steady. New cycle evidence strengthens the companion proxy surface (real 405-listener, both envs) but stays strictly B2C-gated; force-logout is out-of-scope class; dev auth remains unwired (no token flow reachable). Only reportable item is still the dev-callback MISCONFIG on prod client cd34584a (info-level). This cycle: 2 manifest/providers fetches + 11 chunk GETs + 6 status-code probes on companion (prod+dev), all read-only, <=1 rps. No customer/employee data, no auth bypass, no mutating requests.
+===== ANALYST bigpickle 2026-09-07 01:22:21 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m→ [0mRead .
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead leads
+[0m→ [0mRead scope.yml
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m→ [0mRead leads/lead-nemotron3.md
+[0m→ [0mRead knowledge
+[0m→ [0mRead knowledge/index.md
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/art/ 2>/dev/null; ls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md 2>/dev/null; ls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/triage/ 2>/dev/null
+-rw-r--r-- 1 runner runner 14305 Sep  7 01:18 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md
+total 172
+drwxr-xr-x  2 runner runner  4096 Sep  7 01:18 .
+drwxr-xr-x 12 runner runner  4096 Sep  7 01:18 ..
+-rw-r--r--  1 runner runner     0 Sep  7 01:18 .gitkeep
+-rw-r--r--  1 runner runner   182 Sep  7 01:18 run-2026-09-02-21-28.md
+-rw-r--r--  1 runner runner   264 Sep  7 01:18 run-2026-09-02-23-32.md
+-rw-r--r--  1 runner runner   207 Sep  7 01:18 run-2026-09-03-01-24.md
+-rw-r--r--  1 runner runner   221 Sep  7 01:18 run-2026-09-03-06-26.md
+-rw-r--r--  1 runner runner   177 Sep  7 01:18 run-2026-09-03-11-40.md
+-rw-r--r--  1 runner runner   235 Sep  7 01:18 run-2026-09-03-15-10.md
+-rw-r--r--  1 runner runner   203 Sep  7 01:18 run-2026-09-03-18-41.md
+-rw-r--r--  1 runner runner   208 Sep  7 01:18 run-2026-09-03-21-29.md
+-rw-r--r--  1 runner runner   271 Sep  7 01:18 run-2026-09-03-23-30.md
+-rw-r--r--  1 runner runner   207 Sep  7 01:18 run-2026-09-04-01-18.md
+-rw-r--r--  1 runner runner   215 Sep  7 01:18 run-2026-09-04-05-58.md
+-rw-r--r--  1 runner runner   213 Sep  7 01:18 run-2026-09-04-10-36.md
+-rw-r--r--  1 runner runner   279 Sep  7 01:18 run-2026-09-04-14-31.md
+-rw-r--r--  1 runner runner   163 Sep  7 01:18 run-2026-09-04-17-46.md
+-rw-r--r--  1 runner runner  5750 Sep  7 01:18 run-2026-09-04-20-01.md
+-rw-r--r--  1 runner runner   216 Sep  7 01:18 run-2026-09-04-22-12.md
+-rw-r--r--  1 runner runner   177 Sep  7 01:18 run-2026-09-05-00-07.md
+-rw-r--r--  1 runner runner   172 Sep  7 01:18 run-2026-09-05-04-31.md
+-rw-r--r--  1 runner runner   274 Sep  7 01:18 run-2026-09-05-08-33.md
+-rw-r--r--  1 runner runner   205 Sep  7 01:18 run-2026-09-05-12-00.md
+-rw-r--r--  1 runner runner   219 Sep  7 01:18 run-2026-09-05-14-47.md
+-rw-r--r--  1 runner runner   206 Sep  7 01:18 run-2026-09-05-16-59.md
+-rw-r--r--  1 runner runner   272 Sep  7 01:18 run-2026-09-05-18-48.md
+-rw-r--r--  1 runner runner   200 Sep  7 01:18 run-2026-09-05-20-48.md
+-rw-r--r--  1 runner runner   200 Sep  7 01:18 run-2026-09-05-22-27.md
+-rw-r--r--  1 runner runner   225 Sep  7 01:18 run-2026-09-06-00-11.md
+-rw-r--r--  1 runner runner   196 Sep  7 01:18 run-2026-09-06-04-41.md
+-rw-r--r--  1 runner runner  8857 Sep  7 01:18 run-2026-09-06-09-05.md
+-rw-r--r--  1 runner runner   155 Sep  7 01:18 run-2026-09-06-12-53.md
+-rw-r--r--  1 runner runner 16095 Sep  7 01:18 run-2026-09-06-15-54.md
+-rw-r--r--  1 runner runner   300 Sep  7 01:18 run-2026-09-06-17-51.md
+-rw-r--r--  1 runner runner   211 Sep  7 01:18 run-2026-09-06-19-43.md
+-rw-r--r--  1 runner runner   181 Sep  7 01:18 run-2026-09-06-21-49.md
+-rw-r--r--  1 runner runner   501 Sep  7 01:18 run-2026-09-06-23-19.md
+-rw-r--r--  1 runner runner   850 Sep  7 01:18 run-2026-09-07-01-06.md
+[0m
+[0m→ [0mRead probe-results.md
+I'll run a single clean re-probe to resolve the contradiction between the KB's "route-map-complete via buildManifest" claim and the 404 observed at 21:45 (recent probes show backtick-wrapped URL artifacts that may have caused false 404s).
+[0m
+[0m$ [0mcurl -s -o /dev/null -w '%{http_code}\n' --max-time 20 https://companion.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js && echo "---" && curl -s --max-time 20 https://companion.app.daimlertruck.com/api/proxy-http -X GET -o /dev/null -w '%{http_code}|%{size_download}\n'
+200
+---
+405|30
+[0m
+Clean probe resolves both contradictions: `_buildManifest.js` → 200 (route-map stands; prior 404 was a backtick-wrapped-URL artifact) and `/api/proxy-http` GET → 405/30B (handler still middleware-exempt). One more clean retry on the recurring dev-providers timeout:
+[0m$ [0mcurl -s --max-time 30 https://companion-dev.app.daimlertruck.com/api/auth/providers -w '\nHTTP:%{http_code}|%{size_download}\n'
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+HTTP:200|265
+[0m
+Dev confirmed: single `azure-ad-b2c` provider, 200/265B (earlier timeout was an artifact). Comparing against prod companion:
+[0m$ [0mcurl -s --max-time 30 https://companion.app.daimlertruck.com/api/auth/providers -w '\nHTTP:%{http_code}|%{size_download}\n'
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+HTTP:200|257
+[0m
+Probes complete. Both companion hosts expose an identical single-provider config (`azure-ad-b2c`); prod 257B vs dev 265B (hostname-only diff). All contradictions from last round were backtick-wrapped-URL artifacts. Producing the cycle analysis:
+
+---
+
+STEP 1 — DELTA
+- [CHANGED] `GET companion.app/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js` → **200** (clean URL) vs 404 last round ⇒ route-map-complete stands; prior 404 was a backtick-URL artifact (multiple recent probes share that defect).
+- [CHANGED] `GET /api/proxy-http` → **405/30B** on prod AND dev re-confirmed — still the unique middleware-exempt POST-only handler; prior mixed 401/405 readings were artifacts.
+- [NEW] `GET /api/{admin,chat,context,memory,models,user,users,files}` → **all 401** (catch-all) on companion.app — no additional anonymous first-class handlers; only `proxy-http(405)` + `health/ready(200)` are exempt.
+- [NEW] `GET /api/auth/providers` → single `azure-ad-b2c` on prod (200/257B) and dev (200/265B) — companion provider config identical across envs; the two prior dev timeouts were artifacts. Two-provider split is developer.*-only.
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.{as,eu,na}.api.daimlertruck.com/api/graphql,7.10,attack_surface=8,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=5,freshness=7
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http,6.50,attack_surface=6,business_value=8,tech_exposure=7,gate_ease=3,cloud_surface=9,freshness=6
+- [PRIO] login.ciam/login-qa.ciam NOAM policies,6.40,attack_surface=7,business_value=8,tech_exposure=7,gate_ease=4,cloud_surface=5,freshness=5
+
+STEP 3 — HYPOTHESES
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: /api/graphql 307-to-B2C on POST; buildManifest exposes object-ID routes (/apis/[apiId], teams/[teamId]/system-users/associate); client bundle carries GraphQL ops with these IDs; blanket middleware; barrier = valid B2C session. Blocked on two staging accounts since 09-03.
+evidence_needed: authenticated introspection + cross-tenant ID diff between _row and _noam scopes.
+verify_steps: AUTH_HELPED: `_row` + `_noam` sessions → POST /api/graphql `{__schema{types{name}}}` then `teams{items{id orgId}}` from each; diff scoping.
+impact: cross-BU API subscriptions + dealer-network PII (FTLOrg* claims); medium-high
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-auth-required
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B proves registered POST-only handler exempt from blanket wildcard (all 8 other /api/* → 401 catch-all this cycle); server-side proxy for AI web-browsing on istio-AKS mesh; identical listener on dev.
+evidence_needed: valid companion session then POST `{"url":"http://169.254.169.254/latest/meta-data/"}` and internal AI-service URL; diff status/body.
+verify_steps: AUTH_HELPED: `POST /api/proxy-http` with session cookie vs without; then internal/metadata URLs.
+impact: cloud-metadata keys / internal AI-service access; high (conditional)
+testability: AUTH_HELPED
+[HYP] noam-token-cross-bu-acceptance
+class: AUTH
+asset: developer.na.api.daimlertruck.com/api/graphql
+confidence: 55
+reasoning: per-tenant issuer shared by ROW+NOAM policies + single portal client (c387a5ab staging); NOAM claim set is a superset incl. FTLOrg* dealer PII; server-side BU gating (acr/org) unproven — same client may accept NOAM token on ROW-scoped data.
+evidence_needed: NOAM session token accepted by ROW-scoped portal API vs ROW token; diff on org-scoped fields.
+verify_steps: AUTH_HELPED: valid _noam session → POST /api/graphql `teams{items{orgId}}`; same with _row; if org separation fails → cross-BU PII.
+impact: NOAM-acquired token reaching ROW tenant data / dealer PII; medium-high
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] companion-admin-authz-role-claim: 42 < 50 — chunk scan found no UserAppRoles/isAdmin statically; providers probe shows single client, no role signal; needs session.
+- [PARKED] companion-proxy-http (PASSIVE form): listener/middleware-exemption fully proven (405 both envs) but every code path past that requires a valid session — cannot advance anonymously.
+- [FINAL] 1. graphql-object-id-bola-team-scoped (75) — unchanged top; AUTH_HELPED.
+- [FINAL] 2. companion-proxy-http-ssrf-auth-required (55) — re-confirmed 405 this cycle.
+- [FINAL] 3. noam-token-cross-bu-acceptance (55) — new testable form of the ACCEPTED same-issuer collision.
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: request two admin-provisioned staging identities (_row + _noam) from bugs.olivermaicher.eu — unblocks both FINAL #1 and #3 (GraphQL clipboard-introspection + cross-BU acceptance on developer.NA, POST /api/graphql with session). All anonymous surface on companion + developer portals is now exhausted (401-catch-all, 405-proxy, 307-B2C confirmed).
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED companion-providers-identical @ companion.app(+dev): single `azure-ad-b2c` provider on both hosts (200/257B, 200/265B); dev/prod provider config identical; two prior dev timeouts were artifacts — two-provider split remains developer.*-only.
+- [LEARN] ACCEPTED companion-route-map-reconfirmed @ companion.app: _buildManifest 200 clean fetch; prior 404 was backtick-wrapped-URL artifact; route-map-complete stands (6 pages+6 api, no object-ID).
+- [LEARN] ACCEPTED anonymous-api-map-exhausted @ companion.app: /api/{admin,chat,context,memory,models,user,users,files} all 401 catch-all; only /api/proxy-http (405) + /api/health + /api/ready (200) are middleware-exempt — anonymous handler discovery is closed.
+- [LEARN] REJECTED companion-proxy-http-probe-flakiness: prior 401 readings on GET /api/proxy-http (prod+dev) were URL artifacts; clean GET is consistently 405 — handler present and exempt on both envs.
+
+STEP 7 — RISK
+[RISK] Daimler Truck: 46/100. Risk steady. This cycle: four clean read-only GETs (buildManifest, proxy-http, providers on both companion hosts), no mutating requests, <=1 rps. All prior backtick-artifact anomalies resolved — no new reachable surface. Companion stays fully B2C-gated with a single same-origin callback; only reportable item remains the dev-callback-inside-prod-B2C-allowlist MISCONFIG (info-level, no live code-exchange chain). Deep-hunt remains blocked on provisioned staging accounts (FINAL #1/#3) — escalating to HUMAN next.

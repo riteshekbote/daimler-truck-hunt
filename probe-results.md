@@ -227,3 +227,12 @@ https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_
 https://companion.app.daimlertruck.com/api/proxy-http` -> HTTP 401
 https://developer.as.api.daimlertruck.com/graphql` -> 200 len=196649
 https://companion.app.daimlertruck.com/api/{admin,chat,context,memory,models,user,users,files -> HTTP 401
+
+## 2026-09-07 01:22:32 UTC
+https://*.daimlertruck.com -> ERR <urlopen error [Errno -2] Name or service not know
+https://companion-dev.app.daimlertruck.com/admin` -> 200 len=3358
+https://companion-dev.app.daimlertruck.com/api/proxy-http` -> HTTP 401
+https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true` -> HTTP 400
+https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid` -> HTTP 404
+https://companion.app.daimlertruck.com/api/proxy-http` -> HTTP 401
+https://developer.as.api.daimlertruck.com/graphql` -> 200 len=196649

@@ -282,3 +282,11 @@ www.daimlertruck.com
 - NEW companion-dev.app `/api/proxy-http` returns 405 Method Not Allowed (not 307/401) — API route exists but no auth guard
 - CHANGED Both companion apps share identical build ID `IqPB_zhGzw2eQTiap3_bK` and buildManifest — same codebase, config-only drift
 - CHANGED Dev companion CSP: `frame-ancestors https://*.daimlertruck.com ...` (no companion.app frame-src); Prod CSP includes `https://corptb.sharepoint.com` additional frame-ancestor
+
+## 2026-09-07 01:22:21 UTC
+- NEW companion-dev.app.daimlertruck.com/api/auth/providers returns single provider `azure-ad-b2c` (vs developer portals' two: `azure-ad-b2c-dt` + `azure-ad-b2c-dtna`) — dev uses single B2C client, no NA te
+- NEW companion-dev.app signin flow: POST /api/auth/signin/azure-ad-b2c?json=true → 302 to `/api/auth/signin?csrf=true` (SPA shell), NOT to B2C authorize endpoint — dev provider unwired from live tenant
+- NEW companion-dev.app object routes `/admin`, `/chat` return 307 to locale-prefixed `/en/admin`, `/en/chat` (SPA catch-all), not 307 to B2C — no auth middleware enforcement on dev
+- NEW companion-dev.app `/api/proxy-http` returns 405 Method Not Allowed (not 307/401) — API route exists but no auth guard
+- CHANGED Both companion apps share identical build ID `IqPB_zhGzw2eQTiap3_bK` and buildManifest — same codebase, config-only drift
+- CHANGED Dev companion CSP: `frame-ancestors https://*.daimlertruck.com ...` (no companion.app frame-src); Prod CSP includes `https://corptb.sharepoint.com` additional frame-ancestor

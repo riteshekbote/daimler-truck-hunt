@@ -5653,3 +5653,73 @@ testability: AUTH_HELPED
 [LEARN] REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)
 
 [RISK] daimler-truck: 78 — 6 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C; newly live companion.app + companion-dev.app add parallel attack surface with proxy-http/widget/admin routes; companion-dev auth config drift (single provider, unwired B2C, locale redirect before auth, 405 on proxy) creates dev/prod parity risk; B2C cross-BU token boundary relies solely on acr/org claims (same issuer/aud); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk masks real endpoints; prod B2C client allowlist includes dev callback URI
+===== ANALYST nemotron3 2026-09-07 01:22:21 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+# STEP 1 — DELTA
+[NEW] companion-dev.app.daimlertruck.com/api/auth/providers returns single provider `azure-ad-b2c` (vs developer portals' two: `azure-ad-b2c-dt` + `azure-ad-b2c-dtna`) — dev uses single B2C client, no NA tenant separation
+[NEW] companion-dev.app signin flow: POST /api/auth/signin/azure-ad-b2c?json=true → 302 to `/api/auth/signin?csrf=true` (SPA shell), NOT to B2C authorize endpoint — dev provider unwired from live tenant
+[NEW] companion-dev.app object routes `/admin`, `/chat` return 307 to locale-prefixed `/en/admin`, `/en/chat` (SPA catch-all), not 307 to B2C — no auth middleware enforcement on dev
+[NEW] companion-dev.app `/api/proxy-http` returns 405 Method Not Allowed (not 307/401) — API route exists but no auth guard
+[CHANGED] Both companion apps share identical build ID `IqPB_zhGzw2eQTiap3_bK` and buildManifest — same codebase, config-only drift
+[CHANGED] Dev companion CSP: `frame-ancestors https://*.daimlertruck.com ...` (no companion.app frame-src); Prod CSP includes `https://corptb.sharepoint.com` additional frame-ancestor
+
+# STEP 2 — PRIORITIZE
+[PRIO] companion-dev.app.daimlertruck.com,7.9,attack_surface=9,business_value=7,tech_exposure=9,gate_ease=5,cloud_surface=8,freshness=10
+[PRIO] companion.app.daimlertruck.com,7.95,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
+[PRIO] developer.as.api.daimlertruck.com,7.75,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.1,attack_surface=8,business_value=8,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+[PRIO] login-qa.ciam.daimlertruck.com,6.9,attack_surface=8,business_value=7,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+
+# STEP 3 — HYPOTHESES
+[HYP] Companion Dev Auth Bypass via Unwired B2C Provider
+class: MISCONFIG
+asset: companion-dev.app.daimlertruck.com
+confidence: 80
+reasoning: Dev companion has single provider `azure-ad-b2c` (vs prod's two per KB); signin POST returns 302 to `/api/auth/signin?csrf=true` SPA page not B2C authorize URL; object routes `/admin`, `/chat` return 307 to locale SPA shell not B2C; `/api/proxy-http` returns 405 not 307/401; identical build ID to prod means same codebase — config drift likely disables auth middleware in dev
+evidence_needed: Direct access to `/admin`, `/chat`, `/api/proxy-http`, `/api/[...slug]` without auth returning 200 (not 307/401); session creation without B2C redirect
+verify_steps: GET `https://companion-dev.app.daimlertruck.com/admin` — expect 200 SPA shell if auth bypass (currently 307 to /en/admin); GET `https://companion-dev.app.daimlertruck.com/api/proxy-http` with POST body — expect 200/400 not 405; POST `https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true` with valid CSRF — observe if returns B2C authorize URL or SPA redirect
+impact: Auth bypass on dev → same codebase vulns exploitable without credentials; dev/prod config parity violation; potential access to proxy-http SSRF surface, admin panel, widget/chat data — Medium/High
+testability: PASSIVE
+
+[HYP] Companion App Post-Auth BOLA via Object-ID Routes
+class: IDOR
+asset: companion.app.daimlertruck.com
+confidence: 70
+reasoning: Prod companion live (build IqPB_zhGzw2eQTiap3_bK) exposes `/api/proxy-http`, `/api/[...slug]`, `/admin`, `/chat`, `/widget-host` behind Azure AD B2C (client cd34584a, tenant 3db550f0, policy b2c_1a_signin_oidc_row); identical auth discipline to developer portals (PKCE S256, state, same-origin redirect_uri); "proxy-http" and catch-all `/api/[...slug]` suggest downstream API proxying — high-value BOLA surface if object IDs lack ownership validation
+evidence_needed: Authenticated access to object-ID routes; evidence of missing authorization checks when accessing widget/chat/proxy resources across user/tenant boundaries
+verify_steps: AUTH_HELPED: Obtain valid B2C session via `https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid`; POST `https://companion.app.daimlertruck.com/api/proxy-http` with cross-tenant target; GET `/api/widget/<other-user-widgetId>`; GET `/admin/chat/<other-chatId>`
+impact: Cross-user widget/chat data access, proxy SSRF to internal endpoints, admin panel access — High/Critical
+testability: AUTH_HELPED
+
+[HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
+class: OTHER
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: 6 portals expose GraphQL at `/graphql` behind Azure AD B2C (307 on POST with introspection query); portal markets "single source of truth for APIs" with Subscribe card implying mutations (createSubscription, updateApiKey, revokeKey, manageWebhooks); Azure AD B2C per region (as/eu/na) suggests tenant isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential config drift in authorization logic; `/apis/[apiId]` confirmed real endpoint behind auth; identical build manifests across prod/test suggest same GraphQL schema
+evidence_needed: Authenticated GraphQL introspection showing mutation types; mutation examples with tenant-scoped IDs (apiId, subscriptionId, webhookId); evidence of missing authorization checks on mutation resolvers when using cross-tenant IDs
+verify_steps: AUTH_HELPED: Obtain valid Azure AD B2C session; POST `https://developer.as.api.daimlertruck.com/graphql` with `{"query":"{__schema{types{name fields{name args{name type}}}}}"}`; test mutations with cross-tenant IDs (AS vs EU vs NA apiId values)
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+
+# STEP 4 — SELF-CRITIQUE
+[PARKED] Companion App Post-Auth BOLA via Object-ID Routes: confidence 70 but requires valid B2C session (AUTH_HELPED) — no passive verification possible; companion app newly live, schema/operations unknown; keep for post-auth phase
+[PARKED] GraphQL Mutation BOLA Across Tenant Boundaries: confidence 75 but requires valid B2C session (AUTH_HELPED) — no passive verification possible; GraphQL schema unknown without auth; keep for post-auth phase
+[FINAL] 1. Companion Dev Auth Bypass via Unwired B2C Provider (80) — companion-dev.app.daimlertruck.com
+[FINAL] 2. Companion App Post-Auth BOLA via Object-ID Routes (70) — companion.app.daimlertruck.com
+[FINAL] 3. GraphQL Mutation BOLA Across Tenant Boundaries (75) — developer.as.api.daimlertruck.com
+
+# STEP 5 — NEXT ACTION
+[NEXT] PROBE: GET `https://companion-dev.app.daimlertruck.com/admin` with `Accept: text/html` — confirm 307 to `/en/admin` (locale SPA) vs 200 if auth middleware disabled; then GET `https://companion-dev.app.daimlertruck.com/api/proxy-http` with `Content-Type: application/json` and empty POST body — confirm 405 vs 200/400 if auth bypass; then POST `https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true` with fresh CSRF from `/api/auth/csrf` — confirm redirect target (B2C authorize vs SPA)
+
+# STEP 6 — LEARNING
+[LEARN] ACCEPTED companion-dev-auth-config-drift @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` (no NA tenant), signin redirects to SPA not B2C, object routes return locale SPA not B2C, `/api/proxy-http` returns 405 — dev auth middleware disabled/unwired
+[LEARN] ACCEPTED companion-shared-build-identical @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: identical build ID `IqPB_zhGzw2eQTiap3_bK`, identical buildManifest routes — config-only drift
+[LEARN] ACCEPTED companion-dev-callback-in-prod-allowlist @ login.ciam.daimlertruck.com client cd34584a: dev callback URI registered in prod B2C client — misconfig confirmed
+[LEARN] REJECTED companion-dev-weaker-auth-bypass-confirmed: `/admin` and `/chat` still return 307 (to locale SPA), not 200 — auth middleware partially active (locale redirect before auth check); `/api/proxy-http` returns 405 not 200 — no confirmed auth bypass yet
+[LEARN] ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers `azure-ad-b2c-dt` (ROW) + `azure-ad-b2c-dtna` (NA) confirmed via `/api/auth/providers`
+[LEARN] REJECTED companion-prod-na-provider-missing: prod companion uses single client `cd34584a` with ROW policy only — by design per KB (NEW client for companion)
+
+# STEP 7 — RISK
+[RISK] daimler-truck: 78 — 6 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C; newly live companion.app + companion-dev.app add parallel attack surface with proxy-http/widget/admin routes; companion-dev auth config drift (single provider, unwired B2C, locale redirect before auth, 405 on proxy) creates dev/prod parity risk; B2C cross-BU token boundary relies solely on acr/org claims (same issuer/aud); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk masks real endpoints; prod B2C client allowlist includes dev callback URI
