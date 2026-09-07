@@ -290,3 +290,11 @@ www.daimlertruck.com
 - NEW companion-dev.app `/api/proxy-http` returns 405 Method Not Allowed (not 307/401) — API route exists but no auth guard
 - CHANGED Both companion apps share identical build ID `IqPB_zhGzw2eQTiap3_bK` and buildManifest — same codebase, config-only drift
 - CHANGED Dev companion CSP: `frame-ancestors https://*.daimlertruck.com ...` (no companion.app frame-src); Prod CSP includes `https://corptb.sharepoint.com` additional frame-ancestor
+
+## 2026-09-07 06:24:03 UTC
+- NEW companion-dev.app.daimlertruck.com signin POST now redirects to **PRODUCTION B2C** (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri —
+- NEW companion-dev.app.daimlertruck.com/api/proxy-http returns **401 Unauthorized** (not 405) — auth middleware now active on this route
+- NEW companion-dev.app.daimlertruck.com/admin → 307 /en/admin → 307 to B2C login with callbackUrl — auth middleware active on object routes (previously SPA shell)
+- NEW companion-dev.app.daimlertruck.com/chat → 307 /en/chat → 307 to B2C login — same
+- NEW Both companion apps (/api/auth/providers) return **single provider** `azure-ad-b2c` — developer portals have two (`azure-ad-b2c-dt` ROW + `azure-ad-b2c-dtna` NA)
+- CHANGED Prior hypothesis "Companion Dev Auth Bypass via Unwired B2C Provider" (confidence 80) **invalidated** — dev auth now wired to prod B2C, middleware active

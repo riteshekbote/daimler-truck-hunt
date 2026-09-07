@@ -5723,3 +5723,1505 @@ testability: AUTH_HELPED
 
 # STEP 7 — RISK
 [RISK] daimler-truck: 78 — 6 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C; newly live companion.app + companion-dev.app add parallel attack surface with proxy-http/widget/admin routes; companion-dev auth config drift (single provider, unwired B2C, locale redirect before auth, 405 on proxy) creates dev/prod parity risk; B2C cross-BU token boundary relies solely on acr/org claims (same issuer/aud); object-ID routes create BOLA surface across AS/EU/NA tenant boundaries; trailing-slash routing quirk masks real endpoints; prod B2C client allowlist includes dev callback URI
+===== ANALYST nemotron3 2026-09-07 06:24:03 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/admin" -H "Accept: text/html" 2>&1 | head -20
+HTTP/1.1 504 Gateway Time-out
+Server: Microsoft-Azure-Application-Gateway/v2
+Date: Mon, 07 Sep 2026 06:14:15 GMT
+Content-Type: text/html
+Content-Length: 193
+Connection: keep-alive
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/api/proxy-http" -X POST -H "Content-Type: application/json" -d '{}' 2>&1 | head -20
+(no output)
+[0m
+[0m$ [0mcurl -v "https://companion-dev.app.daimlertruck.com/api/proxy-http" -X POST -H "Content-Type: application/json" -d '{}' 2>&1 | head -30
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/api/proxy-http" -X POST -H "Content-Type: application/json" -d '{}' 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> POST /api/proxy-http HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Content-Type: application/json
+> Content-Length: 2
+> 
+} [2 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 401 Unauthorized
+< Date: Mon, 07 Sep 2026 06:15:07 GMT
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 24
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< etag: "12cyln96apxo"
+< vary: Accept-Encoding
+< x-envoy-upstream-service-time: 13
+< server: istio-envoy
+< 
+{ [24 bytes data]
+
+100    26  100    24  100     2     64      5 --:--:-- --:--:-- --:--:--    69
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+{"error":"Unauthorized"}
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/api/auth/csrf" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /api/auth/csrf HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Date: Mon, 07 Sep 2026 06:15:21 GMT
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 80
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< set-cookie: __Host-next-auth.csrf-token=4e680d6578f9cb5a41275504374bb606ac8d4b99913a1aa3f96ba30a6d6d74a6%7C0b5dc2658b196b35911ff5ad18230e4db106fcf72b6f692747ace556ff8beeac; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+< cache-control: private, no-cache, no-store
+< pragma: no-cache
+< expires: 0
+< etag: "qvmcudgl3t28"
+< vary: Accept-Encoding
+< x-envoy-upstream-service-time: 15
+< server: istio-envoy
+< 
+{ [80 bytes data]
+
+100    80  100    80    0     0    159      0 --:--:-- --:--:-- --:--:--   159
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+{"csrfToken":"4e680d6578f9cb5a41275504374bb606ac8d4b99913a1aa3f96ba30a6d6d74a6"}
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" -X POST -H "Content-Type: application/json" -d '{"csrfToken":"4e680d6578f9cb5a41275504374bb606ac8d4b99913a1aa3f96ba30a6d6d74a6","callbackUrl":"https://companion-dev.app.daimlertruck.com/admin"}' -b "__Host-next-auth.csrf-token=4e680d6578f9cb5a41275504374bb606ac8d4b99913a1aa3f96ba30a6d6d74a6%7C0b5dc2658b196b35911ff5ad18230e4db106fcf72b6f692747ace556ff8beeac" 2>&1
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> POST /api/auth/signin/azure-ad-b2c?json=true HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> Cookie: __Host-next-auth.csrf-token=4e680d6578f9cb5a41275504374bb606ac8d4b99913a1aa3f96ba30a6d6d74a6%7C0b5dc2658b196b35911ff5ad18230e4db106fcf72b6f692747ace556ff8beeac
+> Content-Type: application/json
+> Content-Length: 145
+> 
+} [145 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 302 Found
+< Date: Mon, 07 Sep 2026 06:15:37 GMT
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com%2Fadmin; Path=/; HttpOnly; Secure; SameSite=Lax
+< set-cookie: __Secure-next-auth.pkce.code_verifier=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2R0NNIn0..Vkj4IQfBbvJ1iKIy.yh2e3hknheHs-l-klVQ8pCf6JCucahfr8vWjyEE_4IEsQbuBMXoqh-GN1j1mSeHwx1O1uKNb0edAaisA9B-ixE4Y2D8aETms2paog4GFqGRBJonJK_3wVhuzZ9OhReLOGx20ldxe7skKh5N92NaJxGkD7ryBsw5yIbZdQTt7AZJbQCTV1WsxopR36C71u_AyJRJ0BhlK1TQ2TnjArs-n3A.jD2mk-jKv7K6S3cyd0F0pQ; Max-Age=900; Path=/; Expires=Mon, 07 Sep 2026 06:30:37 GMT; HttpOnly; Secure; SameSite=Lax
+< location: https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&scope=openid%20offline_access%20cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https%3A%2F%2Fcompanion-dev.app.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c&json=true&code_challenge=OTDRGTw2g1FFunNlWx4nFI3HG1ILpGS85BFrfNJGdk4&code_challenge_method=S256
+< x-envoy-upstream-service-time: 567
+< server: istio-envoy
+< 
+
+100   145    0     0  100   145      0    137  0:00:01  0:00:01 --:--:--   137
+100   145    0     0  100   145      0    137  0:00:01  0:00:01 --:--:--   137
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/api/auth/providers" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /api/auth/providers HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Date: Mon, 07 Sep 2026 06:15:53 GMT
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 265
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< etag: "yzk1drrpc47d"
+< vary: Accept-Encoding
+< x-envoy-upstream-service-time: 14
+< server: istio-envoy
+< 
+{ [265 bytes data]
+
+100   265  100   265    0     0    710      0 --:--:-- --:--:-- --:--:--   710
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion.app.daimlertruck.com/api/auth/providers" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 9.163.68.3
+*   Trying 9.163.68.3:443...
+* Connected to companion.app.daimlertruck.com (9.163.68.3) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3967 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion.app.daimlertruck.com
+*  start date: Oct 14 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion.app.daimlertruck.com" matched cert's "companion.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /api/auth/providers HTTP/1.1
+> Host: companion.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [281 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [281 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 200 OK
+< Date: Mon, 07 Sep 2026 06:16:26 GMT
+< Content-Type: application/json; charset=utf-8
+< Content-Length: 257
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+< etag: "5eenmt41gk75"
+< vary: Accept-Encoding
+< x-envoy-upstream-service-time: 13
+< server: istio-envoy
+< 
+{ [257 bytes data]
+
+100   257  100   257    0     0    638      0 --:--:-- --:--:-- --:--:--   639
+* Connection #0 to host companion.app.daimlertruck.com left intact
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://developer.as.api.daimlertruck.com/api/auth/providers" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host developer.as.api.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 4.214.165.88
+*   Trying 4.214.165.88:443...
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Connected to developer.as.api.daimlertruck.com (4.214.165.88) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [15 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [4497 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [520 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=as.api.daimlertruck.com
+*  start date: Jan 18 00:00:00 2026 GMT
+*  expire date: Feb 18 23:59:59 2027 GMT
+*  subjectAltName: host "developer.as.api.daimlertruck.com" matched cert's "developer.as.api.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (4096/152 Bits/secBits), signed using sha384WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+} [5 bytes data]
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://developer.as.api.daimlertruck.com/api/auth/providers
+* [HTTP/2] [1] [:method: GET]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: developer.as.api.daimlertruck.com]
+* [HTTP/2] [1] [:path: /api/auth/providers]
+* [HTTP/2] [1] [user-agent: curl/8.5.0]
+* [HTTP/2] [1] [accept: */*]
+} [5 bytes data]
+> GET /api/auth/providers HTTP/2
+> Host: developer.as.api.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [230 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/2 200 
+< x-frame-options: SAMEORIGIN
+< strict-transport-security: max-age=31536000; includeSubDomains; preload
+< content-security-policy: font-src 'self'; img-src 'self' data: https://app.usercentrics.eu; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src https://companion.app.daimlertruck.com
+< content-type: application/json; charset=utf-8
+< etag: "cm20vfitwzfh"
+< content-length: 557
+< vary: Accept-Encoding
+< date: Mon, 07 Sep 2026 06:16:48 GMT
+< 
+{ [557 bytes data]
+
+100   557  100   557    0     0   1109      0 --:--:-- --:--:-- --:--:--  1109
+* Connection #0 to host developer.as.api.daimlertruck.com left intact
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/admin" -H "Accept: text/html" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /admin HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: text/html
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 307 Temporary Redirect
+< Date: Mon, 07 Sep 2026 06:17:10 GMT
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< location: /en/admin
+< x-envoy-upstream-service-time: 11
+< server: istio-envoy
+< 
+{ [9 bytes data]
+
+100     9    0     9    0     0     24      0 --:--:-- --:--:-- --:--:--    24
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+/en/admin
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/en/admin" -H "Accept: text/html" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /en/admin HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: text/html
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 307 Temporary Redirect
+< Date: Mon, 07 Sep 2026 06:17:38 GMT
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< location: /?callbackUrl=%2Fen%2Fadmin
+< x-envoy-upstream-service-time: 9
+< server: istio-envoy
+< 
+{ [27 bytes data]
+
+100    27    0    27    0     0     66      0 --:--:-- --:--:-- --:--:--    66
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+/?callbackUrl=%2Fen%2Fadmin
+[0m
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/chat" -H "Accept: text/html" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /chat HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: text/html
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+* old SSL session ID is stale, removing
+{ [5 bytes data]
+< HTTP/1.1 307 Temporary Redirect
+< Date: Mon, 07 Sep 2026 06:18:02 GMT
+< Transfer-Encoding: chunked
+< Connection: keep-alive
+< content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+< location: /en/chat
+< x-envoy-upstream-service-time: 10
+< server: istio-envoy
+< 
+{ [8 bytes data]
+
+100     8    0     8    0     0     23      0 --:--:-- --:--:-- --:--:--    23
+* Connection #0 to host companion-dev.app.daimlertruck.com left intact
+/en/chat
+[0m
+Now I have current state data. Let me run the full 7-step analysis.
+[0m$ [0mcurl --max-time 10 -v "https://companion-dev.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" 2>&1 | head -50
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion-dev.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 20.224.79.104
+*   Trying 20.224.79.104:443...
+* Connected to companion-dev.app.daimlertruck.com (20.224.79.104) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3973 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+* ALPN: server accepted http/1.1
+* Server certificate:
+*  subject: C=DE; ST=Baden-W�rttemberg; L=Leinfelden-Echterdingen; O=Daimler Truck AG; CN=companion-dev.app.daimlertruck.com
+*  start date: Oct 13 00:00:00 2025 GMT
+*  expire date: Oct 13 23:59:59 2026 GMT
+*  subjectAltName: host "companion-dev.app.daimlertruck.com" matched cert's "companion-dev.app.daimlertruck.com"
+*  issuer: C=US; O=DigiCert Inc; CN=DigiCert Global G2 TLS RSA SHA256 2020 CA1
+*  SSL certificate verify ok.
+*   Certificate level 0: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 1: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+*   Certificate level 2: Public key type RSA (2048/112 Bits/secBits), signed using sha256WithRSAEncryption
+* using HTTP/1.x
+} [5 bytes data]
+> GET /_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js HTTP/1.1
+> Host: companion-dev.app.daimlertruck.com
+> User-Agent: curl/8.5.0
+> Accept: */*
+> 
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Newsession Ticket (4):
+{ [297 bytes data]
+[0m
+[0m$ [0mcurl --max-time 10 "https://companion-dev.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:08 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:09 --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0
+curl: (28) Operation timed out after 10002 milliseconds with 0 bytes received
+[0m
+[0m$ [0mcurl --max-time 10 "https://companion.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100   951  100   951    0     0   2537      0 --:--:-- --:--:-- --:--:--  2542
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/27ervvy-i6vjw.js"
+  ],
+  "/_error": [
+    "static/chunks/11ti9bhmhzrrf.js"
+  ],
+  "/admin": [
+    "static/chunks/06rh8rhi9g6o5.js"
+  ],
+  "/chat": [
+    "static/chunks/0wqwoix56fq47.js"
+  ],
+  "/explore-topics": [
+    "static/chunks/0xp4xxecowpgm.js"
+  ],
+  "/how-to-use": [
+    "static/chunks/1-n9v5dn9pa8a.js"
+  ],
+  "/terms-of-use": [
+    "static/chunks/3ojq-wowy2iig.js"
+  ],
+  "/widget-host": [
+    "static/chunks/0ad3zkc330x_r.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/_app",
+    "/_error",
+    "/admin",
+    "/api/auth/force-logout",
+    "/api/auth/[...nextauth]",
+    "/api/health",
+    "/api/proxy-http",
+    "/api/ready",
+    "/api/[...slug]",
+    "/chat",
+    "/explore-topics",
+    "/how-to-use",
+    "/terms-of-use",
+    "/widget-host"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+[0m
+[0m$ [0mcurl --max-time 10 "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  3224  100  3224    0     0  12283      0 --:--:-- --:--:-- --:--:-- 12305
+{
+  "issuer": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/v2.0/",
+  "authorization_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/logout",
+  "jwks_uri": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "clientId",
+    "oid",
+    "directoryId",
+    "uid",
+    "sub",
+    "tid",
+    "idp",
+    "TokenProvider",
+    "AppClientID",
+    "OIDCScopes",
+    "OriginalAppClientID",
+    "AppRoles",
+    "name",
+    "given_name",
+    "family_name",
+    "amr",
+    "adSid",
+    "adUpn",
+    "authorizations",
+    "businessAllocationLevel1",
+    "businessCategory",
+    "city",
+    "communities",
+    "companyId",
+    "costCenter",
+    "country",
+    "dealerHomeOrganization",
+    "dealerHomeOrganizationAlias",
+    "department",
+    "email",
+    "emailAttribute",
+    "employeeNumber",
+    "employeeType",
+    "entitlements",
+    "externalEmail",
+    "faxNumber",
+    "givenNameInNationalLanguage",
+    "givenNamePart",
+    "givenPhonenumber",
+    "groupType",
+    "homeOrganization",
+    "identStatusList",
+    "internalPostCode",
+    "locationId",
+    "locationName",
+    "locationRoomNumber",
+    "mailStatus",
+    "managementLevel",
+    "middleInitial",
+    "mobile",
+    "namePrefix",
+    "nonScopedEntitlements",
+    "organizationalUnit",
+    "organizationalStatus",
+    "organizations",
+    "organizationStructureId",
+    "phoneNumber",
+    "phoneNumberVerified",
+    "plant1",
+    "plant2",
+    "postalCode",
+    "preferredLanguage",
+    "securityBlocked",
+    "scopedEntitlements",
+    "sourceProcess",
+    "state",
+    "street",
+    "structureId",
+    "supervisor",
+    "supervisorDeputy",
+    "supplierName",
+    "supplierOrganizationIds",
+    "supplierScopedEntitlements",
+    "surnameInNationalLanguage",
+    "surnamePart",
+    "suspended",
+    "TechUser",
+    "title",
+    "validFrom",
+    "validOrganization",
+    "validTo",
+    "workingOrganization",
+    "iss",
+    "iat",
+    "exp",
+    "aud",
+    "acr",
+    "nonce",
+    "auth_time"
+  ]
+}
+[0m
+[0m$ [0mcurl --max-time 10 "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  3637  100  3637    0     0  11740      0 --:--:-- --:--:-- --:--:-- 11770
+{
+  "issuer": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/v2.0/",
+  "authorization_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/oauth2/v2.0/logout",
+  "jwks_uri": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_noam/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "sub",
+    "IdentityType",
+    "isXOrg",
+    "issuerUserId",
+    "signinname",
+    "TokenProvider",
+    "tid",
+    "OIDCScopes",
+    "idp",
+    "amr",
+    "email",
+    "mobile",
+    "otherMails",
+    "UserAppRoles",
+    "city",
+    "phone_number",
+    "address",
+    "given_name",
+    "family_name",
+    "name",
+    "middle_name",
+    "UserID",
+    "uid",
+    "SM_USER",
+    "PrimaryOrgCode",
+    "AdditionalBusinessRoles",
+    "PrimaryBusinessRole",
+    "Zipcode",
+    "State",
+    "c",
+    "UserVisibilities",
+    "business_roles",
+    "visibilities",
+    "UserType",
+    "corptbUpn",
+    "organizationUnit",
+    "companyCode",
+    "departmentName",
+    "companyName",
+    "Plant1",
+    "departmentAbbreviation",
+    "Plant2",
+    "mobilePhone",
+    "managementLevel",
+    "globalCostCenter",
+    "employeeType",
+    "AppRoles",
+    "cn_Org",
+    "createTimeStamp_Org",
+    "FTLOrgAlternateWarrantyCode",
+    "FTLOrgCAN_Org",
+    "FTLOrgDCVCM",
+    "FTLOrgDDCID",
+    "FTLOrgDMSType_Org",
+    "FTLOrgDWCSOC",
+    "FTLOrgGSSNCompanyID",
+    "FTLOrgGSSNOutletID",
+    "FTLOrgIsActive",
+    "FTLOrgIsDealerSponsored_Org",
+    "FTLOrgIsDelegated",
+    "FTLOrgIsExport_Org",
+    "FTLOrgIsITAR_Org",
+    "FTLOrgIsMexico_Org",
+    "FTLOrgIsOwnershipGroup",
+    "FTLOrgIsPDIcenter",
+    "FTLOrgIsWhollyOwned_Org",
+    "FTLOrgJustification",
+    "FTLOrgLocation_Org",
+    "FTLOrgParent",
+    "FTLOrgPCAN_Org",
+    "FTLOrgPrimaryContactEmail",
+    "FTLOrgPrimaryContactName",
+    "FTLOrgSapCode",
+    "FTLOrgSOC",
+    "FTLOrgTBB",
+    "FTLOrgTSSOC",
+    "modifyTimeStamp_Org",
+    "FTLOrgType_Org",
+    "FTLOrgDescription",
+    "FTLOrgAlternateCBCode",
+    "FTLOrgAlternatePCAN",
+    "FTLOrgBrands_Org",
+    "FTLOrgCertifications",
+    "FTLOrgChildren",
+    "FTLOrgCustomerPrograms_Org",
+    "FTLOrgDealerPrograms_Org",
+    "FTLOrgDealerTypes_Org",
+    "FTLOrgDistributorPrograms_Org",
+    "FTLOrgPilotPrograms_Org",
+    "FTLOrgVehicleOwners",
+    "FTLUserVisibilities_Org",
+    "l_Org",
+    "objectClass_Org",
+    "street_Org",
+    "telephoneNumber_Org",
+    "iss",
+    "iat",
+    "exp",
+    "aud",
+    "acr",
+    "nonce",
+    "auth_time"
+  ]
+}
+[0m
+[0m$ [0mcurl --max-time 10 "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  3242  100  3242    0     0  19724      0 --:--:-- --:--:-- --:--:-- 19768
+{
+  "issuer": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/",
+  "authorization_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/logout",
+  "jwks_uri": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "clientId",
+    "oid",
+    "directoryId",
+    "uid",
+    "sub",
+    "tid",
+    "idp",
+    "TokenProvider",
+    "AppClientID",
+    "OIDCScopes",
+    "OriginalAppClientID",
+    "AppRoles",
+    "name",
+    "given_name",
+    "family_name",
+    "amr",
+    "adSid",
+    "adUpn",
+    "authorizations",
+    "businessAllocationLevel1",
+    "businessCategory",
+    "city",
+    "communities",
+    "companyId",
+    "costCenter",
+    "country",
+    "dealerHomeOrganization",
+    "dealerHomeOrganizationAlias",
+    "department",
+    "email",
+    "emailAttribute",
+    "employeeNumber",
+    "employeeType",
+    "entitlements",
+    "externalEmail",
+    "faxNumber",
+    "givenNameInNationalLanguage",
+    "givenNamePart",
+    "givenPhonenumber",
+    "groupType",
+    "homeOrganization",
+    "identStatusList",
+    "internalPostCode",
+    "locationId",
+    "locationName",
+    "locationRoomNumber",
+    "mailStatus",
+    "managementLevel",
+    "middleInitial",
+    "mobile",
+    "namePrefix",
+    "nonScopedEntitlements",
+    "organizationalUnit",
+    "organizationalStatus",
+    "organizations",
+    "organizationStructureId",
+    "phoneNumber",
+    "phoneNumberVerified",
+    "plant1",
+    "plant2",
+    "postalCode",
+    "preferredLanguage",
+    "securityBlocked",
+    "scopedEntitlements",
+    "sourceProcess",
+    "state",
+    "street",
+    "structureId",
+    "supervisor",
+    "supervisorDeputy",
+    "supplierName",
+    "supplierOrganizationIds",
+    "supplierScopedEntitlements",
+    "surnameInNationalLanguage",
+    "surnamePart",
+    "suspended",
+    "TechUser",
+    "title",
+    "validFrom",
+    "validOrganization",
+    "validTo",
+    "workingOrganization",
+    "iss",
+    "iat",
+    "exp",
+    "aud",
+    "acr",
+    "nonce",
+    "auth_time"
+  ]
+}
+[0m
+[0m$ [0mcurl --max-time 10 "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration" 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  3655  100  3655    0     0  24325      0 --:--:-- --:--:-- --:--:-- 24366
+{
+  "issuer": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/",
+  "authorization_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/logout",
+  "jwks_uri": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "sub",
+    "IdentityType",
+    "isXOrg",
+    "issuerUserId",
+    "signinname",
+    "TokenProvider",
+    "tid",
+    "OIDCScopes",
+    "idp",
+    "amr",
+    "email",
+    "mobile",
+    "otherMails",
+    "UserAppRoles",
+    "city",
+    "phone_number",
+    "address",
+    "given_name",
+    "family_name",
+    "name",
+    "middle_name",
+    "UserID",
+    "uid",
+    "SM_USER",
+    "PrimaryOrgCode",
+    "AdditionalBusinessRoles",
+    "PrimaryBusinessRole",
+    "Zipcode",
+    "State",
+    "c",
+    "UserVisibilities",
+    "business_roles",
+    "visibilities",
+    "UserType",
+    "corptbUpn",
+    "organizationUnit",
+    "companyCode",
+    "departmentName",
+    "companyName",
+    "Plant1",
+    "departmentAbbreviation",
+    "Plant2",
+    "mobilePhone",
+    "managementLevel",
+    "globalCostCenter",
+    "employeeType",
+    "AppRoles",
+    "cn_Org",
+    "createTimeStamp_Org",
+    "FTLOrgAlternateWarrantyCode",
+    "FTLOrgCAN_Org",
+    "FTLOrgDCVCM",
+    "FTLOrgDDCID",
+    "FTLOrgDMSType_Org",
+    "FTLOrgDWCSOC",
+    "FTLOrgGSSNCompanyID",
+    "FTLOrgGSSNOutletID",
+    "FTLOrgIsActive",
+    "FTLOrgIsDealerSponsored_Org",
+    "FTLOrgIsDelegated",
+    "FTLOrgIsExport_Org",
+    "FTLOrgIsITAR_Org",
+    "FTLOrgIsMexico_Org",
+    "FTLOrgIsOwnershipGroup",
+    "FTLOrgIsPDIcenter",
+    "FTLOrgIsWhollyOwned_Org",
+    "FTLOrgJustification",
+    "FTLOrgLocation_Org",
+    "FTLOrgParent",
+    "FTLOrgPCAN_Org",
+    "FTLOrgPrimaryContactEmail",
+    "FTLOrgPrimaryContactName",
+    "FTLOrgSapCode",
+    "FTLOrgSOC",
+    "FTLOrgTBB",
+    "FTLOrgTSSOC",
+    "modifyTimeStamp_Org",
+    "FTLOrgType_Org",
+    "FTLOrgDescription",
+    "FTLOrgAlternateCBCode",
+    "FTLOrgAlternatePCAN",
+    "FTLOrgBrands_Org",
+    "FTLOrgCertifications",
+    "FTLOrgChildren",
+    "FTLOrgCustomerPrograms_Org",
+    "FTLOrgDealerPrograms_Org",
+    "FTLOrgDealerTypes_Org",
+    "FTLOrgDistributorPrograms_Org",
+    "FTLOrgPilotPrograms_Org",
+    "FTLOrgVehicleOwners",
+    "FTLUserVisibilities_Org",
+    "l_Org",
+    "objectClass_Org",
+    "street_Org",
+    "telephoneNumber_Org",
+    "iss",
+    "iat",
+    "exp",
+    "aud",
+    "acr",
+    "nonce",
+    "auth_time"
+  ]
+}
+[0m
+Now I have all current-state data. Let me produce the full 7-step analysis.
+
+---
+
+### STEP 1 — DELTA
+
+[NEW] companion-dev.app.daimlertruck.com signin POST now redirects to **PRODUCTION B2C** (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri — previously reported as unwired/staging redirect to SPA shell
+[NEW] companion-dev.app.daimlertruck.com/api/proxy-http returns **401 Unauthorized** (not 405) — auth middleware now active on this route
+[NEW] companion-dev.app.daimlertruck.com/admin → 307 /en/admin → 307 to B2C login with callbackUrl — auth middleware active on object routes (previously SPA shell)
+[NEW] companion-dev.app.daimlertruck.com/chat → 307 /en/chat → 307 to B2C login — same
+[NEW] Both companion apps (/api/auth/providers) return **single provider** `azure-ad-b2c` — developer portals have two (`azure-ad-b2c-dt` ROW + `azure-ad-b2c-dtna` NA)
+[CHANGED] Prior hypothesis "Companion Dev Auth Bypass via Unwired B2C Provider" (confidence 80) **invalidated** — dev auth now wired to prod B2C, middleware active
+[CONFIRMED] Prod B2C tenant 3db550f0: ROW + NOAM policies share **identical issuer** (`.../3db550f0-.../v2.0/`) — cross-BU boundary only via `acr` + org claims
+[CONFIRMED] Staging B2C tenant 88f558f5: ROW + NOAM also share identical issuer — same pattern
+[CONFIRMED] NOAM claim set includes **dealer-network PII**: FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, telephoneNumber_Org, street_Org, FTLOrgSapCode, FTLOrgSOC, FTLOrgTBB
+[CONFIRMED] companion-dev callback URI registered in **prod B2C client cd34584a** allowlist (AADB2C90006 error leak) — misconfig persists
+[CONFIRMED] buildManifest identical prod+dev companion (build ID IqPB_zhGzw2eQTiap3_bK) — config-only drift, same codebase
+
+---
+
+### STEP 2 — PRIORITIZE
+
+[PRIO] companion-dev.app.daimlertruck.com,7.50,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=10
+[PRIO] companion.app.daimlertruck.com,7.95,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
+[PRIO] developer.as.api.daimlertruck.com,7.75,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] login.ciam.daimlertruck.com,7.10,attack_surface=8,business_value=8,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+[PRIO] login-qa.ciam.daimlertruck.com,6.90,attack_surface=8,business_value=7,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+
+---
+
+### STEP 3 — HYPOTHESES
+
+[HYP] B2C Cross-BU Token Boundary Abuse via Shared Issuer
+class: AUTH
+asset: login.ciam.daimlertruck.com (prod) + login-qa.ciam.daimlertruck.com (staging)
+confidence: 75
+reasoning: Both prod (3db550f0) and staging (88f558f5) B2C tenants issue ROW and NOAM policies under **identical issuer URI** per tenant. Token validation by downstream APIs (developer portals, companion apps, APIM gateways) likely checks issuer+aud+signature only; `acr` claim (b2c_1a_signin_oidc_row vs b2c_1a_signin_oidc_noam) and org-scoped claims (FTLOrg*) are sole BU differentiators. NOAM claim superset includes dealer PII (contact email/name, phone, address, SAP codes). Companion apps use single client cd34584a with ROW policy only; developer portals use dual clients (205f35f7 ROW, c387a5ab NA). If any API validates only issuer+aud without enforcing `acr`/`org` claim requirements, ROW token could access NOAM-scoped resources.
+evidence_needed: Downstream API (developer portal /api/*, companion /api/proxy-http, APIM gateways) token validation logic showing missing `acr`/`org` claim enforcement; or ability to request NOAM scope from ROW client (unlikely — client-scoped)
+verify_steps: PASSIVE: Compare JWKS across policies (same kid set?); AUTH_HELPED: Obtain valid ROW token, present to NOAM-scoped endpoint (e.g., developer portal NA region /apis/[apiId] with NA apiId), observe 403 vs 200; test token introspection at userinfo endpoint for claim set
+impact: Cross-business-unit token acceptance → ROW employee accesses NOAM dealer PII (contact details, SAP codes, org hierarchy) or NOAM partner accesses ROW internal APIs → High/Critical (PII + privilege escalation across BU)
+testability: AUTH_HELPED
+
+[HYP] Companion App Post-Auth BOLA via /api/proxy-http and /api/[...slug] Catch-All
+class: IDOR
+asset: companion.app.daimlertruck.com (prod) + companion-dev.app.daimlertruck.com (dev)
+confidence: 70
+reasoning: BuildManifest reveals 6 API routes including `/api/proxy-http` (POST-only, 405 on GET) and `/api/[...slug]` (catch-all) — both return **401 not 307**, proving they are **middleware-exempt** first-class handlers (not blanket auth). `/api/proxy-http` name suggests downstream HTTP proxying (SSRF surface). `/api/[...slug]` catch-all suggests dynamic routing to backend services. Auth discipline matches developer portals (PKCE S256, state, same-origin redirect_uri, B2C client cd34584a). Object routes `/admin`, `/chat`, `/widget-host` also behind auth. Identical build ID on dev+prod means same handler code.
+evidence_needed: Authenticated access to `/api/proxy-http` with target parameter pointing to cross-tenant/internal endpoints; `/api/[...slug]` with object IDs (widgetId, chatId, conversationId) belonging to other users/tenants; evidence of missing ownership checks in proxy/handler logic
+verify_steps: AUTH_HELPED: Obtain valid B2C session via prod authorize (client cd34584a, policy b2c_1a_signin_oidc_row, redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c); POST /api/proxy-http with JSON body targeting internal metadata (169.254.169.254) or cross-tenant API; GET /api/widget/<other-user-id>, /api/chat/<other-chat-id>; test dev companion same endpoints (same build, auth now wired to prod B2C)
+impact: Cross-user widget/chat data access, SSRF to cloud metadata/internal services, admin panel bypass → High/Critical
+testability: AUTH_HELPED
+
+[HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
+class: OTHER
+asset: developer.as.api.daimlertruck.com (prod AS) + developer.eu.api.daimlertruck.com (prod EU) + developer.na.api.daimlertruck.com (prod NA)
+confidence: 75
+reasoning: 6 portals expose GraphQL at `/graphql` and `/api/graphql` behind Azure AD B2C (307 on POST introspection). BuildManifest reveals object-ID routes: `/apis/[apiId]`, `/apps/[appId]/subscriptions/[subscriptionId]`, `/teams/[teamId]/system-users/associate`, `/products/[productId]/subscribe`. Portal UI shows "Subscribe" card implying mutations (createSubscription, updateApiKey, revokeKey, manageWebhooks). Dual B2C providers per portal: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab). Separate regional tenants suggest isolation; build ID divergence (prod JCvrnrykV_KYBk7pu0Npq vs test JVF_tXHlhCfZQOkT-cULr) indicates separate deployments with potential authz config drift. Identical build manifests across prod/test suggest same GraphQL schema.
+evidence_needed: Authenticated GraphQL introspection showing mutation types with tenant-scoped ID arguments (apiId, subscriptionId, webhookId, teamId); mutation examples from client bundle; evidence of missing authorization checks when using cross-tenant IDs (AS user mutating EU apiId)
+verify_steps: AUTH_HELPED: Obtain valid B2C session for AS portal (client 205f35f7, policy b2c_1a_signin_oidc_row); POST /graphql with `{"query":"{__schema{mutationType{fields{name args{name type{name kind ofType{name}}}}}}}"}`; enumerate mutations; test createSubscription/updateApiKey with EU/NA apiId values; repeat for EU/NA portals with cross-region IDs
+impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+
+---
+
+### STEP 4 — SELF-CRITIQUE
+
+[PARKED] Companion Dev Auth Bypass via Unwired B2C Provider: **confidence 80 → 0** — dev auth now wired to prod B2C, middleware active (401 on proxy-http, 307 to B2C on object routes). Previous evidence stale.
+[FINAL] 1. B2C Cross-BU Token Boundary Abuse via Shared Issuer (75) — login.ciam.daimlertruck.com / login-qa.ciam.daimlertruck.com
+[FINAL] 2. GraphQL Mutation BOLA Across Tenant Boundaries (75) — developer.as.api.daimlertruck.com
+[FINAL] 3. Companion App Post-Auth BOLA via /api/proxy-http and /api/[...slug] (70) — companion.app.daimlertruck.com
+
+---
+
+### STEP 5 — NEXT ACTION
+
+[NEXT] HUMAN: Request two admin-provisioned staging identities (ROW + NOAM) from bugs.olivermaicher.eu — unblocks FINAL #1 (cross-BU token test) and FINAL #2 (GraphQL mutation test). Both require valid B2C sessions; dev companion now wired to PROD B2C so staging identities needed for safe testing.
+
+---
+
+### STEP 6 — LEARNING
+
+[LEARN] REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri; /api/proxy-http returns 401; /admin, /chat redirect to B2C via locale — auth middleware active, prior "unwired" finding stale
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com: ROW+NOAM policies per tenant share **identical issuer URI**; only `acr` + org-scoped claims differentiate BU; NOAM claim superset includes dealer PII (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, telephoneNumber_Org, street_Org, FTLOrgSapCode)
+[LEARN] ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` now initiates PKCE-protected flow to **prod B2C tenant** (not staging) — config drift resolved in auth wiring but callback allowlist misconfig persists
+[LEARN] ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab) — regional tenant separation at identity layer
+[LEARN] ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single `azure-ad-b2c` provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
+[LEARN] REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+
+---
+
+### STEP 7 — RISK
+
+[RISK] daimler-truck: 78 — 6 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C (dual providers ROW/NA); companion.app + companion-dev.app add parallel surface with proxy-http/[...slug] catch-all routes (middleware-exempt, SSRF/BOLA candidates); **prod B2C tenant issues ROW+NOAM under same issuer** — cross-BU token boundary relies solely on acr/org claim validation by downstream APIs; companion-dev callback registered in prod B2C client allowlist; identical build manifests across prod/dev companion and across prod/test developer portals suggest same authz logic — any flaw replicates widely
