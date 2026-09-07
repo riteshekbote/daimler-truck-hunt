@@ -197,3 +197,29 @@ reasoning: pgvector admin routes exposed when DEBUG_RAG_API=True. If set in prod
 impact: Medium – admin-level access to vector database management
 verify_steps: Check if any production deployment has DEBUG_RAG_API=true; check if pgvector admin endpoints respond
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-07 06:14:52 UTC
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/app/middleware.py:18-21
+confidence: 65
+reasoning: `security_middleware` checks `os.getenv("JWT_SECRET")`. If unset, it logs a warning and calls `return await next_middleware_call()` — skipping all auth validation and forwarding the request unauthenticated. This is the upstream default; if deployed without JWT_SECRET env var, the entire RAG API is unauthenticated. No indication Daimler has modified this.
+impact: HIGH — full unauthenticated access to document/query endpoints if JWT_SECRET not configured
+verify_steps: Deploy SRC-rag_api without JWT_SECRET env var; hit any protected endpoint without a Bearer token — should succeed.
+class: SECRET
+asset: daimlertruck/SRC-rag_api/app/config.py:57-59, docker-compose.yaml:7, db-compose.yaml:9
+confidence: 70
+reasoning: `POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD", "mypassword")` and docker-compose files hardcode `POSTGRES_PASSWORD: mypassword`, `POSTGRES_USER: myuser`, `POSTGRES_DB: mydatabase`. These are upstream defaults. If Daimler deploys without overriding these, the database is wide open with known credentials.
+impact: MEDIUM — database compromise if deployed with defaults; low risk since these are clearly example values
+verify_steps: Check if any live Daimler deployment references these compose files without overriding env vars; inspect `docker-compose.yaml` in the deployed environment.
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:75-79
+confidence: 55
+reasoning: `CORSMiddleware(allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])` — allows any origin to make credentialed cross-origin requests. This is the upstream default. Combined with the JWT bypass above, this is low-risk; alone it enables CSRF-like attacks against authenticated endpoints.
+impact: LOW — only relevant if JWT_SECRET is properly configured and CORS isn't tightened for production
+verify_steps: Deploy with JWT_SECRET set; make cross-origin requests from arbitrary origins with cookies/Authorization headers.
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:93
+confidence: 40
+reasoning: `pgvector_routes.router` is only included `if debug_mode` (line 93). However, the `/docs` and `/openapi.json` endpoints are always exposed (middleware.py:15). The debug pgvector routes themselves are properly gated, but OpenAPI spec exposure in production is a minor info-disclosure risk.
+impact: LOW — exposes API surface to attackers for reconnaissance
+verify_steps: Hit `/openapi.json` on a production deployment; check if it reveals internal endpoints.
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
