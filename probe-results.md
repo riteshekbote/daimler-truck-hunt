@@ -239,3 +239,6 @@ https://developer.as.api.daimlertruck.com/graphql` -> 200 len=196649
 
 ## 2026-09-07 06:24:05 UTC
 https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-07 12:54:30 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400

@@ -1,15 +1,17 @@
-## 2026-09-07 06:23:53 UTC [target] (model nemotron3)
+## 2026-09-07 12:54:20 UTC [target] (model nemotron3)
 [NEW] companion-dev.app.daimlertruck.com signin POST now redirects to **PRODUCTION B2C** (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri — previously reported as unwired/staging redirect to SPA shell
 [NEW] companion-dev.app.daimlertruck.com/api/proxy-http returns **401 Unauthorized** (not 405) — auth middleware now active on this route
 [NEW] companion-dev.app.daimlertruck.com/admin → 307 /en/admin → 307 to B2C login with callbackUrl — auth middleware active on object routes (previously SPA shell)
 [NEW] companion-dev.app.daimlertruck.com/chat → 307 /en/chat → 307 to B2C login — same
 [NEW] Both companion apps (/api/auth/providers) return **single provider** `azure-ad-b2c` — developer portals have two (`azure-ad-b2c-dt` ROW + `azure-ad-b2c-dtna` NA)
 [CHANGED] Prior hypothesis "Companion Dev Auth Bypass via Unwired B2C Provider" (confidence 80) **invalidated** — dev auth now wired to prod B2C, middleware active
-[PRIO] companion-dev.app.daimlertruck.com,7.50,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=10
-[PRIO] companion.app.daimlertruck.com,7.95,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
-[PRIO] developer.as.api.daimlertruck.com,7.75,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
 [PRIO] login.ciam.daimlertruck.com,7.10,attack_surface=8,business_value=8,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
 [PRIO] login-qa.ciam.daimlertruck.com,6.90,attack_surface=8,business_value=7,tech_exposure=7,gate_ease=2,cloud_surface=8,freshness=8
+[PRIO] developer.as.api.daimlertruck.com,7.75,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] companion.app.daimlertruck.com,7.95,attack_surface=9,business_value=9,tech_exposure=8,gate_ease=3,cloud_surface=8,freshness=10
+[PRIO] companion-dev.app.daimlertruck.com,7.50,attack_surface=9,business_value=7,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=10
+[PRIO] developer.eu.api.daimlertruck.com,7.55,attack_surface=9,business_value=8,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
+[PRIO] developer.na.api.daimlertruck.com,7.55,attack_surface=9,business_value=8,tech_exposure=8,gate_ease=3,cloud_surface=7,freshness=9
 [HYP] B2C Cross-BU Token Boundary Abuse via Shared Issuer
 class: AUTH
 asset: login.ciam.daimlertruck.com (prod) + login-qa.ciam.daimlertruck.com (staging)
@@ -19,15 +21,6 @@ evidence_needed: Downstream API (developer portal /api/*, companion /api/proxy-h
 verify_steps: PASSIVE: Compare JWKS across policies (same kid set?); AUTH_HELPED: Obtain valid ROW token, present to NOAM-scoped endpoint (e.g., developer portal NA region /apis/[apiId] with NA apiId), observe 403 vs 200; test token introspection at userinfo endpoint for claim set
 impact: Cross-business-unit token acceptance → ROW employee accesses NOAM dealer PII (contact details, SAP codes, org hierarchy) or NOAM partner accesses ROW internal APIs → High/Critical (PII + privilege escalation across BU)
 testability: AUTH_HELPED
-[HYP] Companion App Post-Auth BOLA via /api/proxy-http and /api/[...slug] Catch-All
-class: IDOR
-asset: companion.app.daimlertruck.com (prod) + companion-dev.app.daimlertruck.com (dev)
-confidence: 70
-reasoning: BuildManifest reveals 6 API routes including `/api/proxy-http` (POST-only, 405 on GET) and `/api/[...slug]` (catch-all) — both return **401 not 307**, proving they are **middleware-exempt** first-class handlers (not blanket auth). `/api/proxy-http` name suggests downstream HTTP proxying (SSRF surface). `/api/[...slug]` catch-all suggests dynamic routing to backend services. Auth discipline matches developer portals (PKCE S256, state, same-origin redirect_uri, B2C client cd34584a). Object routes `/admin`, `/chat`, `/widget-host` also behind auth. Identical build ID on dev+prod means same handler code.
-evidence_needed: Authenticated access to `/api/proxy-http` with target parameter pointing to cross-tenant/internal endpoints; `/api/[...slug]` with object IDs (widgetId, chatId, conversationId) belonging to other users/tenants; evidence of missing ownership checks in proxy/handler logic
-verify_steps: AUTH_HELPED: Obtain valid B2C session via prod authorize (client cd34584a, policy b2c_1a_signin_oidc_row, redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c); POST /api/proxy-http with JSON body targeting internal metadata (169.254.169.254) or cross-tenant API; GET /api/widget/<other-user-id>, /api/chat/<other-chat-id>; test dev companion same endpoints (same build, auth now wired to prod B2C)
-impact: Cross-user widget/chat data access, SSRF to cloud metadata/internal services, admin panel bypass → High/Critical
-testability: AUTH_HELPED
 [HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
 class: OTHER
 asset: developer.as.api.daimlertruck.com (prod AS) + developer.eu.api.daimlertruck.com (prod EU) + developer.na.api.daimlertruck.com (prod NA)
@@ -36,6 +29,15 @@ reasoning: 6 portals expose GraphQL at `/graphql` and `/api/graphql` behind Azur
 evidence_needed: Authenticated GraphQL introspection showing mutation types with tenant-scoped ID arguments (apiId, subscriptionId, webhookId, teamId); mutation examples from client bundle; evidence of missing authorization checks when using cross-tenant IDs (AS user mutating EU apiId)
 verify_steps: AUTH_HELPED: Obtain valid B2C session for AS portal (client 205f35f7, policy b2c_1a_signin_oidc_row); POST /graphql with `{"query":"{__schema{mutationType{fields{name args{name type{name kind ofType{name}}}}}}}"}`; enumerate mutations; test createSubscription/updateApiKey with EU/NA apiId values; repeat for EU/NA portals with cross-region IDs
 impact: Full API schema enumeration → unauthorized mutations (API subscription takeover, key rotation, webhook hijacking, BOLA across AS/EU/NA tenant APIs) → Critical/High
+testability: AUTH_HELPED
+[HYP] Companion App Post-Auth BOLA via /api/proxy-http and /api/[...slug] Catch-All
+class: IDOR
+asset: companion.app.daimlertruck.com (prod) + companion-dev.app.daimlertruck.com (dev)
+confidence: 70
+reasoning: BuildManifest reveals 6 API routes including `/api/proxy-http` (POST-only, 405 on GET) and `/api/[...slug]` (catch-all) — both return **401 not 307**, proving they are **middleware-exempt** first-class handlers (not blanket auth). `/api/proxy-http` name suggests downstream HTTP proxying (SSRF surface). `/api/[...slug]` catch-all suggests dynamic routing to backend services. Auth discipline matches developer portals (PKCE S256, state, same-origin redirect_uri, B2C client cd34584a). Object routes `/admin`, `/chat`, `/widget-host` also behind auth. Identical build ID on dev+prod means same handler code.
+evidence_needed: Authenticated access to `/api/proxy-http` with target parameter pointing to cross-tenant/internal endpoints; `/api/[...slug]` with object IDs (widgetId, chatId, conversationId) belonging to other users/tenants; evidence of missing ownership checks in proxy/handler logic
+verify_steps: AUTH_HELPED: Obtain valid B2C session via prod authorize (client cd34584a, policy b2c_1a_signin_oidc_row, redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c); POST /api/proxy-http with JSON body targeting internal metadata (169.254.169.254) or cross-tenant API; GET /api/widget/<other-user-id>, /api/chat/<other-chat-id>; test dev companion same endpoints (same build, auth now wired to prod B2C)
+impact: Cross-user widget/chat data access, SSRF to cloud metadata/internal services, admin panel bypass → High/Critical
 testability: AUTH_HELPED
 [PARKED] Companion Dev Auth Bypass via Unwired B2C Provider: **confidence 80 → 0** — dev auth now wired to prod B2C, middleware active (401 on proxy-http, 307 to B2C on object routes). Previous evidence stale.
 [FINAL] 1. B2C Cross-BU Token Boundary Abuse via Shared Issuer (75) — login.ciam.daimlertruck.com / login-qa.ciam.daimlertruck.com
