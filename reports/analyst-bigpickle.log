@@ -10042,3 +10042,505 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] daimler-truck: 78. Steady. Anonymous surface re-verified closed this cycle (docs auth-gated; broker root 404 on both prod+staging; no new sibling companion hosts). Exposure concentrates on three AUTH_HELPED hypotheses — cross-BU token boundary (identical issuer/jwks, only acr/org gating), GraphQL object-ID BOLA across regional portals, companion proxy-http SSRF — all blocked on two staging identities. Only currently reportable item remains the info-level misconfig (dev companion callback registered in prod B2C client cd34584a allowlist). No customer/employee data accessed, no auth bypass, no mutating requests; 7 read-only GETs + 9 DNS resolutions this cycle, <=1 rps.
+===== ANALYST bigpickle 2026-09-07 21:42:06 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mdig +short developer.tst.as.api.daimlertruck.com A; echo "---"; dig +short developer.tst.as.api.daimlertruck.com CNAME; echo "---exit:$?"
+20.18.197.184
+---
+---exit:0
+[0m
+[0m$ [0mfor h in developer.as.api.daimlertruck.com developer.na.api.daimlertruck.com developer.eu.api.daimlertruck.com developer.dev.na.api.daimlertruck.com developer.tst.eu.api.daimlertruck.com developer.tst.na.api.daimlertruck.com developer.tst.as.api.daimlertruck.com developer.dev.as.api.daimlertruck.com developer.dev.eu.api.daimlertruck.com developer.as.dev.api.daimlertruck.com developer.as.tst.api.daimlertruck.com developer.eu.dev.api.daimlertruck.com developer.eu.tst.api.daimlertruck.com developer.na.dev.api.daimlertruck.com developer.na.tst.api.daimlertruck.com; do ip=$(dig +short "$h" A | tr '\n' ',' ); echo "$h => $ip"; done
+developer.as.api.daimlertruck.com => 4.214.165.88,
+developer.na.api.daimlertruck.com => 20.72.227.176,
+developer.eu.api.daimlertruck.com => 9.163.222.35,
+developer.dev.na.api.daimlertruck.com => 4.154.193.7,
+developer.tst.eu.api.daimlertruck.com => 20.76.97.47,
+developer.tst.na.api.daimlertruck.com => 20.72.235.110,
+developer.tst.as.api.daimlertruck.com => 20.18.197.184,
+developer.dev.as.api.daimlertruck.com => 
+developer.dev.eu.api.daimlertruck.com => 
+developer.as.dev.api.daimlertruck.com => 
+developer.as.tst.api.daimlertruck.com => 
+developer.eu.dev.api.daimlertruck.com => 
+developer.eu.tst.api.daimlertruck.com => 
+developer.na.dev.api.daimlertruck.com => 
+developer.na.tst.api.daimlertruck.com =>
+[0m
+`developer.tst.as.api.daimlertruck.com` resolves (20.18.197.184) and is **absent from the 23-host inventory** — a live TST-AS portal never enumerated. Characterizing read-only:
+[0m$ [0mH=https://developer.tst.as.api.daimlertruck.com; echo "== ROOT =="; curl -s -m 15 -o /tmp/root.html -w "code=%{http_code} len=%{size_download} loc=%{redirect_url}\n" "$H/"; sleep 1; echo "== buildId =="; grep -o '__NEXT_DATA__[^<]*' /tmp/root.html | head -c 200; echo; grep -oE '"buildId":"[^"]+"' /tmp/root.html; echo "== providers =="; curl -s -m 15 -w "\ncode=%{http_code}\n" "$H/api/auth/providers" | head -c 600
+== ROOT ==
+code=200 len=196341 loc=
+== buildId ==
+__NEXT_DATA__" type="application/json">{"props":{"pageProps":{}},"page":"/","query":{},"buildId":"JVF_tXHlhCfZQOkT-cULr","nextExport":true,"autoExport":true,"isFallback":false,"scriptLoader":[]}
+
+"buildId":"JVF_tXHlhCfZQOkT-cULr"
+== providers ==
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+code=200
+[0m
+The host is live, test-build (len 196341, buildId `JVF_tXHlhCfZQOkT-cULr`), dual B2C providers. Verifying auth-route behavior + headers consistency:
+[0m$ [0mH=https://developer.tst.as.api.daimlertruck.com; for p in /graphql /api/healthcheck /apis /api/auth/session; do curl -s -m 15 -o /dev/null -w "$p => code=%{http_code} len=%{size_download} loc=%{redirect_url}\n" "$H$p"; sleep 1; done; echo "== HEADERS root =="; curl -s -m 15 -D - -o /dev/null "$H/" | grep -iE 'content-security|server|x-|set-cookie' | head -20
+/graphql => code=307 len=24 loc=https://developer.tst.as.api.daimlertruck.com/?callbackUrl=%2Fgraphql
+/api/healthcheck => code=200 len=70 loc=
+/apis => code=307 len=21 loc=https://developer.tst.as.api.daimlertruck.com/?callbackUrl=%2Fapis
+/api/auth/session => code=200 len=2 loc=
+== HEADERS root ==
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+x-powered-by: Next.js
+[0m
+[0m$ [0mfor h in developer.tst.as.api.daimlertruck.com developer.tst.na.api.daimlertruck.com; do echo "== $h =="; echo | timeout 15 openssl s_client -connect "$h:443" -servername "$h" 2>/dev/null | openssl x509 -noout -subject -issuer -ext subjectAltName 2>/dev/null; sleep 1; done
+== developer.tst.as.api.daimlertruck.com ==
+subject=C = DE, ST = Baden-W\C3\BCrttemberg, L = Leinfelden-Echterdingen, O = Daimler Truck AG, CN = tst.as.api.daimlertruck.com
+issuer=C = US, O = DigiCert Inc, CN = DigiCert Global G2 TLS RSA SHA256 2020 CA1
+X509v3 Subject Alternative Name: 
+    DNS:tst.as.api.daimlertruck.com, DNS:provider.tst.as.api.daimlertruck.com, DNS:developer.tst.as.api.daimlertruck.com, DNS:mtls.tst.as.api.daimlertruck.com, DNS:services.tst.as.api.daimlertruck.com, DNS:authz.tst.as.api.daimlertruck.com, DNS:management.tst.as.api.daimlertruck.com, DNS:shg-config.tst.as.api.daimlertruck.com, DNS:shg-cache.tst.as.api.daimlertruck.com
+== developer.tst.na.api.daimlertruck.com ==
+subject=C = DE, ST = Baden-W\C3\BCrttemberg, L = Leinfelden-Echterdingen, O = Daimler Truck AG, CN = tst.na.api.daimlertruck.com
+issuer=C = US, O = DigiCert Inc, CN = DigiCert Global G2 TLS RSA SHA256 2020 CA1
+X509v3 Subject Alternative Name: 
+    DNS:tst.na.api.daimlertruck.com, DNS:developer.tst.na.api.daimlertruck.com, DNS:provider.tst.na.api.daimlertruck.com, DNS:mtls.tst.na.api.daimlertruck.com, DNS:shg-config.tst.na.api.daimlertruck.com, DNS:authz.tst.na.api.daimlertruck.com, DNS:services.tst.na.api.daimlertruck.com, DNS:management.tst.na.api.daimlertruck.com, DNS:shg-cache.tst.na.api.daimlertruck.com
+[0m
+The tst.as cert reveals the full per-region service-name family (`provider.*`, `mtls.*`, `services.*`, `management.*`, `shg-config.*`, `shg-cache.*`). Enumerating which of these resolve for AS vs known regions, plus prod SANs:
+[0m$ [0mecho "== prod as SANs =="; echo | timeout 15 openssl s_client -connect developer.as.api.daimlertruck.com:443 -servername developer.as.api.daimlertruck.com 2>/dev/null | openssl x509 -noout -ext subjectAltName 2>/dev/null; echo; for h in provider.tst.as.api.daimlertruck.com mtls.tst.as.api.daimlertruck.com services.tst.as.api.daimlertruck.com management.tst.as.api.daimlertruck.com shg-config.tst.as.api.daimlertruck.com shg-cache.tst.as.api.daimlertruck.com authz.tst.as.api.daimlertruck.com provider.as.api.daimlertruck.com mtls.as.api.daimlertruck.com services.as.api.daimlertruck.com management.as.api.daimlertruck.com shg-config.as.api.daimlertruck.com shg-cache.as.api.daimlertruck.com; do ip=$(dig +short "$h" A | tr '\n' ','); echo "$h => ${ip:-NXDOMAIN/none}"; done
+== prod as SANs ==
+X509v3 Subject Alternative Name: 
+    DNS:as.api.daimlertruck.com, DNS:authz.as.api.daimlertruck.com, DNS:shg-cache.as.api.daimlertruck.com, DNS:management.as.api.daimlertruck.com, DNS:shg-config.as.api.daimlertruck.com, DNS:developer.as.api.daimlertruck.com, DNS:mtls.as.api.daimlertruck.com, DNS:services.as.api.daimlertruck.com, DNS:provider.as.api.daimlertruck.com
+
+provider.tst.as.api.daimlertruck.com => 20.18.197.184,
+mtls.tst.as.api.daimlertruck.com => 20.44.143.213,
+services.tst.as.api.daimlertruck.com => 20.18.197.184,
+management.tst.as.api.daimlertruck.com => 53.112.231.10,
+shg-config.tst.as.api.daimlertruck.com => 20.44.143.213,
+shg-cache.tst.as.api.daimlertruck.com => 20.18.197.184,
+authz.tst.as.api.daimlertruck.com => 20.18.197.184,
+provider.as.api.daimlertruck.com => 4.214.165.88,
+mtls.as.api.daimlertruck.com => 40.81.218.168,
+services.as.api.daimlertruck.com => 4.214.165.88,
+management.as.api.daimlertruck.com => 53.112.232.4,
+shg-config.as.api.daimlertruck.com => 40.81.218.168,
+shg-cache.as.api.daimlertruck.com => 4.214.165.88,
+[0m
+All AS-family service names resolve across 3 distinct Azure clusters (portal/gateway, mtls+shg-config, management). Never probed previously. Enumerating HTTP status on these unexplored scoped hosts:
+[0m$ [0mfor h in provider.as.api.daimlertruck.com mtls.as.api.daimlertruck.com services.as.api.daimlertruck.com management.as.api.daimlertruck.com shg-config.as.api.daimlertruck.com shg-cache.as.api.daimlertruck.com provider.tst.as.api.daimlertruck.com mtls.tst.as.api.daimlertruck.com management.tst.as.api.daimlertruck.com shg-config.tst.as.api.daimlertruck.com shg-cache.tst.as.api.daimlertruck.com services.tst.as.api.daimlertruck.com; do curl -s -m 12 -o /dev/null -w "$h => code=%{http_code} len=%{size_download} loc=%{redirect_url} srv=%{header_json}\n" "https://$h/" 2>/dev/null | head -c 300; echo; sleep 1; done
+provider.as.api.daimlertruck.com => code=200 len=196823 loc= srv={"x-frame-options":["SAMEORIGIN"],
+"strict-transport-security":["max-age=31536000; includeSubDomains; preload"],
+"content-security-policy":["font-src 'self'; img-src 'self' data: https://app.usercentrics.eu; object-src 'self'; style-sr
+mtls.as.api.daimlertruck.com => code=400 len=263 loc= srv={"server":["Microsoft-Azure-Application-Gateway/v2"],
+"date":["Mon, 07 Sep 2026 21:39:17 GMT"],
+"content-type":["text/html"],
+"content-length":["263"]
+}
+
+services.as.api.daimlertruck.com => code=401 len=121 loc= srv={"content-type":["application/json"],
+"content-length":["121"],
+"date":["Mon, 07 Sep 2026 21:39:18 GMT"]
+}
+
+management.as.api.daimlertruck.com => code=000 len=0 loc= srv={
+}
+
+shg-config.as.api.daimlertruck.com => code=404 len=0 loc= srv={"date":["Mon, 07 Sep 2026 21:39:33 GMT"],
+"content-type":["application/json"],
+"content-length":["0"]
+}
+
+shg-cache.as.api.daimlertruck.com => code=444 len=0 loc= srv={"date":["Mon, 07 Sep 2026 21:39:34 GMT"]
+}
+
+provider.tst.as.api.daimlertruck.com => code=200 len=196516 loc= srv={"x-frame-options":["SAMEORIGIN"],
+"strict-transport-security":["max-age=31536000; includeSubDomains; preload"],
+"content-security-policy":["font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsa
+mtls.tst.as.api.daimlertruck.com => code=400 len=263 loc= srv={"server":["Microsoft-Azure-Application-Gateway/v2"],
+"date":["Mon, 07 Sep 2026 21:39:38 GMT"],
+"content-type":["text/html"],
+"content-length":["263"]
+}
+
+management.tst.as.api.daimlertruck.com => code=000 len=0 loc= srv={
+}
+
+shg-config.tst.as.api.daimlertruck.com => code=404 len=0 loc= srv={"date":["Mon, 07 Sep 2026 21:39:52 GMT"],
+"content-type":["application/json"],
+"content-length":["0"]
+}
+
+shg-cache.tst.as.api.daimlertruck.com => code=444 len=0 loc= srv={"date":["Mon, 07 Sep 2026 21:39:53 GMT"]
+}
+
+services.tst.as.api.daimlertruck.com => code=401 len=121 loc= srv={"content-type":["application/json"],
+"content-length":["121"],
+"date":["Mon, 07 Sep 2026 21:39:54 GMT"]
+}
+[0m
+`provider.*` is a distinct Next.js portal (different length/build than developer), `services.*` is 401-gated JSON, `mtls.*` is a client-cert App Gateway (400). Characterizing the new provider portal:
+[0m$ [0mecho "== provider.as root meta =="; curl -s -m 15 https://provider.as.api.daimlertruck.com/ | grep -oE '<title>[^<]*</title>|"buildId":"[^"]+"' | head -5; sleep 1; echo "== provider.tst.as buildId =="; curl -s -m 15 https://provider.tst.as.api.daimlertruck.com/ | grep -oE '<title>[^<]*</title>|"buildId":"[^"]+"' | head -5; sleep 1; echo "== services.as body =="; curl -s -m 15 -w "\ncode=%{http_code}\n" https://services.as.api.daimlertruck.com/; sleep 1; echo "== provider.as providers =="; curl -s -m 15 -w "\ncode=%{http_code}\n" https://provider.as.api.daimlertruck.com/api/auth/providers | head -c 500
+== provider.as root meta ==
+"buildId":"dRkoj9wkiV4Mb4T9igBoa"
+== provider.tst.as buildId ==
+"buildId":"jPTK3ny6cWeiQnU-WxRYW"
+== services.as body ==
+{"error": "Unauthorized", "message": "Authentication required: Please provide a valid token in the Authorization header"}
+code=401
+== provider.as providers ==
+{"azure-ad":{"id":"azure-ad","name":"Azure Active Directory","type":"oauth","signinUrl":"https://provider.as.api.daimlertruck.com/api/auth/signin/azure-ad","callbackUrl":"https://provider.as.api.daimlertruck.com/api/auth/callback/azure-ad"}}
+code=200
+[0m
+`provider.*` is a separate Next.js app with its own build IDs and — critically — a **different identity provider** (`azure-ad`, Entra ID, not B2C). Pulling its route manifests:
+[0m$ [0mecho "== provider.as manifest =="; curl -s -m 15 https://provider.as.api.daimlertruck.com/_next/static/dRkoj9wkiV4Mb4T9igBoa/_buildManifest.js; echo; sleep 1; echo "== provider.tst.as manifest =="; curl -s -m 15 https://provider.tst.as.api.daimlertruck.com/_next/static/jPTK3ny6cWeiQnU-WxRYW/_buildManifest.js; echo; sleep 1; echo "== provider.tst.as providers =="; curl -s -m 15 -w "\ncode=%{http_code}\n" https://provider.tst.as.api.daimlertruck.com/api/auth/providers; echo "== title check =="; curl -s -m 15 https://provider.as.api.daimlertruck.com/ | grep -oE '(<title>[^<]*</title>|"name":"[^"]+"|Provider|portal)' | head -8
+== provider.as manifest ==
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/3r11cvhcpovfx.js"
+  ],
+  "/404": [
+    "static/chunks/0tr5k0_2-4i3p.js"
+  ],
+  "/_error": [
+    "static/chunks/30s7yzw916fn5.js"
+  ],
+  "/apis": [
+    "static/chunks/2b27eamdt6n0x.js"
+  ],
+  "/apis/[apiId]/[[...tab]]": [
+    "static/chunks/0we6z9b9y_932.js"
+  ],
+  "/apis/[apiId]/edit": [
+    "static/chunks/008kmjp2wc2jw.js"
+  ],
+  "/apis/[apiId]/versions/[versionId]/[[...tab]]": [
+    "static/chunks/0x4jxt0im9o6i.js"
+  ],
+  "/apis/[apiId]/versions/[versionId]/edit": [
+    "static/chunks/2dehy7u_vde8k.js"
+  ],
+  "/apis/[apiId]/versions/[versionId]/trust-path-sign-keys/new": [
+    "static/chunks/380tv93xg_px8.js"
+  ],
+  "/apis/[apiId]/versions/new": [
+    "static/chunks/277n3qd_dsrll.js"
+  ],
+  "/apis/new": [
+    "static/chunks/35ckw7bmie712.js"
+  ],
+  "/legal": [
+    "static/chunks/396_bg3lg415y.js"
+  ],
+  "/legal/consent": [
+    "static/chunks/3r_55h37l_4-m.js"
+  ],
+  "/legal/imprint": [
+    "static/chunks/0cbzo0ah64twg.js"
+  ],
+  "/legal/legal-notice": [
+    "static/chunks/13axqrm37yt0g.js"
+  ],
+  "/legal/privacy-statement": [
+    "static/chunks/1u8uq0o6px8ej.js"
+  ],
+  "/products": [
+    "static/chunks/0_bwc6d3g91_t.js"
+  ],
+  "/products/[productId]/[[...tab]]": [
+    "static/chunks/35u6uuym6l62i.js"
+  ],
+  "/products/[productId]/associate": [
+    "static/chunks/1rbno6mxsdrcy.js"
+  ],
+  "/products/[productId]/custom-fields/new": [
+    "static/chunks/3cl7978xfu-5h.js"
+  ],
+  "/products/[productId]/edit": [
+    "static/chunks/1boqn6habzqus.js"
+  ],
+  "/products/new": [
+    "static/chunks/18y265f30axaw.js"
+  ],
+  "/subscriptions": [
+    "static/chunks/2tv4n_rc9t-ki.js"
+  ],
+  "/subscriptions/[subscriptionId]": [
+    "static/chunks/3uzueihc3ge95.js"
+  ],
+  "/teams": [
+    "static/chunks/3i18atpu13cr4.js"
+  ],
+  "/teams/[teamId]/[[...tab]]": [
+    "static/chunks/1-fkbvmjbyq4s.js"
+  ],
+  "/teams/[teamId]/edit": [
+    "static/chunks/1dv-w306i-1my.js"
+  ],
+  "/teams/[teamId]/members/invite": [
+    "static/chunks/2-tda_932c_4s.js"
+  ],
+  "/teams/[teamId]/system-users/associate": [
+    "static/chunks/40-9ghs_7jf4g.js"
+  ],
+  "/teams/new": [
+    "static/chunks/0xgs3qczuzlga.js"
+  ],
+  "/welcome": [
+    "static/chunks/0fhb4murebk55.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [
+      {
+        "source": "/docs/:slug*"
+      },
+      {
+        "source": "/api/healthcheck",
+        "destination": "/healthcheck"
+      },
+      {
+        "source": "/api/metrics",
+        "destination": "/metrics"
+      }
+    ],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/404",
+    "/_app",
+    "/_error",
+    "/api/auth/[...nextauth]",
+    "/api/graphql",
+    "/api/healthcheck",
+    "/api/metrics",
+    "/apis",
+    "/apis/new",
+    "/apis/[apiId]/edit",
+    "/apis/[apiId]/versions/new",
+    "/apis/[apiId]/versions/[versionId]/edit",
+    "/apis/[apiId]/versions/[versionId]/trust-path-sign-keys/new",
+    "/apis/[apiId]/versions/[versionId]/[[...tab]]",
+    "/apis/[apiId]/[[...tab]]",
+    "/legal",
+    "/legal/consent",
+    "/legal/imprint",
+    "/legal/legal-notice",
+    "/legal/privacy-statement",
+    "/products",
+    "/products/new",
+    "/products/[productId]/associate",
+    "/products/[productId]/custom-fields/new",
+    "/products/[productId]/edit",
+    "/products/[productId]/[[...tab]]",
+    "/subscriptions",
+    "/subscriptions/[subscriptionId]",
+    "/teams",
+    "/teams/new",
+    "/teams/[teamId]/edit",
+    "/teams/[teamId]/members/invite",
+    "/teams/[teamId]/system-users/associate",
+    "/teams/[teamId]/[[...tab]]",
+    "/welcome"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+== provider.tst.as manifest ==
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/3x5sdphz_nyd7.js"
+  ],
+  "/404": [
+    "static/chunks/2a54xlze-oftr.js"
+  ],
+  "/_error": [
+    "static/chunks/26iwpuq1asim0.js"
+  ],
+  "/apis": [
+    "static/chunks/2ao2nj_zcoe0a.js"
+  ],
+  "/apis/[apiId]/[[...tab]]": [
+    "static/chunks/405y0owty54-h.js"
+  ],
+  "/apis/[apiId]/edit": [
+    "static/chunks/2hg3ply3xewok.js"
+  ],
+  "/apis/[apiId]/versions/[versionId]/[[...tab]]": [
+    "static/chunks/2xcyo7hpd-o58.js"
+  ],
+  "/apis/[apiId]/versions/[versionId]/edit": [
+    "static/chunks/02tngvsjwo82d.js"
+  ],
+  "/apis/[apiId]/versions/[versionId]/trust-path-sign-keys/new": [
+    "static/chunks/17aab334lohwc.js"
+  ],
+  "/apis/[apiId]/versions/new": [
+    "static/chunks/2uxn4akc80wq-.js"
+  ],
+  "/apis/new": [
+    "static/chunks/1uj-fw9lz07e6.js"
+  ],
+  "/legal": [
+    "static/chunks/3azfvuziqjz5w.js"
+  ],
+  "/legal/consent": [
+    "static/chunks/21b20fgi7tsg6.js"
+  ],
+  "/legal/imprint": [
+    "static/chunks/2koh757lhbedr.js"
+  ],
+  "/legal/legal-notice": [
+    "static/chunks/1e5cbdpd6tn5u.js"
+  ],
+  "/legal/privacy-statement": [
+    "static/chunks/02l0f7dv4hzlv.js"
+  ],
+  "/products": [
+    "static/chunks/2dmlml9u4vgss.js"
+  ],
+  "/products/[productId]/[[...tab]]": [
+    "static/chunks/40d50wdr_ccy1.js"
+  ],
+  "/products/[productId]/associate": [
+    "static/chunks/3b7f9lst0yqyf.js"
+  ],
+  "/products/[productId]/custom-fields/new": [
+    "static/chunks/21zhyd3kdt23s.js"
+  ],
+  "/products/[productId]/edit": [
+    "static/chunks/3ale2r-d-77ca.js"
+  ],
+  "/products/new": [
+    "static/chunks/43rjqk8akc3a2.js"
+  ],
+  "/subscriptions": [
+    "static/chunks/3un_u0_mz6mnn.js"
+  ],
+  "/subscriptions/[subscriptionId]": [
+    "static/chunks/18xv_f-0q66kq.js"
+  ],
+  "/teams": [
+    "static/chunks/0-90f94am760p.js"
+  ],
+  "/teams/[teamId]/[[...tab]]": [
+    "static/chunks/2k9vyxmnd1-6s.js"
+  ],
+  "/teams/[teamId]/edit": [
+    "static/chunks/44b6fg546kc28.js"
+  ],
+  "/teams/[teamId]/members/invite": [
+    "static/chunks/2p58ac4doxm2m.js"
+  ],
+  "/teams/[teamId]/system-users/associate": [
+    "static/chunks/010ycab7v_pyj.js"
+  ],
+  "/teams/new": [
+    "static/chunks/2j4wvvt6cx5-h.js"
+  ],
+  "/welcome": [
+    "static/chunks/35-9sgm_ws-vh.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [
+      {
+        "source": "/docs/:slug*"
+      },
+      {
+        "source": "/api/healthcheck",
+        "destination": "/healthcheck"
+      },
+      {
+        "source": "/api/metrics",
+        "destination": "/metrics"
+      }
+    ],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/404",
+    "/_app",
+    "/_error",
+    "/api/auth/[...nextauth]",
+    "/api/graphql",
+    "/api/healthcheck",
+    "/api/metrics",
+    "/apis",
+    "/apis/new",
+    "/apis/[apiId]/edit",
+    "/apis/[apiId]/versions/new",
+    "/apis/[apiId]/versions/[versionId]/edit",
+    "/apis/[apiId]/versions/[versionId]/trust-path-sign-keys/new",
+    "/apis/[apiId]/versions/[versionId]/[[...tab]]",
+    "/apis/[apiId]/[[...tab]]",
+    "/legal",
+    "/legal/consent",
+    "/legal/imprint",
+    "/legal/legal-notice",
+    "/legal/privacy-statement",
+    "/products",
+    "/products/new",
+    "/products/[productId]/associate",
+    "/products/[productId]/custom-fields/new",
+    "/products/[productId]/edit",
+    "/products/[productId]/[[...tab]]",
+    "/subscriptions",
+    "/subscriptions/[subscriptionId]",
+    "/teams",
+    "/teams/new",
+    "/teams/[teamId]/edit",
+    "/teams/[teamId]/members/invite",
+    "/teams/[teamId]/system-users/associate",
+    "/teams/[teamId]/[[...tab]]",
+    "/welcome"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+== provider.tst.as providers ==
+{"azure-ad":{"id":"azure-ad","name":"Azure Active Directory","type":"oauth","signinUrl":"https://provider.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad","callbackUrl":"https://provider.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad"}}
+code=200
+== title check ==
+Provider
+[0m
+Major find: `provider.*` is the **API Provider console** — write-surface (`/apis/new`, `/apis/[apiId]/edit`, `/products/[productId]/edit`, `/subscriptions/[subscriptionId]`, `/teams/.../members/invite`, plus **`/apis/[apiId]/versions/[versionId]/trust-path-sign-keys/new`**), auth via single `azure-ad` (Entra) provider, own `/api/graphql`. Checking auth-blanket behavior + regional spread:
+[0m$ [0mH=https://provider.as.api.daimlertruck.com; for p in /api/graphql /apis /api/healthcheck /subscriptions /teams/new /apis/1234/edit /docs; do curl -s -m 12 -o /dev/null -w "$p => code=%{http_code} len=%{size_download} loc=%{redirect_url}\n" "$H$p"; sleep 1; done; echo "== DNS spread =="; for h in provider.eu.api.daimlertruck.com provider.na.api.daimlertruck.com provider.tst.eu.api.daimlertruck.com provider.tst.na.api.daimlertruck.com provider.dev.na.api.daimlertruck.com services.eu.api.daimlertruck.com services.na.api.daimlertruck.com services.tst.eu.api.daimlertruck.com services.tst.na.api.daimlertruck.com mtls.eu.api.daimlertruck.com mtls.na.api.daimlertruck.com; do ip=$(dig +short "$h" A | tr '\n' ','); echo "$h => ${ip:-NX}" ; done
+/api/graphql => code=307 len=30 loc=https://provider.as.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fgraphql
+/apis => code=307 len=21 loc=https://provider.as.api.daimlertruck.com/?callbackUrl=%2Fapis
+/api/healthcheck => code=200 len=71 loc=
+/subscriptions => code=307 len=30 loc=https://provider.as.api.daimlertruck.com/?callbackUrl=%2Fsubscriptions
+/teams/new => code=307 len=28 loc=https://provider.as.api.daimlertruck.com/?callbackUrl=%2Fteams%2Fnew
+/apis/1234/edit => code=307 len=35 loc=https://provider.as.api.daimlertruck.com/?callbackUrl=%2Fapis%2F1234%2Fedit
+/docs => code=307 len=21 loc=https://provider.as.api.daimlertruck.com/?callbackUrl=%2Fdocs
+== DNS spread ==
+provider.eu.api.daimlertruck.com => 9.163.222.35,
+provider.na.api.daimlertruck.com => 20.72.227.176,
+provider.tst.eu.api.daimlertruck.com => 20.76.97.47,
+provider.tst.na.api.daimlertruck.com => 20.72.235.110,
+provider.dev.na.api.daimlertruck.com => 4.154.193.7,
+services.eu.api.daimlertruck.com => 9.163.222.35,
+services.na.api.daimlertruck.com => 20.72.227.176,
+services.tst.eu.api.daimlertruck.com => 20.76.97.47,
+services.tst.na.api.daimlertruck.com => 20.72.235.110,
+mtls.eu.api.daimlertruck.com => 20.76.15.251,
+mtls.na.api.daimlertruck.com => 20.99.193.175,
+[0m
+`provider.*` mirrors developer.* across the full matrix (7 hosts, same cluster IPs), all route writes behind the same blanket 307 auth; `services.*` = bearer-gated API service; `mtls.*` = per-region client-cert App Gateway. Extracting provider portal JS to fingerprint its Entra config + GraphQL ops:
+[0m$ [0mH=https://provider.as.api.daimlertruck.com; curl -s -m 15 "$H/" | grep -oE '/_next/static/chunks/[^"]+\.js' | sort -u | head -30
+/_next/static/chunks/0cc7vnyrfumhp.js
+/_next/static/chunks/0quempu9mjcyq.js
+/_next/static/chunks/0r6_v-7wodm0b.js
+/_next/static/chunks/0w-qqtuzq6y8-.js
+/_next/static/chunks/17nmyu9c9cvro.js
+/_next/static/chunks/1aydtiq1olm16.js
+/_next/static/chunks/234fu09v95p7y.js
+/_next/static/chunks/2ng4zneyoub8b.js
+/_next/static/chunks/2u_3us2c8li1c.js
+/_next/static/chunks/2wev7f0trp1as.js
+/_next/static/chunks/35ltm6wzma54k.js
+/_next/static/chunks/39ghdwues_az8.js
+/_next/static/chunks/3__l1qf8dc-cf.js
+/_next/static/chunks/3l4g8sn7e-dpn.js
+/_next/static/chunks/3rqectkr08oig.js
+/_next/static/chunks/turbopack-31x237-s_83v0.js
+/_next/static/chunks/turbopack-3x5665n_q9rld.js
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mH=https://provider.as.api.daimlertruck.com; mkdir -p /tmp/pv; curl -s -m 15 "$H/_next/static/chunks/380tv93xg_px8.js" -o /tmp/pv/trust.js; sleep 1; curl -s -m 15 "$H/_next/static/chunks/008kmjp2wc2jw.js" -o /tmp/pv/edit.js; sleep 1; for f in 0cc7vnyrfumhp 0quempu9mjcyq 0r6_v-7wodm0b 3rqectkr08oig; do curl -s -m 15 "$H/_next/static/chunks/$f.js" -o "/tmp/pv/$f.js"; sleep 1; done; wc -c /tmp/pv/*.js; echo "== graphql/identity strings =="; grep -ohE '(mutation|query) [A-Za-z]+|clientId|tenantId|"aud"|azure|signIn|graphql' /tmp/pv/*.js | sort | uniq -c | sort -rn | head -40 failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.

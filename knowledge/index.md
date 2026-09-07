@@ -197,3 +197,4 @@
 - 2026-09-07 ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenant (not staging) — config drift resolved in auth wiring but callback allowlist misconfig persists
 - 2026-09-07 ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
 - 2026-09-07 ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
+- 2026-09-07 ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII
