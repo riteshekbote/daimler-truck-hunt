@@ -2362,3 +2362,36 @@ testability: AUTH_HELPED
 [LEARN] REJECTED companion-dev-weaker-auth-bypass-confirmed: middleware active on all routes; no auth bypass path found.
 [LEARN] REJECTED companion-proxy-http-405 @ dev: now returns 401, not 405 — middleware active.
 [RISK] daimler-truck: 78/100. Risk steady. Attack surface well-characterized: 6 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C (dual ROW/NA providers); companion app with middleware-exempt proxy-http + catch-all slug routes (SSRF/BOLA candidates); prod B2C tenant issues ROW+NOAM under same issuer (cross-BU token boundary relies solely on acr/org claim validation); companion-dev callback registered in prod B2C client allowlist (info-level misconfig). Deep-hunt blocked on staging accounts — all anonymous surface exhausted. No customer/employee data accessed, no auth bypass, no mutating requests this cycle.
+## 2026-09-07 18:12:47 UTC [target] (model bigpickle)
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com
+confidence: 75
+reasoning: prod (3db550f0) + staging (88f558f5) issue ROW + NOAM policies under IDENTICAL issuer URI; single RSA RS256 key per policy on same tenant jwks; NOAM claim superset = FTLOrg* dealer PII (contact email/name, phone, address, SAP codes); BU differentiation relies solely on acr + org-claim enforcement by downstream APIs. No endpoint observed validating acr/org at proxy/API layer.
+evidence_needed: NOAM token accepted by ROW-scoped developer portal API (200 + ROW data instead of 403); same client c387a5ab accepting cross-policy token.
+verify_steps: AUTH_HELPED: _noam session → POST developer.na.api.daimlertruck.com/api/graphql `{teams{items{id orgId}}}`; repeat with _row session; diff orgId field values — identical/missing org gating = cross-BU collision.
+impact: ROW employee → NOAM dealer-network PII or NOAM partner → ROW internal APIs; high (PII + privilege escalation).
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest exposes object-ID routes (/apis/[apiId], /teams/[teamId]/system-users/associate, /subscriptions/[subscriptionId], /products/[productId]/subscribe); client bundle carries GraphQL ops (subscription(teamId,appId,subscriptionId)); identical build manifests prod+test imply identical authz logic; dual providers (ROW 205f35f7 / NA c387a5ab) imply regional tenant separation, raising cross-region BOLA risk on shared schema.
+evidence_needed: post-auth introspection enumerating mutations keyed on tenant-scoped IDs; cross-region ID swap (as.apiId → eu portal) returning 200 + data instead of 403.
+verify_steps: AUTH_HELPED: _row session → POST /api/graphql introspection → read-only on-org subscription(teamId,appId,subscriptionId) baseline → foreign-ID swap → diff 200/403.
+impact: cross-tenant subscription takeover, key rotation, webhook hijack across AS/EU/NA; critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-post-auth
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 (30B) vs all other /api/*→401 catch-all proves registered POST-only handler exempt from blanket middleware; /api/[...slug] slots (chat, context, memory, models, user, users, files) all →401; server-side AI web-browsing proxy on istio-AKS mesh (frontend 1.91.0); auth now active (401) on prod+dev; single B2C client cd34584a.
+evidence_needed: valid companion session → POST /api/proxy-http `{"url":"http://169.254.169.254/latest/meta-data/"}` → status+body; internal AI-service URL diff.
+verify_steps: AUTH_HELPED: B2C session → POST proxy-http with metadata URL then internal host; diff status/body; repeat on dev (identical build).
+impact: cloud-metadata IAM keys / internal AI-service lateral movement; high (conditional on post-auth).
+testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities from bugs.olivermaicher.eu — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6) + one `b2c_1a_signin_oidc_noam` (separate FTL org) on login-qa.ciam tenant 88f558f5 for developer.tst.na; ALSO request full broker tenant GUIDs (or equivalent) to re-verify login.businessid-qa anonymous OIDC/JWKS. These unblock FINAL #1 (cross-BU token test: NOAM vs ROW session → POST /api/graphql `{teams{items{orgId}}}`), FINAL #2 (GraphQL introspection + cross-tenant ID swap), FINAL #3 (companion session → POST /api/proxy-http metadata URL). All anonymous surface re-verified exhausted this cycle (docs 307, broker root 404 prod+staging, no sibling hosts).
+[LEARN] ACCEPTED portal-blanket-auth-middleware @ developer.*: /docs and /docs/apis now 307→B2C (len 21/28) on prod+test — the /docs/:slug* rewrite sits behind the wildcard middleware; no public docs content.
+[LEARN] REJECTED broker-oidc-surface @ login.businessid-qa: bare-root 404 len=103 is now IDENTICAL on prod login.businessid — broker landing removal is consistent host hardening across prod+staging, not a qa-specific regression or vuln.
+[LEARN] ACCEPTED companion-deploy-separation @ companion.app.daimlertruck.com (9.163.68.3) vs companion-dev.app.daimlertruck.com (20.224.79.104): distinct Azure deploys confirmed via DNS; companion-*/widget.app siblings all NXDOMAIN.
+[RISK] daimler-truck: 78. Steady. Anonymous surface re-verified closed this cycle (docs auth-gated; broker root 404 on both prod+staging; no new sibling companion hosts). Exposure concentrates on three AUTH_HELPED hypotheses — cross-BU token boundary (identical issuer/jwks, only acr/org gating), GraphQL object-ID BOLA across regional portals, companion proxy-http SSRF — all blocked on two staging identities. Only currently reportable item remains the info-level misconfig (dev companion callback registered in prod B2C client cd34584a allowlist). No customer/employee data accessed, no auth bypass, no mutating requests; 7 read-only GETs + 9 DNS resolutions this cycle, <=1 rps.

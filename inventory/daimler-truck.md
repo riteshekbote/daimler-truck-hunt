@@ -306,3 +306,25 @@ www.daimlertruck.com
 - NEW companion-dev.app.daimlertruck.com/chat → 307 /en/chat → 307 to B2C login — same
 - NEW Both companion apps (/api/auth/providers) return **single provider** `azure-ad-b2c` — developer portals have two (`azure-ad-b2c-dt` ROW + `azure-ad-b2c-dtna` NA)
 - CHANGED Prior hypothesis "Companion Dev Auth Bypass via Unwired B2C Provider" (confidence 80) **invalidated** — dev auth now wired to prod B2C, middleware active
+
+## 2026-09-07 18:23:56 UTC
+- NEW companion-dev.app.daimlertruck.com signin POST now redirects to PRODUCTION B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri — pre
+- NEW companion-dev.app.daimlertruck.com/api/proxy-http returns 401 Unauthorized (not 405) — auth middleware now active on this route
+- NEW companion-dev.app.daimlertruck.com/admin → 307 /en/admin → 307 to B2C login with callbackUrl — auth middleware active on object routes (previously SPA shell)
+- NEW companion-dev.app.daimlertruck.com/chat → 307 /en/chat → 307 to B2C login — same
+- NEW Both companion apps (/api/auth/providers) return single provider `azure-ad-b2c` — developer portals have two (`azure-ad-b2c-dt` ROW + `azure-ad-b2c-dtna` NA)
+- CHANGED Prior hypothesis "Companion Dev Auth Bypass via Unwired B2C Provider" (confidence 80) INVALIDATED — dev auth now wired to prod B2C, middleware active
+- CHANGED b2c-cross-bu-token-boundary: ROW+NOAM policies per tenant share IDENTICAL issuer URI; only acr + org-scoped claims differentiate BU; NOAM claim superset includes dealer PII (FTLOrgPrimaryContactEmail,
+- CHANGED developer-portal-dual-b2c-providers: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
+- CHANGED companion-single-provider: both companion apps use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB
+- CHANGED companion-dev-callback-in-prod-allowlist: dev callback URI registered in prod B2C client — misconfig confirmed
+- NEW companion-dev.app.daimlertruck.com signin POST now redirects to PRODUCTION B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri — pre
+- NEW companion-dev.app.daimlertruck.com/api/proxy-http returns 401 Unauthorized (not 405) — auth middleware now active on this route
+- NEW companion-dev.app.daimlertruck.com/admin → 307 /en/admin → 307 to B2C login with callbackUrl — auth middleware active on object routes (previously SPA shell)
+- NEW companion-dev.app.daimlertruck.com/chat → 307 /en/chat → 307 to B2C login — same
+- NEW Both companion apps (/api/auth/providers) return single provider `azure-ad-b2c` — developer portals have two (`azure-ad-b2c-dt` ROW + `azure-ad-b2c-dtna` NA)
+- CHANGED Prior hypothesis "Companion Dev Auth Bypass via Unwired B2C Provider" (confidence 80) INVALIDATED — dev auth now wired to prod B2C, middleware active
+- CHANGED b2c-cross-bu-token-boundary: ROW+NOAM policies per tenant share IDENTICAL issuer URI; only acr + org-scoped claims differentiate BU; NOAM claim superset includes dealer PII (FTLOrgPrimaryContactEmail,
+- CHANGED developer-portal-dual-b2c-providers: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
+- CHANGED companion-single-provider: both companion apps use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB
+- CHANGED companion-dev-callback-in-prod-allowlist: dev callback URI registered in prod B2C client — misconfig confirmed

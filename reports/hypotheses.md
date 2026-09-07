@@ -809,3 +809,24 @@
 - LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-
 - LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single `azure-ad-b2c` provider (client cd3458
 - LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+
+## RANKED HYPOTHESES 2026-09-07 18:23:56 UTC
+- [75] login.ciam.daimlertruck.com: b2c-cross-bu-token-boundary-abuse (from art/lead_bigpickle.txt)
+- [75] login.ciam.daimlertruck.com: B2C Cross-BU Token Boundary Abuse via Shared Issuer (from art/lead_nemotron3.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Request two admin-provisioned staging identities from bugs.olivermaicher.eu — one `b2c_1a_signin_oidc_row` (corporate, via broker tenant e39fd9b6) + one 
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Request two admin-provisioned staging identities (ROW employee + NOAM partner) from bugs.olivermaicher.eu — unblocks FINAL #1 (cross-BU token boundary te
+- LEARN: ACCEPTED portal-blanket-auth-middleware @ developer.*: /docs and /docs/apis now 307→B2C (len 21/28) on prod+test — the /docs/:slug* rewrite sits behind the wild
+- LEARN: REJECTED broker-oidc-surface @ login.businessid-qa: bare-root 404 len=103 is now IDENTICAL on prod login.businessid — broker landing removal is consistent host 
+- LEARN: ACCEPTED companion-deploy-separation @ companion.app.daimlertruck.com (9.163.68.3) vs companion-dev.app.daimlertruck.com (20.224.79.104): distinct Azure deploys
+- LEARN: REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com: ROW+NOAM policies per tenant share IDENTICAL issuer URI; on
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenan
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
+- LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
+- LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+- LEARN: REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com: ROW+NOAM policies per tenant share IDENTICAL issuer URI; on
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenan
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
+- LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
+- LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
