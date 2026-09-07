@@ -153,3 +153,47 @@ TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 ## REPOSCAN 2026-09-06 23:09:14 UTC
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-07 01:07:06 UTC
+class: SECRET
+asset: daimlertruck/SRC-LibreChat/.devcontainer/docker-compose.yml:60
+confidence: 85
+reasoning: Real SHA-256 hex key 5c71cf56d672d009e36070b5bc5e47b743535ae55c818ae3b735bb6ebfb4ba63 hardcoded in devcontainer. Devcontainer configs are frequently copy-pasted into production.
+impact: High – admin access to MeiliSearch instance if key reused in prod
+verify_steps: Check if any production docker-compose references this key; passively check if *.api.daimlertruck.com exposes MeiliSearch on port 7700
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:76
+confidence: 80
+reasoning: allow_origins=["*"] combined with allow_credentials=True violates CORS spec. RAG API is AI infrastructure likely used by developer portal.
+impact: Medium – cross-origin data theft if CORS enforcement bypassed
+verify_steps: Check if RAG API is deployed on *.api.daimlertruck.com; observe CORS headers on live endpoints
+class: SECRET
+asset: daimlertruck/SRC-rag_api/app/config.py:57-58
+confidence: 65
+reasoning: POSTGRES_USER = "myuser" and POSTGRES_PASSWORD = "mypassword" are default values if env vars are unset.
+impact: Medium – unauthorized access to vector database with corporate embeddings
+verify_steps: Check if docker-compose/k8s properly sets POSTGRES_PASSWORD; check if port 5432 exposed on daimlertruck.com
+class: MISCONFIG
+asset: daimlertruck/SRC-LibreChat/api/server/index.js:322
+confidence: 55
+reasoning: app.use(cors()) with no origin restrictions. LibreChat handles auth (JWT, OpenID Connect), chat sessions, and AI model API keys.
+impact: Medium – session hijacking, chat data exfiltration via CSRF from any origin
+verify_steps: Check if LibreChat is deployed on *.daimlertruck.com; observe Access-Control-Allow-Origin header
+class: MISCONFIG
+asset: daimlertruck/SRC-openai-aca-lb/infra/core/database/sql/sql-server.bicep
+confidence: 75
+reasoning: Firewall rule startIpAddress: '0.0.0.1' endIpAddress: '255.255.255.254' allows connections from any public IP (marked "debugging purposes").
+impact: Medium – SQL Server exposed to entire internet if deployed to real Azure subscription
+verify_steps: Deploy Bicep template and inspect SQL Server firewall rules in Azure portal
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/app/middleware.py:18-21
+confidence: 85
+reasoning: When JWT_SECRET is unset, middleware logs warning and calls next without validating token. Every protected endpoint becomes unauthenticated.
+impact: HIGH – RAG API fully open without JWT_SECRET; attacker can access all document endpoints
+verify_steps: Deploy without JWT_SECRET; confirm /documents returns 200 without bearer token
+class: OTHER
+asset: daimlertruck/SRC-rag_api/main.py:93-94
+confidence: 50
+reasoning: pgvector admin routes exposed when DEBUG_RAG_API=True. If set in production during troubleshooting, exposes administrative vector DB routes.
+impact: Medium – admin-level access to vector database management
+verify_steps: Check if any production deployment has DEBUG_RAG_API=true; check if pgvector admin endpoints respond
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
