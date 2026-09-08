@@ -346,3 +346,5 @@ www.daimlertruck.com
 - CHANGED companion-dev.app auth now wired to **PROD B2C** (tenant `3db550f0`, client `cd34584a`, policy `b2c_1a_signin_oidc_row`) with PKCE S256 + state + same-origin redirect_uri (since 2026-09-07 06:24)
 - CHANGED companion-dev.app `/api/proxy-http` returns **401** (was 405) — auth middleware active on this route
 - CHANGED companion-dev.app `/admin`, `/chat` now 307 → B2C via locale (was SPA shell) — auth middleware active on object routes
+
+## 2026-09-08 03:50:44 UTC
