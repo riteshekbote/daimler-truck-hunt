@@ -12252,3 +12252,220 @@ Let me compile my structured output. Key facts this cycle:
 Delta: no material new surface. The tst.as host re-confirmed. All three FINAL hypotheses remain AUTH_HELPED. Blocker unchanged (need staging identities from bugs.olivermaicher.eu).
 
 Let me write the output blocks.
+===== ANALYST bigpickle 2026-09-08 22:47:27 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor p in "/" "/api/auth/providers" "/api/healthcheck"; do echo "=== $p ==="; curl -sS --max-time 20 -o /tmp/opencode/resp.txt -w "HTTP %{http_code} len=%{size_download}\n" "https://developer.tst.as.api.daimlertruck.com$p"; head -c 600 /tmp/opencode/resp.txt | tr -d '\n' | cut -c1-400; echo; sleep 1; done
+=== / ===
+HTTP 200 len=196341
+<!DOCTYPE html><html><head><meta charSet="utf-8" data-next-head=""/><meta name="viewport" content="width=device-width" data-next-head=""/><link rel="icon" href="/assets/svgs/favicon_.svg" type="images/svg" sizes="16x16" data-next-head=""/><title data-next-head="">Home </title><meta name="robots" content="noindex, nofollow"/><link data-next-font="" rel="preconnect" href="/" crossorigin="anonymous"/
+
+=== /api/auth/providers ===
+HTTP 200 len=573
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"htt
+
+=== /api/healthcheck ===
+HTTP 200 len=69
+{"status":"ok","uptime":22498,"timestamp":"2026-09-08T22:45:32.300Z"}
+[0m
+[0m$ [0mcurl -sS --max-time 20 "https://developer.tst.as.api.daimlertruck.com/" -o /tmp/opencode/tstas_home.html; grep -o '"buildId":"[^"]*"' /tmp/opencode/tstas_home.html | head -1; grep -o 'buildManifest.js' /tmp/opencode/tstas_home.html | head -1; echo "---tst.na providers---"; sleep 1; curl -sS --max-time 20 "https://developer.tst.na.api.daimlertruck.com/api/auth/providers" -o /tmp/opencode/tstna_prov.json -w "HTTP %{http_code} len=%{size_download}\n"; cut -c1-300 /tmp/opencode/tstna_prov.json; echo
+"buildId":"mS_4SiQmkiaGsx2vLoXkH"
+buildManifest.js
+---tst.na providers---
+HTTP 200 len=573
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad
+[0m
+[0m$ [0mcurl -sS --max-time 20 -o /tmp/opencode/tstas_bm.txt -w "HTTP %{http_code} len=%{size_download}\n" "https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js"; sleep 1; cut -c1-1500 /tmp/opencode/tstas_bm.txt
+HTTP 200 len=2999
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/1j3mqsb6eepxr.js"
+  ],
+  "/404": [
+    "static/chunks/1m8i2oywdo3iq.js"
+  ],
+  "/_error": [
+    "static/chunks/1632m14g8ppbg.js"
+  ],
+  "/apis": [
+    "static/chunks/2v489gknzu7q_.js"
+  ],
+  "/apis/[apiId]": [
+    "static/chunks/0ixhx25il_7u0.js"
+  ],
+  "/apps": [
+    "static/chunks/3s6nhq0rp9mta.js"
+  ],
+  "/apps/[appId]/[[...tab]]": [
+    "static/chunks/2001uamq9btvn.js"
+  ],
+  "/apps/[appId]/authentications/new": [
+    "static/chunks/3npk81ailenk1.js"
+  ],
+  "/apps/[appId]/edit": [
+    "static/chunks/26-2lbpljvmrm.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]": [
+    "static/chunks/0tby_g5kcs_2z.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]/edit": [
+    "static/chunks/2fj62qzh0gnnf.js"
+  ],
+  "/apps/new": [
+    "static/chunks/3p9hhnbbu4u0y.js"
+  ],
+  "/legal": [
+    "static/chunks/1u1gcj92j71zz.js"
+  ],
+  "/legal/consent": [
+    "static/chunks/3jpo3a77_vy39.js"
+  ],
+  "/legal/imprint": [
+    "static/chunks/1_lnl5uj3vdoz.js"
+  ],
+  "/legal/legal-notice": [
+    "static/chunks/45c3eczpy6x4d.js"
+  ],
+  "/legal/privacy-statement": [
+    "static/chunks/161dzkpawqkbs.js"
+  ],
+  "/products": [
+    "static/chunks/0v8o7bni3114f.js"
+  ],
+  "/products/[productId]": [
+    "static/chunks/2dq2zqk_zmqc8.js"
+  ],
+  "/products/[productId]/subscribe": [
+    "static/chunks/0p5zs2y3ly5xm.js"
+  ],
+  "/teams": [
+    "static/chunks/0ybgggiwbqssz.js"
+  ],
+  "/teams/[teamId]/[[...tab]]": [
+    "static/chunks/00bypmifr0z5p.js"
+  ],
+  "/teams/[teamId]/edit": [
+    "static/chunks/1ib7izy1n4k4a.js"
+  ],
+  "/teams/[teamId]/members/invite": [
+    "static/chunks/408isulu76z59.js"
+  ],
+  "/teams/[teamId]/system-users/associate": [
+    "static/chunks/2b1bhp7szm3c_.js"
+  ],
+  "/teams/new": [
+    "static/chunks/1wymi_qn7ur60.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [
+      {
+        "source": "/docs/:slug*"
+      },
+      {
+        "source": "/api/healthcheck",
+        "destination": "/healthcheck"
+      },
+      {
+        "source": "/api/metrics",
+        "destination": "/metrics"
+      }
+    ],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/404",
+    "/_app",
+    "/_error",
+    "/api/auth/[...nextauth]",
+    "/api/graphql",
+    "/api/healthcheck",
+    "/api/metrics",
+    "/apis",
+    "/apis/[apiId]",
+    "/apps",
+    "/apps/new",
+    "/apps/[appId]/authentications/new",
+    "/apps/[appId]/edit",
+    "/apps/[appId]/subscriptions/[subscriptionId]",
+    "/apps/[appId]/subscriptions/[subscriptionId]/edit",
+    "/apps/[appId]/[[...tab]]",
+    "/legal",
+    "/legal/consent",
+    "/legal/imprint",
+    "/legal/legal-notice",
+    "/legal/privacy-statement",
+    "/products",
+    "/products/[productId]",
+    "/products/[productId]/subscribe",
+    "/teams",
+    "/teams/new",
+    "/teams/[teamId]/edit",
+    "/teams/[teamId]/members/invite",
+    "/teams/[teamId]/system-users/associate",
+    "/teams/[teamId]/[[...tab]]"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+[0m
+Probes this cycle (5 GETs, read-only, ≥1s spacing): tst.as `/`, `/api/auth/providers`, `/api/healthcheck`, `/_buildManifest.js`, tst.na `/api/auth/providers`.
+
+## STEP 1 — DELTA
+- [CONFIRMED] developer.tst.as 7th-portal anomaly stable: buildId `mS_4SiQmkiaGsx2vLoXkH`, len=196341, healthcheck 200 uptime=22498s (no restart since prior cycle).
+- [NARROWED] `/api/auth/providers` on tst.as returns **len=573 with BOTH providers listed** — structurally identical to tst.na (len=573) where dtna works. The dtna `OAuthSignin` abort is therefore per-build **NextAuth OAuth wiring config** (URL/well-known/authorization construction), NOT a provider-table gap and NOT a route gap.
+- [NARROWED] tst.as `_buildManifest.js` (len=2999) shows **identical route surface** to the other two builds (same `/apis/[apiId]`, `/teams/[teamId]/system-users/associate`, `/apps/[appId]/subscriptions/[subscriptionId]`, same `/docs/:slug*` rewrite) — drift is config-only, no new anonymous routes.
+
+## STEP 2 — PRIORITIZE
+- [PRIO] developer.tst.as.api.daimlertruck.com,6.0,attack_surface=7,business_value=6,tech_exposure=7,gate_ease=1,cloud_surface=5,freshness=2 (re-confirmed stable; drift config-only, still info-level)
+- [PRIO] developer.tst.na.api.daimlertruck.com,7.5,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=1,cloud_surface=5,freshness=4 (existing top)
+- [PRIO] login-qa.ciam.daimlertruck.com,7.3,attack_surface=5,business_value=9,tech_exposure=9,gate_ease=2,cloud_surface=5,freshness=5 (existing top)
+
+## STEP 3 — HYPOTHESES
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: ROW+NOAM share identical issuer/jwks per tenant (login-qa 88f558f5); NOAM claim superset carries FTLOrg* dealer PII; BU separation rests solely on downstream acr/org enforcement; 7th build confirms shared client c387a5ab across regions.
+evidence_needed: NOAM token accepted by ROW-scoped portal route (200+ROW org data vs 403).
+verify_steps: AUTH_HELPED: `_noam` session → POST /api/graphql `{teams{items{orgId}}}`; repeat `_row`; diff orgIds.
+impact: ROW↔NOAM PII/privilege crossing — High/Critical.
+testability: AUTH_HELPED
+
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest identical on all 3 builds with object-ID routes; shared schema across region/test deploys.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: `_row` session → POST introspection → baseline subscription(teamId,appId,subscriptionId) → swap IDs across portals → diff.
+impact: cross-tenant webhook/key rotation hijack — Critical.
+testability: AUTH_HELPED
+
+[HYP] companion-proxy-http-ssrf-post-auth
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: POST-only first-class handler (GET→405 vs 401 catch-all); server-side browser proxy on istio-AKS; auth active.
+evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}`.
+verify_steps: AUTH_HELPED: `_row` session → POST metadata URL then internal mesh host; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+
+## STEP 4 — SELF-CRITIQUE
+- [PARKED] test-as-na-provider-config-drift: 55 PASSIVE but informational only (no auth gap; all routes 307; providers table identical to working tst.na). Kept as inventory/drift evidence, not a reportable vuln.
+- [REJECTED-if-proposed] nextauth-error-page-info-leak: `/api/auth/error?error=OAuthSignin` → descriptive-error class, program out of scope.
+- [FINAL] b2c-cross-bu-token-boundary-abuse — 75, AUTH_HELPED, highest impact.
+- [FINAL] graphql-object-id-bola-team-scoped — 75, AUTH_HELPED, Critical.
+- [FINAL] companion-proxy-http-ssrf-post-auth — 55, AUTH_HELPED.
+
+## STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam (88f558f5, staging tier): one `b2c_1a_signin_oidc_row` + one `b2c_1a_signin_oidc_noam` (route via broker e39fd9b6 for ROW), for **developer.tst.na** — unblocks all three FINAL hypotheses simultaneously. No further anonymous probes scheduled: tst.as re-verified stable (buildId, providers, buildManifest, healthcheck), surface unchanged this cycle (5 GET probes only).
+
+## STEP 6 — LEARNING
+- [LEARN] ACCEPTED tst-as-third-build-config-only @ developer.tst.as.api.daimlertruck.com: buildId `mS_4SiQmkiaGsx2vLoXkH` stable; providers table len identical (573) to tst.na; buildManifest route surface identical — per-build drift is NextAuth provider **wiring** config only, not routing or provider table.
+- [LEARN] ACCEPTED dtna-oauthsignin-wiring-failure @ developer.tst.as: dtna signin aborts client-side (OAuthSignin) while tst.na succeeds — confirms per-build config variance is in authorization/well-known URL construction, not registration.
+- [LEARN] REJECTED-error-page-leak @ developer.tst.as/api/auth/error: descriptive-error class, out of scope; no new surface.
+
+## STEP 7 — RISK
+[RISK] daimler-truck: 78. No change. tst.as re-confirmed stable (info-level dtna wiring defect + inherited prod-allowlist dev-callback misconfig remain the only reportable items). All high-value hypotheses remain locked behind staging identities; anonymity surface exhausted with no new routes. This cycle: 5 low-rate read-only GETs; no data accessed, no bypass, no mutations.

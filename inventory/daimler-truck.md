@@ -362,3 +362,11 @@ www.daimlertruck.com
 - NEW developer.tst.as.api.daimlertruck.com — 7th developer portal, absent from the 23-host inventory (which listed only as/eu/na + dev.na/tst.eu/tst.na); build ID `mS_4SiQmkiaGsx2vLoXkH` is a THIRD distinc
 - NEW NA-provider asymmetry on tst.as: POST signin `azure-ad-b2c-dtna` returns `{"url":".../api/auth/error?error=OAuthSignin"}` (config-level failure, no B2C hit) whereas tst.na's identical call returns a c
 - CHANGED capacitor-admin.* (as/eu/na/tst.na) still 000 (dead); broker root 404 len=103 prod+staging; developer healthchecks stable — no other drift.
+
+## 2026-09-08 22:47:27 UTC
+- NEW developer.tst.as.api.daimlertruck.com: 7th developer portal discovered (absent from 23-host inventory); third distinct build ID `mS_4SiQmkiaGsx2vLoXkH`; NA provider `azure-ad-b2c-dtna` signin aborts w
+- CHANGED companion-dev.app.daimlertruck.com: auth now wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri); `/api/proxy-http` return
+- CHANGED b2c-cross-bu-token-boundary: ROW+NOAM policies per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims differentiate BU; NOAM claim superset includes de
+- CHANGED developer-portal-dual-b2c-providers: two providers confirmed on all 7 portals — `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab) — regional tenant separation at ide
+- CHANGED companion-single-provider: both companion apps use single `azure-ad-b2c` provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
+- CHANGED companion-dev-callback-in-prod-allowlist: dev callback URI registered in prod B2C client cd34584a — misconfig confirmed, persists despite auth wiring fix
