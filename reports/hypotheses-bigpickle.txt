@@ -1,7 +1,7 @@
-## 2026-09-08 03:49:43 UTC [target] (model bigpickle)
-[PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com,75,identity-layer:5 cloud:4 gate:0 freshness:1
-[PRIO] developer.*.api.daimlertruck.com/api/graphql,75,api:5 tech:4 gate:0 freshness:1
-[PRIO] companion.app.daimlertruck.com/api/proxy-http,55,api:4 tech:3 cloud:2 gate:0 freshness:1
+## 2026-09-08 08:45:10 UTC [target] (model bigpickle)
+[PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com,7.5,identity-layer=5,cloud=4,gate=0,freshness=1
+[PRIO] developer.*.api.daimlertruck.com/api/graphql,7.5,api=5,tech=4,gate=0,freshness=1
+[PRIO] companion.app.daimlertruck.com/api/proxy-http,5.5,api=4,tech=3,cloud=2,gate=0,freshness=1
 [HYP] b2c-cross-bu-token-boundary-abuse
 class: AUTH
 asset: login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com
@@ -24,11 +24,12 @@ testability: AUTH_HELPED
 class: SSRF
 asset: companion.app.daimlertruck.com/api/proxy-http
 confidence: 55
-reasoning: GET→405 (30B) vs catch-all 401 proves registered POST-only handler sitting in front of blanket middleware; server-side AI web-browse proxy on istio-AKS (frontend 1.91.0); single B2C client cd34584a; auth now active (401) on prod+dev.
+reasoning: GET→405 (30B) vs catch-all 401 proves registered POST-only handler sitting in front of blanket middleware; server-side AI web-browse proxy on istio-AKS (frontend 1.91.0); landing SSR (`_next/data` 200, __N_SSP) confirms live serverless runtime reachable; single B2C client cd34584a.
 evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}` → status+body.
 verify_steps: AUTH_HELPED: _row session → POST companion /api/proxy-http metadata URL, then internal mesh host; diff status/body; repeat on dev (identical build).
 impact: cloud-metadata IAM keys / lateral to AI-service mesh — High.
 testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities from bugs.olivermaicher.eu on login-qa.ciam (88f558f5): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na — unblocks FINAL #1 (cross-policy session → POST /api/graphql `{teams{items{orgId}}}`), FINAL #2 (GraphQL introspection + cross-region ID swap), FINAL #3 (companion POST /api/proxy-http metadata URL). All anonymous surface now closed: `_next/data` catalog routes 307 on portals, landing SSR pageProps reviewed (info-only), broker root 404 prod+staging, companion remaining routes 307.
 [LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII — confirmed passively.
 [LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql 307-to-B2C; buildManifest + client bundle confirm object-ID route surface across all 6 portals.
 [LEARN] ACCEPTED companion-proxy-http-ssrf-auth-required: GET→405 proves POST-only first-class handler; all other /api/* → 401 catch-all; auth middleware active post-dev-fix.
