@@ -239,3 +239,29 @@ TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 ## REPOSCAN 2026-09-08 17:17:42 UTC
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-08 20:03:00 UTC
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/docker-compose.yaml, db-compose.yaml, app/config.py
+confidence: 30
+reasoning: >
+impact: low
+verify_steps: >
+class: SECRET
+asset: daimlertruck/SRC-LibreChat/api/test/.env.test.example
+confidence: 15
+reasoning: >
+impact: low
+verify_steps: >
+class: OTHER
+asset: daimlertruck/SRC-openai-aca-lb/README.md, docs/README.md
+confidence: 5
+reasoning: >
+impact: informational
+verify_steps: >
+class: OTHER
+asset: daimlertruck/SRC-LibreChat/.github/workflows/docker-smoke.yml
+confidence: 10
+reasoning: >
+impact: informational
+verify_steps: >
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
