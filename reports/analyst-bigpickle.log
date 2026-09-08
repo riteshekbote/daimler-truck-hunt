@@ -11923,3 +11923,332 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] daimler-truck: 78. Slight uptick on fresh surface (new AS test portal, provider-wiring asymmetry strengthens cross-build drift signal) but remains locked behind staging identities; only reportable item still info-level (tst.as NA provider config error + inherited dev-callback-in-prod-allowlist). No data accessed, no bypass, no mutations; this cycle 18 low-rate read-only probes (<=1 rps, GET/POST csrf+signin init only, no B2C credential submission).
+===== ANALYST bigpickle 2026-09-08 20:20:34 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && ls && cat scope.yml 2>/dev/null | head -50
+README.md
+analyst-out.txt
+analyst-prompt.txt
+ctx.txt
+inventory
+knowledge
+leads
+probe-results.md
+recon-notes
+reports
+reposcan-raw
+scope.yml
+scripts
+state_bigpickle.json
+state_laguna.json
+state_ling3.json
+state_longcat.json
+state_mimo.json
+state_nemotron3.json
+triage
+programs:
+  daimler-truck:
+    name: Daimler Truck Holding AG Bug Bounty
+    disclosure_policy: via bugs.olivermaicher.eu (Oliver Maicher private program) - report + PoC + contact + payment
+    assets:
+      - name: "All infrastructure, digital services, brands and subsidiaries operated by Daimler Truck Holding AG"
+        priority: In
+    out_of_scope:
+- "Network level Denial of Service attacks"
+      - "Application Denial of Service by locking user accounts"
+      - "Descriptive error messages or headers (e.g. Stack Traces, banner grabbing)"
+      - "Disclosure of known public files or directories (e.g. robots.txt)"
+      - "Outdated software / library versions"
+      - "OPTIONS / TRACE HTTP method enabled"
+      - "CSRF on logout"
+      - "CSRF on forms that are available to anonymous users"
+      - "Cookies that lack HTTP Only or Secure settings for non-sensitive data"
+      - "Self-XSS and issues exploitable only through Self-XSS"
+      - "Reports resulting from automated scanning utilities without additional details or a POC demonstrating a specific exploit"
+      - "Attacks requiring physical access to a user's device"
+      - "Attacks dependent upon social engineering of employees or vendors"
+      - "Username enumeration based on login or forgot password pages"
+      - "Enforcement policies for brute force, rate limiting, or account lockout"
+      - "SSL/TLS best practices"
+      - "SSL attacks such as BEAST, BREACH, Renegotiation attack"
+      - "Clickjacking, without additional details demonstrating a specific exploit"
+      - "Mail configuration issues including SPF, DKIM, DMARC settings"
+      - "Use of a known-vulnerable library without a description of an exploit specific to our implementation"
+      - "Password and account recovery policies"
+      - "Presence of autocomplete functionality in form fields"
+      - "Publicly accessible login panels"
+      - "Lack of email address verification during account registration or account invitation"
+      - "Lack of email address verification password restore"
+      - "Session control during email/password changes"
+      - "Social engineering, physical attacks, and DoS/DDoS testing (per program notes)"
+      - "Exposure of customer/employee/financial/authentication data during testing (per program notes)"
+    github_orgs:
+      - none-configured
+
+rules:
+  passive_first: false          # deep-hunt agent: active probes allowed when scoped
+  max_requests_per_second: 1    # never hammer live infra
+  no_doom: true                 # no DoS/DDoS, no account-lockout attacks
+  account_creation: restricted  # only on test/sandbox assets, never live customer data
+  no_data_modification: true    # no writes/deletes on live customer data
+  no_pre_disclosure: true       # never disclose before program response
+  poc_required: true            # scanner output alone is REJECTED
+  redact_secrets_in_commits: true
+
+models:
+[0m
+I'm the analyst for this bug bounty program. My state indicates phase POC/target api, with leads pointing to a new 7th developer portal discovery and the cross-BU token boundary hypothesis as final. Let me check the current state files and leads to reconcile.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat state_bigpickle.json 2>/dev/null | head -60; echo "=== LEADS ==="; ls leads/ 2>/dev/null
+{"phase": "POC", "target": "api"}=== LEADS ===
+lead-bigpickle.md
+lead-laguna.md
+lead-ling3.md
+lead-longcat.md
+lead-mimo.md
+lead-nemotron3.md
+reposcan-daimler-truck.md
+[0m
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && cat leads/lead-bigpickle.md 2>/dev/null | tail -120
+verify_steps: AUTH_HELPED: _row session → POST /api/graphql introspection → read-only baseline `subscription(teamId,appId,subscriptionId)` → swap as.apiId into eu/na portal → diff status.
+impact: cross-tenant key rotation / webhook hijack across AS/EU/NA — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-post-auth
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 (30B) vs catch-all 401 proves registered POST-only handler sitting in front of blanket middleware; server-side AI web-browse proxy on istio-AKS (frontend 1.91.0); landing SSR (`_next/data` 200, __N_SSP) confirms live serverless runtime reachable; single B2C client cd34584a.
+evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}` → status+body.
+verify_steps: AUTH_HELPED: _row session → POST companion /api/proxy-http metadata URL, then internal mesh host; diff status/body; repeat on dev (identical build).
+impact: cloud-metadata IAM keys / lateral to AI-service mesh — High.
+testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities from bugs.olivermaicher.eu on login-qa.ciam (88f558f5): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na — unblocks FINAL #1 (cross-policy session → POST /api/graphql `{teams{items{orgId}}}`), FINAL #2 (GraphQL introspection + cross-region ID swap), FINAL #3 (companion POST /api/proxy-http metadata URL). All anonymous surface now closed: `_next/data` catalog routes 307 on portals, landing SSR pageProps reviewed (info-only), broker root 404 prod+staging, companion remaining routes 307.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII — confirmed passively.
+[LEARN] ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql 307-to-B2C; buildManifest + client bundle confirm object-ID route surface across all 6 portals.
+[LEARN] ACCEPTED companion-proxy-http-ssrf-auth-required: GET→405 proves POST-only first-class handler; all other /api/* → 401 catch-all; auth middleware active post-dev-fix.
+[LEARN] REJECTED companion-dev-auth-bypass: dev companion now wired to prod B2C (3db550f0, cd34584a, b2c_1a_signin_oidc_row, PKCE S256 + state); /api/proxy-http returns 401; /admin /chat 307→B2C. Prior "unwired" finding stale.
+[RISK] daimler-truck: 77. Steady with slight decline — anonymous surface exhausted, all remaining hypotheses AUTH_HELPED, no new access or data this cycle. Three high-value AUTH_HELPED hypotheses locked behind staging identities. Only currently reportable item remains info-level misconfig (dev companion callback registered in prod B2C client cd34584a allowlist). No customer/employee data accessed, no auth bypass, no mutating requests; 0 active probes this cycle, <=1 rps.
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com
+confidence: 75
+reasoning: prod (3db550f0) + staging (88f558f5) issue ROW+NOAM under IDENTICAL issuer URI + same jwks; NOAM claim superset carries FTLOrg* dealer PII; BU boundary relies solely on acr/org enforcement downstream; no endpoint observed validating acr/org at proxy layer; same client c387a5ab serves portal NA provider.
+evidence_needed: NOAM token accepted by ROW-scoped portal API (200+ROW data vs 403); cross-policy token usable on same client.
+verify_steps: AUTH_HELPED: _noam session → POST developer.na.api.daimlertruck.com/api/graphql `{teams{items{orgId}}}`; repeat with _row; diff orgId.
+impact: ROW employee↔NOAM partner PII + privilege crossing — High/Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest + client bundle confirm object-ID routes (/apis/[apiId], teams/[teamId]/system-users/associate, subscriptions/[subscriptionId], products/[productId]/subscribe) and GraphQL ops keyed on tenant-scoped IDs; identical build manifests prod+test imply shared authz logic; dual providers (ROW 205f35f7 / NA c387a5ab) = regional tenants on shared schema — cross-region ID swap candidate.
+evidence_needed: post-auth introspection enumerating mutations on tenant-scoped IDs; foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: _row session → POST /api/graphql introspection → read-only baseline subscription(teamId,appId,subscriptionId) → swap as.apiId into eu/na portal → diff status.
+impact: cross-tenant key rotation / webhook hijack across AS/EU/NA — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-post-auth
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 (30B) vs catch-all 401 proves registered POST-only handler in front of blanket middleware; server-side AI web-browse proxy on istio-AKS (frontend 1.91.0); landing SSR reachable; single B2C client cd34584a; auth active (401) prod+dev.
+evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}` → status+body.
+verify_steps: AUTH_HELPED: _row session → POST companion /api/proxy-http metadata URL, then internal mesh host; diff status/body; repeat on dev.
+impact: cloud-metadata IAM keys / lateral to AI-service mesh — High.
+testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities from bugs.olivermaicher.eu on login-qa.ciam (88f558f5): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6) + one `b2c_1a_signin_oidc_noam` (separate FTL org) for developer.tst.na — unblocks all three FINAL hypotheses (cross-BU `{teams{items{orgId}}}`, GraphQL introspection + cross-region ID swap, companion POST /api/proxy-http metadata URL). Unchanged blocker; anonymous surface fully exhausted.
+[RISK] daimler-truck: 76. Steady — anonymous surface exhausted, all three high-value hypotheses remain AUTH_HELPED behind staging identities, no new access/data this cycle. Only reportable item is the info-level misconfig (dev companion callback in prod B2C client cd34584a allowlist). No customer/employee data accessed, no auth bypass, no mutating requests; 0 active probes this cycle, <=1 rps.
+asset: daimlertruck/SRC-rag_api/app/middleware.py:18-21
+confidence: 65
+reasoning: `security_middleware` checks `os.getenv("JWT_SECRET")`. If unset, it logs a warning and calls `return await next_middleware_call()` — skipping all auth validation and forwarding the request unauthenticated. This is the upstream default; if deployed without JWT_SECRET env var, the entire RAG API is unauthenticated. No indication Daimler has modified this.
+impact: HIGH — full unauthenticated access to document/query endpoints if JWT_SECRET not configured
+verify_steps: Deploy SRC-rag_api without JWT_SECRET env var; hit any protected endpoint without a Bearer token — should succeed.
+class: SECRET
+asset: daimlertruck/SRC-rag_api/app/config.py:57-59, docker-compose.yaml:7, db-compose.yaml:9
+confidence: 70
+reasoning: `POSTGRES_PASSWORD = get_env_variable("POSTGRES_PASSWORD", "mypassword")` and docker-compose files hardcode `POSTGRES_PASSWORD: mypassword`, `POSTGRES_USER: myuser`, `POSTGRES_DB: mydatabase`. These are upstream defaults. If Daimler deploys without overriding these, the database is wide open with known credentials.
+impact: MEDIUM — database compromise if deployed with defaults; low risk since these are clearly example values
+verify_steps: Check if any live Daimler deployment references these compose files without overriding env vars; inspect `docker-compose.yaml` in the deployed environment.
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:75-79
+confidence: 55
+reasoning: `CORSMiddleware(allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])` — allows any origin to make credentialed cross-origin requests. This is the upstream default. Combined with the JWT bypass above, this is low-risk; alone it enables CSRF-like attacks against authenticated endpoints.
+impact: LOW — only relevant if JWT_SECRET is properly configured and CORS isn't tightened for production
+verify_steps: Deploy with JWT_SECRET set; make cross-origin requests from arbitrary origins with cookies/Authorization headers.
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:93
+confidence: 40
+reasoning: `pgvector_routes.router` is only included `if debug_mode` (line 93). However, the `/docs` and `/openapi.json` endpoints are always exposed (middleware.py:15). The debug pgvector routes themselves are properly gated, but OpenAPI spec exposure in production is a minor info-disclosure risk.
+impact: LOW — exposes API surface to attackers for reconnaissance
+verify_steps: Hit `/openapi.json` on a production deployment; check if it reveals internal endpoints.
+[NEW] developer.tst.as.api.daimlertruck.com — 7th developer portal, absent from the 23-host inventory (which listed only as/eu/na + dev.na/tst.eu/tst.na); build ID `mS_4SiQmkiaGsx2vLoXkH` is a THIRD distinct deployment (vs prod `JCvrnrykV_KYBk7pu0Npq`, test `JVF_tXHlhCfZQOkT-cULr`); len=196341 test-family; CSP `img-src 'self' data: undefined`; /graphql + /api/graphql + /apis + /apis/test123 all 307-auth; /api/healthcheck 200 (uptime 3695s).
+[NEW] NA-provider asymmetry on tst.as: POST signin `azure-ad-b2c-dtna` returns `{"url":".../api/auth/error?error=OAuthSignin"}` (config-level failure, no B2C hit) whereas tst.na's identical call returns a clean `b2c_1a_signin_oidc_noam` authorize URL with client c387a5ab — per-build provider wiring differs on the AS test deployment.
+[CHANGED] capacitor-admin.* (as/eu/na/tst.na) still 000 (dead); broker root 404 len=103 prod+staging; developer healthchecks stable — no other drift.
+[PRIO] developer.tst.as.api.daimlertruck.com,6.9,attack_surface=7,business_value=6,tech_exposure=7,gate_ease=1,cloud_surface=5,freshness=9
+[PRIO] developer.tst.na.api.daimlertruck.com,7.5,attack_surface=8,business_value=7,tech_exposure=8,gate_ease=1,cloud_surface=5,freshness=4 (existing top)
+[PRIO] login-qa.ciam.daimlertruck.com,7.3,attack_surface=5,business_value=9,tech_exposure=9,gate_ease=2,cloud_surface=5,freshness=5 (existing top)
+[HYP] test-as-na-provider-config-drift
+class: MISCONFIG
+asset: developer.tst.as.api.daimlertruck.com
+confidence: 55
+reasoning: third build `mS_4SiQmkiaGsx2vLoXkH` on new tst.as host; ROW provider signs clean (88f558f5, c387a5ab, staging scope) while dtna provider aborts client-side with OAuthSignin (no authorize redirect) — same call succeeds on tst.na; indicates AS test build carries a broken/differently-wired NA provider config rather than shared provider table.
+evidence_needed: identify whether dtna on tst.as targets a nonexistent tenant-client/policy (e.g., NA staging tenant not provisioned for policy) vs a typo; confirm all other routes stay 307 so the coil is only config, not an auth gap.
+verify_steps: GET /api/auth/providers (confirm dtna listed); POST signin dtna with fresh CSRF+cookie jar expecting OAuthSignin; repeat POST signin dt on same host expecting valid authorize URL; compare against tst.na dtna (passes).
+impact: not exploitable alone — all routes still 307; value is inventory completeness + drift signal feeding cross-build config hypothesis — Informational/Low.
+testability: PASSIVE
+[HYP] b2c-cross-bu-token-boundary-abuse (carried)
+class: AUTH
+asset: login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM share identical issuer/jwks per tenant; NOAM superset carries FTLOrg* dealer PII; BU boundary rests on downstream acr/org enforcement; tst.as discovery confirms per-build provider wiring varies (NA client c387a5ab used across regions) — shared-client cross-policy risk unchanged.
+evidence_needed: NOAM token accepted by ROW-scoped portal API (200+ROW org data vs 403).
+verify_steps: AUTH_HELPED: _noam session → POST developer.na.api /api/graphql `{teams{items{orgId}}}`; repeat _row; diff orgIds.
+impact: ROW↔NOAM PII/privilege crossing — High/Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped (carried)
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest + client bundle confirm tenant-scoped object-ID routes; three distinct builds now observed (as/eu/na + tst.as + tst.eu/tst.na/dev.na) — cross-region/cross-build ID swap candidate on shared schema.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: _row session → POST /api/graphql introspection → read baseline subscription(teamId,appId,subscriptionId) → swap IDs across portals → diff.
+impact: cross-tenant webhook/key rotation hijack — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-post-auth (carried)
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: POST-only first-class handler (GET→405 vs 401 catch-all); server-side browser proxy on istio-AKS; auth active prod+dev.
+evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}`.
+verify_steps: AUTH_HELPED: _row session → POST metadata URL then internal mesh host; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[PARKED] test-as-na-provider-config-drift: 55, PASSIVE, but value is Informational (no auth gap, all routes 307) — keeping as inventory/drift signal.
+[FINAL] b2c-cross-bu-token-boundary-abuse — 75, AUTH_HELPED, highest impact (PII crossing).
+[FINAL] graphql-object-id-bola-team-scoped — 75, AUTH_HELPED, Critical impact.
+[FINAL] companion-proxy-http-ssrf-post-auth — 55, AUTH_HELPED, High impact.
+[NEXT] HUMAN: Request two admin-provisioned staging identities from bugs.olivermaicher.eu on login-qa.ciam (88f558f5): one `b2c_1a_signin_oidc_row` + one `b2c_1a_signin_oidc_noam` for developer.tst.na — same blocker as prior cycle; now also feeds cross-build note that tst.as exists (3rd build, NA provider broken). New tst.as discovery requires no further active probing (all routes 307; dtna asymmetry confirmed passively). 0 further anonymous probes scheduled.
+[LEARN] ACCEPTED MISCONFIG @ developer.tst.as.api.daimlertruck.com: unlisted 7th developer portal; third build ID `mS_4SiQmkiaGsx2vLoXkH`; NA provider signin aborts OAuthSignin while ROW works and tst.na's NA works — per-build provider wiring variance confirmed; inventory updated (was missing).
+[LEARN] REJECTED admin-panel @ capacitor-admin.*: as/eu/na/tst.na re-probed 000 this cycle — still no HTTP surface; prior rejection holds.
+[RISK] daimler-truck: 78. Slight uptick on fresh surface (new AS test portal, provider-wiring asymmetry strengthens cross-build drift signal) but remains locked behind staging identities; only reportable item still info-level (tst.as NA provider config error + inherited dev-callback-in-prod-allowlist). No data accessed, no bypass, no mutations; this cycle 18 low-rate read-only probes (<=1 rps, GET/POST csrf+signin init only, no B2C credential submission).
+[0m
+I've reviewed the state. The environment shows my leads file is the latest (from 2026-09-08 17:35, which is the current run's lead tail). Let me check whether there's anything new to probe in this cycle — the tst.as discovery and NA-provider asymmetry are the freshest items. Let me verify the state of the tst.as host to see if there's drift worth probing this cycle, and check the probe-results for current data.
+
+Let me do a quick passive re-confirmation of the freshest finding (tst.as NA provider asymmetry) since that's the current cycle's delta, and check whether any surface has changed. But first, let me check the probe-results and current tools available.
+[0m$ [0mcd /home/runner/work/daimler-truck-hunt/daimler-truck-hunt && tail -40 probe-results.md 2>/dev/null; echo "=== SCRIPTS ==="; ls scripts/ 2>/dev/null
+https://companion.app.daimlertruck.com/api/proxy-http` -> HTTP 401
+https://developer.as.api.daimlertruck.com/graphql` -> 200 len=196649
+https://companion.app.daimlertruck.com/api/{admin,chat,context,memory,models,user,users,files -> HTTP 401
+
+## 2026-09-07 01:22:32 UTC
+https://*.daimlertruck.com -> ERR <urlopen error [Errno -2] Name or service not know
+https://companion-dev.app.daimlertruck.com/admin` -> 200 len=3358
+https://companion-dev.app.daimlertruck.com/api/proxy-http` -> HTTP 401
+https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true` -> HTTP 400
+https://login.ciam.daimlertruck.com/3db550f0-0c7f-439b-8e24-e32bf233615d/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=cd34584a-7d56-4125-acb3-e8cf2e257de8&response_type=code&redirect_uri=https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c&scope=openid` -> HTTP 404
+https://companion.app.daimlertruck.com/api/proxy-http` -> HTTP 401
+https://developer.as.api.daimlertruck.com/graphql` -> 200 len=196649
+
+## 2026-09-07 06:24:05 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-07 12:54:30 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-07 18:23:57 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-07 21:42:08 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-07 23:49:11 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-08 03:50:46 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-08 08:48:15 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-08 13:28:41 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-08 17:35:20 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+https://developer.as.api.daimlertruck.com/ -> 200 len=196341
+=== SCRIPTS ===
+sync-issues.py
+[0m
+The probe results tail matches my leads. My state shows this is the POC phase targeting the api. The last cycle (13:28 UTC on 2026-09-08) already confirmed the tst.as discovery and NA-provider asymmetry. Since my leads reflect the 17:35:17 UTC state (which is the latest), I should reconcile what the current run should do.
+
+The freshest surface is `developer.tst.as.api.daimlertruck.com` (7th portal, 3rd build) and the NA-provider asymmetry. All routes confirmed 307-auth; the NA dtna provider aborts with OAuthSignin. This is passive-confirmed. Let me verify current state with a couple of low-rate read-only probes to check for drift on the newest host, since that's the delta-driver this cycle.
+
+Let me do a minimal probe set on the new host to re-confirm the NA-provider asymmetry is still present (this is the freshest, highest-drift surface), being careful about rate limits.
+[0m$ [0mcd /tmp/opencode && sleep 1 && curl -s -o /dev/null -w "providers:%{http_code}:%{size_download}\n" "https://developer.tst.as.api.daimlertruck.com/api/auth/providers" ; sleep 1; curl -s -o /dev/null -w "healthcheck:%{http_code}:%{size_download}\n" "https://developer.tst.as.api.daimlertruck.com/api/healthcheck"; sleep 1; curl -s -o /dev/null -w "graphql:%{http_code}:%{size_download}\n" "https://developer.tst.as.api.daimlertruck.com/api/graphql"
+providers:200:573
+healthcheck:200:69
+graphql:307:30
+[0m
+Let me get the actual providers and healthcheck body to confirm no drift since last cycle.
+[0m$ [0mcd /tmp/opencode && sleep 2 && curl -s "https://developer.tst.as.api.daimlertruck.com/api/auth/providers"; echo; sleep 1.5; curl -s "https://developer.tst.as.api.daimlertruck.com/api/healthcheck"; echo; sleep 1.5; curl -s -I "https://developer.tst.as.api.daimlertruck.com/" | grep -i -E "content-length|x-dns-prefetch|build"
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+{"status":"ok","uptime":13564,"timestamp":"2026-09-08T20:16:38.182Z"}
+content-length: 196341
+[0m
+Let me now test the NA-provider asymmetry on tst.as with a fresh CSRF token + signin.
+[0m$ [0mcd /tmp/opencode && sleep 1 && CSRF=$(curl -s -c /tmp/tst_as_cookies.txt -b /tmp/tst_as_cookies.txt "https://developer.tst.as.api.daimlertruck.com/api/auth/csrf" | python3 -c "import sys,json; print(json.load(sys.stdin)['csrfToken'])") && echo "CSRF: $CSRF" && sleep 1.5 && curl -s -w "\nHTTP:%{http_code}" -b /tmp/tst_as_cookies.txt -c /tmp/tst_as_cookies.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "csrfToken=$CSRF&callbackUrl=%2Fgraphql&json=true" "https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna" && echo; sleep 1.5 && curl -s -w "\nHTTP:%{http_code}" -b /tmp/tst_as_cookies.txt -c /tmp/tst_as_cookies.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "csrfToken=$CSRF&callbackUrl=%2Fgraphql&json=true" "https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt"
+CSRF: 3ddf18d015c07de0343de4a9947cb6ab16074653c2fcdc09697eb36cb0198fcf
+{"url":"https://developer.tst.as.api.daimlertruck.com/api/auth/error?error=OAuthSignin"}
+HTTP:200
+{"url":"https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.as.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback%2Fazure-ad-b2c-dt&state=oAtRGUH99EoF8vi4HhxdYKbmmk6QuP0lFmqy8Cd4XA4&code_challenge=_mEHCIcd-WkZIplryYaeYS1eGhgB1wBz3QHYjSzb2Ig&code_challenge_method=S256"}
+HTTP:200
+[0m
+Confirmed: NA-provider asymmetry on tst.as persists unchanged. Now let me also check the companion for any drift since last cycle (the companion callback has been stable at 400 for days).
+[0m$ [0mcd /tmp/opencode && sleep 1 && curl -s -o /dev/null -w "companion_health:%{http_code}:%{size_download}\n" "https://companion.app.daimlertruck.com/api/health" && sleep 1 && curl -s -o /dev/null -w "companion_ready:%{http_code}:%{size_download}\n" "https://companion.app.daimlertruck.com/api/ready" && sleep 1 && curl -s -o /dev/null -w "companion_proxy:%{http_code}:%{size_download}\n" "https://companion.app.daimlertruck.com/api/proxy-http" && sleep 1 && curl -s -o /dev/null -w "dev_companion_health:%{http_code}:%{size_download}\n" "https://companion-dev.app.daimlertruck.com/api/health"
+companion_health:200:15
+companion_ready:200:18
+companion_proxy:405:30
+dev_companion_health:200:15
+[0m
+Interesting — companion `/api/proxy-http` now returns 405 again (was 401 in the April 7 cycle, now back to 405). Let me verify the exact body content and check for any configuration change.
+[0m$ [0mcd /tmp/opencode && sleep 1 && curl -s -i "https://companion.app.daimlertruck.com/api/proxy-http" | head -30
+HTTP/1.1 405 Method Not Allowed
+Date: Tue, 08 Sep 2026 20:17:15 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 30
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+etag: "gz8ozgte0mu"
+vary: Accept-Encoding
+x-envoy-upstream-service-time: 13
+server: istio-envoy
+
+{"error":"Method not allowed"}
+[0m
+Prod companion returns 405 on `/api/proxy-http` (30B "Method not allowed") — consistent with the known prod state. Let me verify the catch-all 401 behavior and check companion-dev for drift from last cycle.
+[0m$ [0mcd /tmp/opencode && sleep 1 && curl -s -o /dev/null -w "prod_catchall:%{http_code}:%{size_download}\n" "https://companion.app.daimlertruck.com/api/admin" && sleep 1 && curl -s -o /dev/null -w "dev_proxy:%{http_code}:%{size_download}\n" "https://companion-dev.app.daimlertruck.com/api/proxy-http" && sleep 1 && curl -s -o /dev/null -w "dev_catchall:%{http_code}:%{size_download}\n" "https://companion-dev.app.daimlertruck.com/api/admin" && sleep 1 && curl -s -o /dev/null -w "tstna_health:%{http_code}:%{size_download}\n" "https://developer.tst.na.api.daimlertruck.com/api/healthcheck"
+prod_catchall:401:24
+dev_proxy:405:30
+dev_catchall:401:24
+tstna_health:200:69
+[0m
+Interesting — `/api/proxy-http` shows 405 on both prod+dev while catch-all shows 401, matching the original accepted finding (405 = POST-only first-class handler exempt from blanket middleware). Let me confirm the tst.na dtna baseline (the comparison that makes tst.as asymmetric) before finalizing.
+[0m$ [0mcd /tmp/opencode && sleep 1 && CSRF=$(curl -s -c /tmp/tst_na_cookies.txt -b /tmp/tst_na_cookies.txt "https://developer.tst.na.api.daimlertruck.com/api/auth/csrf" | python3 -c "import sys,json; print(json.load(sys.stdin)['csrfToken'])") && echo "CSRF: $CSRF" && sleep 1.5 && curl -s -w "\nHTTP:%{http_code}" -b /tmp/tst_na_cookies.txt -c /tmp/tst_na_cookies.txt -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "csrfToken=$CSRF&callbackUrl=%2Fgraphql&json=true" "https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna" | head -c 400
+CSRF: 2faad82c1db180e98d21a2bf47adfa872e83f41f948b23dfce0d287d488076e0
+{"url":"https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize?client_id=c387a5ab-f534-48ee-b026-c24f9a0a92d5&scope=openid%20offline_access%20https%3A%2F%2Fdtagapim.stg.ciam.daimlertruck.com%2FDTAG_API_CP%2Fuser_impersonation&response_type=code&redirect_uri=https%3A%2F%2Fdeveloper.tst.na.api.daimlertruck.com%2Fapi%2Fauth%2Fcallback
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/opencode/*, /tmp/*); auto-rejecting
+[0m✗ [0mcd /tmp/opencode && rm -f /tmp/tst_as_cookies.txt /tmp/tst_na_cookies.txt failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+tst.na dtna is clean (returns valid authorize URL at task). tst.as dtna asymmetry confirmed stable across 2 probes. Now let me finalize the analysis. Let me verify the state file and produce the output.
+
+Let me compile my structured output. Key facts this cycle:
+- tst.as /api/auth/providers still lists both providers (573B)
+- tst.as dtna → OAuthSignin error (broken); tst.as dt → working authorize URL (PKCE S256, staging tenant 88f558f5, client c387a5ab, scope stg user_impersonation)
+- tst.na dtna → clean authorize URL for noam policy (baseline healthy)
+- companion prod+dev: proxy-http → 405 (30B, first-class POST handler), catch-all /api/* → 401, health/ready 200
+- tst.as healthcheck uptime 13564s (a restart occurred since ~3695s last cycle)
+
+Delta: no material new surface. The tst.as host re-confirmed. All three FINAL hypotheses remain AUTH_HELPED. Blocker unchanged (need staging identities from bugs.olivermaicher.eu).
+
+Let me write the output blocks.
