@@ -208,3 +208,11 @@
 - 2026-09-08 ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
 - 2026-09-08 ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
 - 2026-09-08 REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+- 2026-09-08 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- 2026-09-08 REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+- 2026-09-08 ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+- 2026-09-08 ACCEPTED GraphQL introspection @ developer.*: high-value, passive, in-scope (API logic flaw)
+- 2026-09-08 ACCEPTED Admin panel discovery @ capacitor-admin.*: high-value, requires auth-helped verification
+- 2026-09-08 REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+- 2026-09-08 ACCEPTED MISCONFIG @ developer.tst.as.api.daimlertruck.com: unlisted 7th developer portal; third build ID `mS_4SiQmkiaGsx2vLoXkH`; NA provider signin aborts OAuthSignin while ROW works and tst.na's NA works — per-build provider wiring variance confirmed; inventory updated (was missing).
+- 2026-09-08 REJECTED admin-panel @ capacitor-admin.*: as/eu/na/tst.na re-probed 000 this cycle — still no HTTP surface; prior rejection holds.

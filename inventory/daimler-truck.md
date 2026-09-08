@@ -352,3 +352,8 @@ www.daimlertruck.com
 ## 2026-09-08 08:48:14 UTC
 
 ## 2026-09-08 13:28:39 UTC
+
+## 2026-09-08 17:35:17 UTC
+- NEW developer.tst.as.api.daimlertruck.com — 7th developer portal, absent from the 23-host inventory (which listed only as/eu/na + dev.na/tst.eu/tst.na); build ID `mS_4SiQmkiaGsx2vLoXkH` is a THIRD distinc
+- NEW NA-provider asymmetry on tst.as: POST signin `azure-ad-b2c-dtna` returns `{"url":".../api/auth/error?error=OAuthSignin"}` (config-level failure, no B2C hit) whereas tst.na's identical call returns a c
+- CHANGED capacitor-admin.* (as/eu/na/tst.na) still 000 (dead); broker root 404 len=103 prod+staging; developer healthchecks stable — no other drift.
