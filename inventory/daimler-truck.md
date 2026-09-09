@@ -377,3 +377,5 @@ www.daimlertruck.com
 - CHANGED developer.tst.as.api.daimlertruck.com: stability re-verified — 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08
 - CHANGED companion.app.daimlertruck.com: re-probe confirms root+liveness unchanged; no new anonymous surface; `/api/proxy-http` still auth-gated (401)
 - CHANGED companion-dev.app.daimlertruck.com: auth now wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` returns 40
+
+## 2026-09-09 11:37:37 UTC
