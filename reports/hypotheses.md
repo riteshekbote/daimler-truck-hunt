@@ -966,3 +966,19 @@
 - LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
 - LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
 - LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+
+## RANKED HYPOTHESES 2026-09-09 06:10:17 UTC
+- [75] login.ciam.daimlertruck.com: B2C Cross-BU Token Boundary Abuse via Shared Issuer (from art/lead_nemotron3.txt)
+- [75] developer.tst.na.api.daimlertruck.com/api/graphql: b2c-cross-bu-token-boundary-abuse (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Request two admin-provisioned staging identities on login-qa.ciam (tenant 88f558f5, staging tier): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6 for 
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Request two admin-provisioned staging identities (ROW employee + NOAM partner) from bugs.olivermaicher.eu — unblocks FINAL #1 (cross-BU token boundary te
+- LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
+- LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
+- LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
+- LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
+- LEARN: REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU;
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenan
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
+- LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
+- LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
