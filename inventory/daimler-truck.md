@@ -379,3 +379,7 @@ www.daimlertruck.com
 - CHANGED companion-dev.app.daimlertruck.com: auth now wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` returns 40
 
 ## 2026-09-09 11:37:37 UTC
+
+## 2026-09-09 15:29:28 UTC
+- NEW None — knowledge base and inventory last updated 2026-09-09 11:37:37 UTC, matching last leads timestamp. No new passive observations since last cycle.
+- CHANGED None — all assets stable per re-probes (developer.tst.as build ID `mS_4SiQmkiaGsx2vLoXkH` stable, companion apps auth-wired to prod B2C, dual providers confirmed on all 7 portals).
