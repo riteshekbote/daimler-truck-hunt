@@ -1,87 +1,40 @@
-## 2026-09-09 21:34:28 UTC [target] (model bigpickle)
-testability: AUTH_HELPED
-[HYP] graphql-object-id-bola-team-scoped
-class: IDOR
-asset: developer.as.api.daimlertruck.com/api/graphql
-confidence: 75
-reasoning: buildManifest identical across all 3 builds with object-ID routes; shared schema across region/test deploys; client bundle shows tenant-scoped GraphQL ops.
-evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
-verify_steps: AUTH_HELPED: `_row` session → POST introspection → baseline subscription(teamId,appId,subscriptionId) → swap IDs across portals → diff.
-impact: cross-tenant webhook/key rotation hijack — Critical.
-testability: AUTH_HELPED
-[HYP] companion-proxy-http-ssrf-post-auth
-class: SSRF
-asset: companion.app.daimlertruck.com/api/proxy-http
-confidence: 55
-reasoning: GET→405 vs 401 catch-all proves POST-only first-class handler; server-side browser proxy on istio-AKS; auth active prod+dev.
-evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}`.
-verify_steps: AUTH_HELPED: `_row` session → POST metadata URL then internal mesh host; diff status/body.
-impact: cloud-metadata IAM keys / mesh lateral — High.
-testability: AUTH_HELPED
-[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08.
-[LEARN] REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
-[RISK] daimler-truck: 78. Unchanged. All high-value hypotheses locked behind staging identities; anonymous surface exhausted. Only reportable items remain info-level (tst.as NA provider wiring defect + inherited dev-callback-in-prod-allowlist). No mutations this cycle.
-[PRIO] developer.tst.as.api.daimlertruck.com,7.0,t:7 b:7 g:6 f:6 c:5
-[PRIO] companion.app.daimlertruck.com/api/proxy-http,6.0,t:5 b:6 g:5 f:3 c:8
-[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.5,t:6 b:7 g:6 f:4 c:6
-[HYP] tst-as-na-provider-wiring-as-is
-class: MISCONFIG
-asset: developer.tst.as.api.daimlertruck.com
-confidence: 85
-reasoning: NA provider returns OAuthSignin error while ROW works; distinct from tst.na where both work.
-evidence_needed: Network trace showing where OAuthSignin fails
-verify_steps: AUTH_HELPED: login with ROW, compare session/auth, trace NA flow
-impact: Configuration drift in staging - informational
-testability: AUTH_HELPED
-[HYP] companion-proxy-http-post-only
-class: SSRF
-asset: companion.app.daimlertruck.com/api/proxy-http
-confidence: 55
-reasoning: GET→405, POST→401; likely internal service
-evidence_needed: POST with valid session
-verify_steps: AUTH_HELPED: POST with URL parameter
-impact: Internal network access - High
-testability: AUTH_HELPED
-[HYP] graphql-object-id-bola
-class: IDOR
-asset: developer.tst.na.api.daimlertruck.com/api/graphql
-confidence: 75
-reasoning: Object-ID routes confirmed in buildManifest
-evidence_needed: Post-auth IDOR test
-verify_steps: AUTH_HELPED: cross-tenant IDOR test
-impact: Cross-tenant data access - Critical
-testability: AUTH_HELPED
-[PARKED] tst-as-na-provider-wiring-as-is: Informational only, not a vulnerability.
-[FINAL] graphql-object-id-bola: High impact if confirmed, but requires auth.
-[FINAL] companion-proxy-http-post-only: High impact if SSRF confirmed, but requires auth.
-[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam (tenant 88f558f5, staging tier): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6 for ROW) + one `b2c_1a_signin_oidc_noam`, for `developer.tst.na.api.daimlertruck.com` — same ASR since 2026-09-04; unblocks all three FINAL hypotheses simultaneously. No further anonymous probes scheduled.
-[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08.
-[LEARN] REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
-[RISK] daimler-truck: 78. Unchanged. All high-value hypotheses locked behind staging identities; anonymous surface exhausted. Only reportable items remain info-level (tst.as NA provider wiring defect + inherited dev-callback-in-prod-allowlist). This cycle: 4 low-rate read-only GETs; no data accessed, no bypass, no mutations.
+## 2026-09-09 23:31:17 UTC [target] (model bigpickle)
+[PRIO] developer.*.api.daimlertruck.com/api/graphql: 6.35 (7/10/8/2/4/2 — GraphQL BOLA, auth-gated, high freshness decay)
+[PRIO] companion.app.daimlertruck.com/api/proxy-http: 6.10 (6/9/7/2/7/3 — SSRF-to-metadata potential on istio-AKS)
+[PRIO] login-qa.ciam.daimlertruck.com: 5.95 (6/8/7/4/5/3 — shared-issuer BU collision; staging identities required)
 [HYP] graphql-object-id-bola-cross-portal
 class: IDOR
 asset: developer.tst.na.api.daimlertruck.com/api/graphql
 confidence: 75
-reasoning: buildManifest identical across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle shows tenant-scoped GraphQL ops; /api/graphql 307→B2C on all 7 portals.
+reasoning: buildManifest identical across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307→B2C on all 7 portals.
 evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
-verify_steps: AUTH_HELPED: `_row` session → POST introspection → baseline subscription(teamId,appId,subscriptionId) → swap IDs across portals → diff.
+verify_steps: AUTH_HELPED: ROW session → POST introspection → baseline (teamId,appId,subscriptionId) → swap IDs across portals → diff.
 impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
-testability: AUTH_HELPED
-[HYP] b2c-cross-bu-token-boundary-abuse
-class: AUTH
-asset: login-qa.ciam.daimlertruck.com
-confidence: 75
-reasoning: ROW+NOAM per tenant share IDENTICAL issuer URI; only acr + org-shape claims separate BU; NOAM superset includes dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); portal clients 205f35f7 (ROW) vs c387a5ab (NA).
-evidence_needed: two staging identities (ROW employee + NOAM partner) → confirm claim set and whether NOAM-bearer executes ROW-scoped GraphQL ops.
-verify_steps: AUTH_HELPED: both tokens → POST /api/graphql with ROW-tenant-scoped query using NOAM token → diff by acr/org claims.
-impact: cross-BU privilege boundary collapse → dealer-PII exposure — Critical if segment isolation relies on acr only.
 testability: AUTH_HELPED
 [HYP] companion-proxy-http-metadata-ssrf
 class: SSRF
 asset: companion.app.daimlertruck.com/api/proxy-http
 confidence: 55
-reasoning: GET→405 proves POST-only first-class handler exempt from 401 catch-all; server-side proxy on istio-AKS; auth active prod+dev (401).
-evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}` → diff vs external URL.
+reasoning: GET→405 proves POST-only first-class handler exempt from 401 catch-all; producion elm is istio-envoy on AKS (cloud-metadata reachable class); auth active prod+dev.
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL.
 verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body.
 impact: cloud-metadata IAM keys / mesh lateral — High.
 testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share IDENTICAL issuer URI; only acr + org-shape claims separate BU; NOAM superset includes dealer PII (FTLOrg* contact name/email, telephone, street, SAP code); portal clients 205f35f7 (ROW) vs c387a5ab (NA).
+evidence_needed: two staging identities → claim set; whether NOAM-bearer can execute ROW-scoped GraphQL ops.
+verify_steps: AUTH_HELPED: both tokens → POST /api/graphql with ROW-scoped query using NOAM token → diff by acr/org claims.
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only.
+testability: AUTH_HELPED
+[PARKED] tst-as-na-provider-wiring-as-is: verified stable 09-08/09-09; informational MISCONFIG only, not exploitable.
+[PARKED] companion-dev-callback-in-prod-allowlist: confirmed, static; info/misconfig, no live code-exchange chain.
+[FINAL] graphql-object-id-bola-cross-portal (75) — unchanged, blocked on identity.
+[FINAL] b2c-cross-bu-token-boundary-abuse (75) — unchanged, blocked on identity.
+[FINAL] companion-proxy-http-metadata-ssrf (55) — unchanged, blocked on session.
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam (tenant 88f558f5, staging tier): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6) + one `b2c_1a_signin_oidc_noam`, for developer.tst.na.api.daimlertruck.com — same single blocker since 2026-09-04; unblocks all three FINAL hypotheses simultaneously. No anonymous GET/HEAD/OPTIONS probe currently adds signal (re-probe value rejected 09-09).
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: every exploitable surface probed to exhaustion under blanket-middleware + auth-gated handlers; remaining candidates (proxy-http POST body, graphql introspection, token claims) each require a request shape not permitted in passive mode.
+[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, /apis 307, healthcheck 200 — no drift since 09-08.
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities; passive surface is fully mapped with no bypass or mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
