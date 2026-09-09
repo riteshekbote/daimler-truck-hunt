@@ -370,3 +370,5 @@ www.daimlertruck.com
 - CHANGED developer-portal-dual-b2c-providers: two providers confirmed on all 7 portals — `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab) — regional tenant separation at ide
 - CHANGED companion-single-provider: both companion apps use single `azure-ad-b2c` provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
 - CHANGED companion-dev-callback-in-prod-allowlist: dev callback URI registered in prod B2C client cd34584a — misconfig confirmed, persists despite auth wiring fix
+
+## 2026-09-09 01:09:44 UTC

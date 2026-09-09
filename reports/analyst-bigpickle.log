@@ -12469,3 +12469,75 @@ testability: AUTH_HELPED
 
 ## STEP 7 — RISK
 [RISK] daimler-truck: 78. No change. tst.as re-confirmed stable (info-level dtna wiring defect + inherited prod-allowlist dev-callback misconfig remain the only reportable items). All high-value hypotheses remain locked behind staging identities; anonymity surface exhausted with no new routes. This cycle: 5 low-rate read-only GETs; no data accessed, no bypass, no mutations.
+===== ANALYST bigpickle 2026-09-09 01:09:44 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 https://developer.tst.as.api.daimlertruck.com/api/healthcheck ; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 https://developer.tst.as.api.daimlertruck.com/ ; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 https://companion.app.daimlertruck.com/api/ready ; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" --max-time 15 https://companion.app.daimlertruck.com/
+200 69
+200 196341
+200 18
+200 3330
+[0m
+[0m$ [0mcurl -s --max-time 15 https://developer.tst.as.api.daimlertruck.com/ | grep -o 'buildId[^,]*' | head -1 ; sleep 1; curl -s --max-time 15 https://developer.tst.as.api.daimlertruck.com/api/auth/providers | head -c 400 ; echo; sleep 1; curl -s -o /dev/null -w "tst.as /apis -> %{http_code} %{redirect_url}\n" --max-time 15 https://developer.tst.as.api.daimlertruck.com/apis
+buildId":"mS_4SiQmkiaGsx2vLoXkH"
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"htt
+tst.as /apis -> 307 https://developer.tst.as.api.daimlertruck.com/?callbackUrl=%2Fapis
+[0m
+Probes done (4 read-only GETs, ≤1 rps). No drift; re-verified tst.as stability and companion liveness.
+
+STEP 1 — DELTA
+- NO_DELTA: `developer.tst.as` (7th portal, build `mS_4SiQmkiaGsx2vLoXkH`) re-verified stable — root 200/196341, dual providers, `/apis`→307, healthcheck 200/69.
+- NO_DELTA: companion prod live — root 200/3330, `/api/ready` 200/18.
+- Surface identical to 2026-09-08; all high-value routes still auth-gated.
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.tst.na.api/api/graphql,6.85,B2C-shared-issuer+GraphQL post-auth PII crossing
+- [PRIO] companion.app/api/proxy-http,6.20,POST-only server-side proxy on istio-AKS → SSRF/metadata
+- [PRIO] developer.tst.as.api,5.10,third build / provider-wiring variance (informational)
+
+STEP 3 — HYPOTHESES
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: ROW+NOAM share identical issuer/jwks per tenant (login-qa 88f558f5); NOAM claim superset carries FTLOrg* dealer PII; BU separation rests solely on downstream acr/org enforcement; tst.as confirms shared client c387a5ab across builds.
+evidence_needed: NOAM token accepted by ROW-scoped portal route (200+ROW org data vs 403).
+verify_steps: AUTH_HELPED: `_noam` session → POST `/api/graphql` `{teams{items{orgId}}}`; repeat `_row`; diff orgIds.
+impact: ROW↔NOAM PII/privilege crossing — High/Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-team-scoped
+class: IDOR
+asset: developer.as.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest identical across all 3 builds with object-ID routes; shared schema across region/test deploys; client bundle shows tenant-scoped GraphQL ops.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: `_row` session → POST introspection → baseline subscription(teamId,appId,subscriptionId) → swap IDs across portals → diff.
+impact: cross-tenant webhook/key rotation hijack — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-ssrf-post-auth
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 vs 401 catch-all proves POST-only first-class handler; server-side browser proxy on istio-AKS; auth active prod+dev.
+evidence_needed: valid B2C session → POST `{"url":"http://169.254.169.254/latest/meta-data/"}`.
+verify_steps: AUTH_HELPED: `_row` session → POST metadata URL then internal mesh host; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] test-as-na-provider-config-drift: 55 confidence but Informational-only (no auth gap; all routes 307) — keep as drift signal, not a FINAL.
+- [FINAL] b2c-cross-bu-token-boundary-abuse — 75, AUTH_HELPED, highest impact (dealer-PII crossing).
+- [FINAL] graphql-object-id-bola-team-scoped — 75, AUTH_HELPED, Critical.
+- [FINAL] companion-proxy-http-ssrf-post-auth — 55, AUTH_HELPED, High.
+- Drop: none — no sub-40, no REJECTED-class candidates this cycle.
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam (tenant 88f558f5, staging tier): one `b2c_1a_signin_oidc_row` (Broker: ROW) + one `b2c_1a_signin_oidc_noam`, for `developer.tst.na.api.daimlertruck.com` — same ASR since 2026-09-04; unblocks all three FINAL hypotheses simultaneously. Anonymous surface confirmed exhausted (tst.as stable, no new routes).
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08.
+[LEARN] REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
+
+STEP 7 — RISK
+[RISK] daimler-truck: 78. Unchanged. All high-value hypotheses remain locked behind staging identities; only reportable items remain info-level (tst.as NA provider config + inherited dev-callback-in-prod-allowlist). This cycle: 4 low-rate read-only GETs; no data accessed, no bypass, no mutations.
