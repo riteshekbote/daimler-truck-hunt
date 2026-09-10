@@ -244,3 +244,4 @@
 - 2026-09-10 ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
 - 2026-09-10 ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
 - 2026-09-10 REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+- 2026-09-10 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no drift since 09-08.
