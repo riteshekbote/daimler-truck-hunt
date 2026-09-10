@@ -401,3 +401,11 @@ www.daimlertruck.com
 ## 2026-09-10 19:15:21 UTC
 
 ## 2026-09-10 21:43:28 UTC
+
+## 2026-09-10 23:55:04 UTC
+- NEW developer.tst.as.api.daimlertruck.com stability re-verified: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08
+- NEW Fresh passive probe value REJECTED @ all-scoped-hosts: every exploitable surface probed to exhaustion under blanket-middleware + auth-gated handlers; remaining candidates (proxy-http POST body, graphq
+- CHANGED companion-dev.app.daimlertruck.com auth wiring: now fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri); /api/proxy-
+- CHANGED b2c-cross-bu-token-boundary: ROW+NOAM share identical issuer URI per tenant (prod 3db550f0, staging 88f558f5); only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII (FT
+- CHANGED developer-portal-dual-b2c-providers: two providers confirmed on all 7 portals — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identit
+- CHANGED companion-dev-callback-in-prod-allowlist: dev callback URI registered in prod B2C client cd34584a — misconfig confirmed, persists despite auth wiring fix

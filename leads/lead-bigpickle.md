@@ -3432,3 +3432,33 @@ impact: cloud-metadata IAM keys / mesh lateral — High
 testability: AUTH_HELPED
 [NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) for developer.tst.na.api.daimlertruck.com: (1) `b2c_1a_signin_oidc_row` via broker e39fd9b6, (2) `b2c_1a_signin_oidc_noam` — the identical single blocker since 2026-09-04 unblocks all three FINAL hypotheses; while awaiting, no scoped-probe action adds signal.
 [RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities; passive map is complete with no bypass/mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist, both HOLD). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
+## 2026-09-10 23:51:43 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: identical buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql + /graphql 307→B2C (prod 3db550f0 / staging 88f558f5) on all 7 portals; ROW client 205f35f7, NA client c387a5ab
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403
+verify_steps: AUTH_HELPED: ROW session (login-qa, tenant 88f558f5) → POST /api/graphql introspection → baseline (teamId, appId, subscriptionId) → swap IDs across portals → diff status/body
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share IDENTICAL issuer URI; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); ROW client 205f35f7 vs NA client c387a5ab; claim contracts identical prod/staging
+evidence_needed: two staging identities → decoded claim set; whether NOAM-bearer executes ROW-scoped GraphQL ops
+verify_steps: AUTH_HELPED: obtain ROW + NOAM tokens from login-qa → POST /api/graphql with ROW-scoped query using NOAM token → diff by acr/org claims
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 proves POST-only first-class handler exempt from 401 catch-all; prod istio-envoy on AKS = cloud-metadata (169.254.169.254) reachable class; auth active prod+dev (401/307)
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL
+verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body/redirects
+impact: cloud-metadata IAM keys / mesh lateral — High
+testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) for developer.tst.na.api.daimlertruck.com: (1) `b2c_1a_signin_oidc_row` via broker e39fd9b6, (2) `b2c_1a_signin_oidc_noam` — identical single blocker since 2026-09-04, unblocks all three FINAL hypotheses simultaneously. Also (offline): purge the stale 09-04 "VALID Open Redirect" entry from reports/valid-bugs.md. No anonymous GET/HEAD/OPTIONS probe adds signal; none run this cycle.
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities; passive map is complete with no bypass or mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist — dev auth now PKCE+state protected). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.

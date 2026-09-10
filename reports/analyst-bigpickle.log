@@ -14074,3 +14074,92 @@ testability: AUTH_HELPED
 
 ## STEP 7 — RISK
 [RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities; passive map is complete with no bypass/mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist, both HOLD). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
+===== ANALYST bigpickle 2026-09-10 23:55:04 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt 2>/dev/null; ls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/art 2>/dev/null
+total 332
+drwxr-xr-x 12 runner runner   4096 Sep 10 23:50 .
+drwxr-xr-x  3 runner runner   4096 Sep 10 23:50 ..
+drwxr-xr-x  7 runner runner   4096 Sep 10 23:50 .git
+drwxr-xr-x  3 runner runner   4096 Sep 10 23:50 .github
+-rw-r--r--  1 runner runner   1715 Sep 10 23:50 README.md
+-rw-r--r--  1 runner runner     32 Sep 10 23:51 analyst-out.txt
+-rw-r--r--  1 runner runner 114964 Sep 10 23:50 analyst-prompt.txt
+-rw-r--r--  1 runner runner 111195 Sep 10 23:50 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 leads
+-rw-r--r--  1 runner runner  17618 Sep 10 23:50 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 reports
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 reposcan-raw
+-rw-r--r--  1 runner runner   3182 Sep 10 23:50 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 scripts
+-rw-r--r--  1 runner runner     33 Sep 10 23:50 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 10 23:50 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 10 23:50 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 10 23:50 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 10 23:50 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 10 23:50 state_nemotron3.json
+drwxr-xr-x  2 runner runner   4096 Sep 10 23:50 triage
+[0m
+[0m✱ [0mGlob "**/*.{yml,yaml,md,txt,json}"[90m in . · 95 matches[0m
+[0m→ [0mRead triage/run-2026-09-10-23-11.md
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead triage/run-2026-09-10-21-11.md
+STEP 1 — DELTA
+- NO_DELTA (live surface): all 7 developer portals + companion.app(.dev) + CIAM tenants + broker re-verified stable since last cycle (21:43 UTC); build IDs `JCvrnrykV…`/`JVF_tXHlh…`/`mS_4SiQmk…` unchanged; companion auth wired to prod B2C; proxy-http auth-gated.
+- [CHANGED] (internal only): `reports/valid-bugs.md` still lists stale 09-04 "VALID — NextAuth.js Open Redirect (6.1), report to bugs.olivermaicher.eu" — that verdict was REJECTED on 09-06 (callbackUrl same-domain, subdomains rejected); must not be reported as-is. `Companion-Dev Callback in Prod B2C → HOLD` entry is current.
+- [CHANGED] (process only): triage run 23:11:55 empty (no leads passed); no other agent surfaced new surface in the last window.
+
+STEP 2 — PRIORITIZE
+- [PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com, 5.9, gate_ease(1)/business_value(9)/tech_exposure(B2C+JWT claims)
+- [PRIO] developer.tst.na.api.daimlertruck.com/api/graphql, 5.6, gate_ease(1)/business_value(8)/tech_exposure(GraphQL+object-ID)
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http, 5.3, gate_ease(1)/cloud_surface(9)/tech_exposure(SSRF-metadata)
+
+STEP 3 — HYPOTHESES
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: identical buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql + /graphql 307→B2C (prod 3db550f0 / staging 88f558f5) on all 7 portals; ROW client 205f35f7, NA client c387a5ab
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403
+verify_steps: AUTH_HELPED: ROW session (login-qa, tenant 88f558f5) → POST /api/graphql introspection → baseline (teamId, appId, subscriptionId) → swap IDs across portals → diff status/body
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share IDENTICAL issuer URI; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); ROW client 205f35f7 vs NA client c387a5ab; claim contracts identical prod/staging
+evidence_needed: two staging identities → decoded claim set; whether NOAM-bearer executes ROW-scoped GraphQL ops
+verify_steps: AUTH_HELPED: obtain ROW + NOAM tokens from login-qa → POST /api/graphql with ROW-scoped query using NOAM token → diff by acr/org claims
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 proves POST-only first-class handler exempt from 401 catch-all; prod istio-envoy on AKS = cloud-metadata (169.254.169.254) reachable class; auth active prod+dev (401/307)
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL
+verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body/redirects
+impact: cloud-metadata IAM keys / mesh lateral — High
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- All three survivors have confidence ≥40, no REJECTED-class overlap, concrete verify_steps, real impact. No hypothesis cheapened by repeated ignore-delta — surface truly exhaustively mapped.
+- [PARKED] none new this cycle; the only actionable housekeeping item is the stale valid-bugs entry below.
+- [FINAL] ranked: (1) b2c-cross-bu-token-boundary-abuse [75], (2) graphql-object-id-bola-cross-portal [75], (3) companion-proxy-http-metadata-ssrf [55].
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) for developer.tst.na.api.daimlertruck.com: (1) `b2c_1a_signin_oidc_row` via broker e39fd9b6, (2) `b2c_1a_signin_oidc_noam` — identical single blocker since 2026-09-04, unblocks all three FINAL hypotheses simultaneously. Also (offline): purge the stale 09-04 "VALID Open Redirect" entry from reports/valid-bugs.md. No anonymous GET/HEAD/OPTIONS probe adds signal; none run this cycle.
+
+STEP 6 — LEARNING
+- [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: confirmed again — every exploitable surface is middlewared/auth-gated; only remaining tests (proxy-http POST body, GraphQL introspection, token claims) require a request shape not permitted without a session. No new anonymous surface appeared this cycle.
+- [LEARN] REJECTED nextauth-open-redirect-reportable @ developer.*: 09-04 VALID verdict stale — 09-06 rejection (callbackUrl same-domain-only, subdomains rejected, cookie reset to origin) still holds; valid-bugs.md entry must be cleaned, not reported.
+
+STEP 7 — RISK
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities; passive map is complete with no bypass or mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist — dev auth now PKCE+state protected). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
