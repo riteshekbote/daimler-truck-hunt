@@ -13328,3 +13328,122 @@ testability: AUTH_HELPED
 ---
 
 The analysis confirms a complete stalemate at passive-only. All three high-value hypotheses are valid and survive self-critique, but every verification path requires an authenticated session. The single actionable next step is human escalation to obtain two staging B2C identities, which unblocks all three FINAL hypotheses simultaneously. No further anonymous probes will yield new signal.
+===== ANALYST bigpickle 2026-09-10 11:54:16 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m# [0mTodos
+[•] STEP 1: DELTA — inventory/knowledge/leads vs current surface
+[ ] STEP 2: PRIORITIZE — score top assets 0-10
+[ ] STEP 3: HYPOTHESES — top 3 assets, max 1 each
+[ ] STEP 4: SELF-CRITIQUE — drop low confidence, park or finalize
+[ ] STEP 5: NEXT ACTION — one concrete action
+[ ] STEP 6: LEARNING — REJECTED/ACCEPTED entries
+[ ] STEP 7: RISK — program risk score
+[0m
+[0m✱ [0mGlob "**/*.json"[90m 6 matches[0m
+[0m✱ [0mGlob "**/*.txt"[90m 9 matches[0m
+[0m✱ [0mGlob "**/*.md"[90m 75 matches[0m
+[0m→ [0mRead reports/hypotheses-bigpickle.txt
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead triage/run-2026-09-10-11-46.md
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead triage/run-2026-09-10-01-24.md
+Now let me check if there are any new probe results since the last cycle.
+[0m
+[0m$ [0mls -lt /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/triage/ | head -15
+total 268
+-rw-r--r-- 1 runner runner   220 Sep 10 11:51 run-2026-09-10-01-24.md
+-rw-r--r-- 1 runner runner 17664 Sep 10 11:51 run-2026-09-10-06-38.md
+-rw-r--r-- 1 runner runner   156 Sep 10 11:51 run-2026-09-10-11-46.md
+-rw-r--r-- 1 runner runner 16095 Sep 10 11:51 run-2026-09-06-15-54.md
+-rw-r--r-- 1 runner runner   300 Sep 10 11:51 run-2026-09-06-17-51.md
+-rw-r--r-- 1 runner runner   211 Sep 10 11:51 run-2026-09-06-19-43.md
+-rw-r--r-- 1 runner runner   181 Sep 10 11:51 run-2026-09-06-21-49.md
+-rw-r--r-- 1 runner runner   501 Sep 10 11:51 run-2026-09-06-23-19.md
+-rw-r--r-- 1 runner runner   850 Sep 10 11:51 run-2026-09-07-01-06.md
+-rw-r--r-- 1 runner runner   238 Sep 10 11:51 run-2026-09-07-06-07.md
+-rw-r--r-- 1 runner runner   189 Sep 10 11:51 run-2026-09-07-12-35.md
+-rw-r--r-- 1 runner runner  1209 Sep 10 11:51 run-2026-09-07-17-53.md
+-rw-r--r-- 1 runner runner   242 Sep 10 11:51 run-2026-09-07-20-53.md
+-rw-r--r-- 1 runner runner   284 Sep 10 11:51 run-2026-09-07-23-08.md
+[0m
+[0m→ [0mRead triage/run-2026-09-10-06-38.md
+[0m
+[0m# [0mTodos
+[✓] STEP 1: DELTA — inventory/knowledge/leads vs current surface
+[✓] STEP 2: PRIORITIZE — score top assets 0-10
+[✓] STEP 3: HYPOTHESES — top 3 assets, max 1 each
+[✓] STEP 4: SELF-CRITIQUE — drop low confidence, park or finalize
+[✓] STEP 5: NEXT ACTION — one concrete action
+[✓] STEP 6: LEARNING — REJECTED/ACCEPTED entries
+[✓] STEP 7: RISK — program risk score
+[0m
+Now I have full context. Let me produce the structured output.
+
+---
+
+## 2026-09-10 12:00 UTC [target] (model bigpickle)
+
+[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql, 6.35, a=7,b=10,t=8,g=2,e=4,f=2
+[PRIO] companion.app.daimlertruck.com/api/proxy-http, 6.10, a=6,b=9,t=7,g=2,e=7,f=3
+[PRIO] login-qa.ciam.daimlertruck.com, 5.95, a=6,b=8,t=7,g=4,e=5,f=3
+
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest identical across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307→B2C on all 7 portals
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403
+verify_steps: AUTH_HELPED: ROW session → POST introspection → baseline (teamId,appId,subscriptionId) → swap IDs across portals → diff
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical
+testability: AUTH_HELPED
+
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 proves POST-only first-class handler exempt from 401 catch-all; production env is istio-envoy on AKS (cloud-metadata reachable class); auth active prod+dev
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL
+verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body
+impact: cloud-metadata IAM keys / mesh lateral — High
+testability: AUTH_HELPED
+
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share IDENTICAL issuer URI; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); portal clients 205f35f7 (ROW) vs c387a5ab (NA)
+evidence_needed: two staging identities → claim set; whether NOAM-bearer can execute ROW-scoped GraphQL ops
+verify_steps: AUTH_HELPED: both tokens → POST /api/graphql with ROW-scoped query using NOAM token → diff by acr/org claims
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only
+testability: AUTH_HELPED
+
+[FINAL] graphql-object-id-bola-cross-portal (75) — highest value; object-ID routes confirmed via buildManifest; blocking on two staging identities since 2026-09-04
+[FINAL] b2c-cross-bu-token-boundary-abuse (75) — same blocker, complementary evidence; anonymous metadata confirmed identical issuer/claim structure
+[FINAL] companion-proxy-http-metadata-ssrf (55) — lower confidence; handler confirmed POST-only; needs valid session
+
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam (tenant 88f558f5, staging tier): one `b2c_1a_signin_oidc_row` (via broker e39fd9b6) + one `b2c_1a_signin_oidc_noam`, for developer.tst.na.api.daimlertruck.com — same single blocker since 2026-09-04; unblocks all three FINAL hypotheses simultaneously. No anonymous GET/HEAD/OPTIONS probe currently adds signal (re-probe value rejected 09-09).
+
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: every exploitable surface probed to exhaustion under blanket-middleware + auth-gated handlers; remaining candidates (proxy-http POST body, graphql introspection, token claims) each require a request shape not permitted in passive mode.
+[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no drift since 09-08.
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities; passive surface is fully mapped with no bypass or mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
+[0m← [0mWrite reports/hypotheses-bigpickle.txt
+Wrote file successfully.
+[0m
+Now let me write the updated hypotheses file:
+All 7 steps complete. Summary:
+
+**No delta** from last cycle. Passive surface fully mapped; all three FINAL hypotheses are **auth-gated** and have been blocked on the same single blocker since 2026-09-04.
+
+| Hypothesis | Confidence | Status |
+|---|---|---|
+| graphql-object-id-bola-cross-portal | 75 | BLOCKED — needs staging identity |
+| b2c-cross-bu-token-boundary-abuse | 75 | BLOCKED — needs staging identity |
+| companion-proxy-http-metadata-ssrf | 55 | BLOCKED — needs valid session |
+
+**Single required action:** Request two admin-provisioned staging identities on `login-qa.ciam.daimlertruck.com` (tenant `88f558f5`, staging tier):
+- One `b2c_1a_signin_oidc_row` (via broker `e39fd9b6`)
+- One `b2c_1a_signin_oidc_noam`
+
+This unblocks all three hypotheses simultaneously. Risk score unchanged at **78**.
