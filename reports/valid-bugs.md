@@ -14,3 +14,10 @@
   - **Verdict: HOLD** — Requires AUTH_HELPED (valid Azure AD B2C test account) to confirm. Cannot verify passively.
   - | Q2 Attacker reachable? | **NO** — requires valid Azure AD B2C session |
   - | 1 | NextAuth.js Open Redirect (callbackUrl) | **VALID** | 6.1 | None — ready to report |
+
+- 5 lead(s) marked VALID at 2026-09-10 06:38:59 UTC
+  - | Q3 Impact? | **Low-Medium** — dev environment could be used to obtain valid prod tokens via the registered callback; however, dev B2C signin now wired to prod B2C with PKCE S256 + state, reducing ex
+  - | Q7 Reasonable triager? | **Borderline** — valid config issue but low direct impact due to PKCE + state + same-origin redirect_uri validation. Without evidence of actual exploitation path, triagers m
+  - **Verdict: HOLD** — Valid misconfiguration but requires PoC showing actual token theft or cross-environment exploitation to be accepted. Recommend: attempt to obtain a prod token via companion-dev aut
+  - | Q7 Reasonable triager? | **Yes** — if proof shows cross-BU token acceptance, this is a valid auth bypass. Requires AUTH_HELPED verification. |
+  - | 3 | Companion-Dev Callback in Prod B2C | **HOLD** | Valid misconfig, needs exploitation PoC |
