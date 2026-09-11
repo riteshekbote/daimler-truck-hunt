@@ -3535,3 +3535,47 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED developer-portal-dual-b2c-providers: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
 [LEARN] ACCEPTED companion-single-provider: both companion apps use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
 [RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities on login-qa (tenant 88f558f5); passive map complete with no bypass/mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect + companion dev-callback-in-prod allowlist — dev auth now PKCE+state protected). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
+## 2026-09-11 13:24:48 UTC [target] (model bigpickle)
+[PRIO] login.ciam.daimlertruck.com,8.05,attack_surface=9,business_value=10,tech_exposure=10,gate_ease=0,cloud_surface=8,freshness=10
+[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,7.3,attack_surface=8,business_value=9,tech_exposure=9,gate_ease=0,cloud_surface=7,freshness=10
+[PRIO] companion.app.daimlertruck.com/api/proxy-http,7.1,attack_surface=7,business_value=8,tech_exposure=9,gate_ease=0,cloud_surface=10,freshness=10
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share IDENTICAL issuer URI; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); ROW client 205f35f7 vs NA client c387a5ab; claim contracts identical prod/staging
+evidence_needed: two staging identities → decoded claim set; whether NOAM-bearer executes ROW-scoped GraphQL ops
+verify_steps: AUTH_HELPED: obtain ROW + NOAM tokens from login-qa (tenant 88f558f5) → POST /api/graphql with ROW-scoped query using NOAM token → diff by acr/org claims
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: identical buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql + /graphql 307→B2C (prod 3db550f0 / staging 88f558f5) on all 7 portals
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403
+verify_steps: AUTH_HELPED: ROW session (login-qa) → POST /api/graphql introspection → baseline (teamId, appId, subscriptionId) → swap IDs across portals → diff status/body
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 proves POST-only first-class handler exempt from 401 catch-all; prod istio-envoy on AKS = cloud-metadata (169.254.169.254) reachable class; auth active prod+dev (401/307) post-dev-fix
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL
+verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body/redirects
+impact: cloud-metadata IAM keys / mesh lateral — High
+testability: AUTH_HELPED
+[FINAL] b2c-cross-bu-token-boundary-abuse (confidence 75)
+[FINAL] graphql-object-id-bola-cross-portal (confidence 75)
+[FINAL] companion-proxy-http-metadata-ssrf (confidence 55)
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) for developer.tst.na.api.daimlertruck.com: (1) b2c_1a_signin_oidc_row via broker e39fd9b6, (2) b2c_1a_signin_oidc_noam — the unchanged single blocker since 2026-09-04; one grant unblocks all three FINAL hypotheses. No anonymous GET/HEAD/OPTIONS probe adds signal; none run this cycle.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: surfaces remain exhausted; proxy-http POST body, GraphQL introspection, and cross-BU token claims all require a request shape not permitted in passive mode — rejected this cycle again.
+[LEARN] ACCEPTED b2c-cross-bu-token-boundary-abuse: ROW+NOAM share identical issuer URI (prod 3db550f0 / staging 88f558f5); only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII — remains top AUTH-helped candidate.
+[LEARN] ACCEPTED graphql-object-id-bola-cross-portal: /api/graphql 307-to-B2C on all 7 portals; buildManifest + client bundle confirm object-ID route surface — stays the top IDOR candidate.
+[LEARN] ACCEPTED companion-proxy-http-ssrf-auth-required: GET→405 proves POST-only first-class handler; all other /api/* → 401/307 catch-and-auth — SSRF candidate stands pending session.
+[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, /apis 307, healthcheck 200 — no drift since 09-08.
+[LEARN] ACCEPTED developer-portal-dual-b2c-providers: azure-ad-b2c-dt (ROW, 205f35f7) + azure-ad-b2c-dtna (NA, c387a5ab) on all 7 portals — regional tenant separation confirmed.
+[LEARN] ACCEPTED companion-single-provider: both companion apps single azure-ad-b2c (client cd34584a, ROW policy only) — by design per KB.
+[LEARN] REJECTED companion-dev-auth-bypass: dev now wired to prod B2C (3db550f0, cd34584a, b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri); /api/proxy-http 401; /admin /chat 307→B2C — middleware active, prior "unwired" finding stale.
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities on login-qa (tenant 88f558f5); passive map complete with no bypass/mutation path. Reportable items stay info-level (tst.as NA-provider wiring defect OAuthSignin abort + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only.
