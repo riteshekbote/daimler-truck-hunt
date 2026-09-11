@@ -30,3 +30,8 @@
   - | 1 | NextAuth.js Open Redirect (callbackUrl) | **VALID** | 6.1 |
   - | 3 | Dev Callback in Prod Allowlist | **VALID** | 4.0 |
   - | 4 | B2C Cross-BU Token Boundary | **VALID** | 5.3 |
+
+- 3 lead(s) marked VALID at 2026-09-11 21:15:32 UTC
+  - | Q2 Reachable? | AUTH_HELPED | Requires valid Azure AD B2C session to access /graphql |
+  - | Q4 Provable? | NO | Requires authenticated session with valid test account to test cross-tenant access |
+  - | Q2 Reachable? | AUTH_HELPED | /api/auth/session returns 200 {} unauthenticated; needs valid session to analyze JWT |
