@@ -253,3 +253,9 @@
 - 2026-09-11 ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
 - 2026-09-11 ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
 - 2026-09-11 REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+- 2026-09-11 ACCEPTED graphql-object-id-bola-team-scoped: /api/graphql returns 307 to Azure AD B2C; buildManifest shows explicit object-ID routes; client bundle shows GraphQL ops with these IDs
+- 2026-09-11 ACCEPTED b2c-cross-bu-token-boundary: prod+test tenants issue ROW+NOAM under same issuer/aud; BU separation depends on acr/org claims
+- 2026-09-11 ACCEPTED companion-proxy-http-ssrf-auth-required: GET→405 proves POST-only first-class handler; all other /api/* → 401 catch-all; auth middleware active post-dev-fix
+- 2026-09-11 REJECTED companion-dev-auth-bypass: dev companion now wired to prod B2C (3db550f0, cd34584a, b2c_1a_signin_oidc_row) with PKCE S256 + state + same-origin redirect_uri; /api/proxy-http returns 401; /admin, /chat redirect to B2C via locale — auth middleware active, prior "unwired" finding stale
+- 2026-09-11 ACCEPTED developer-portal-dual-b2c-providers: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identity layer
+- 2026-09-11 ACCEPTED companion-single-provider: both companion apps use single azure-ad-b2c provider (client cd34584a, ROW policy only) — by design per KB (new client for companion)
