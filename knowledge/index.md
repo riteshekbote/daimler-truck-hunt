@@ -267,3 +267,8 @@
 - 2026-09-11 ACCEPTED developer-portal-dual-b2c-providers: azure-ad-b2c-dt (ROW, 205f35f7) + azure-ad-b2c-dtna (NA, c387a5ab) on all 7 portals — regional tenant separation confirmed.
 - 2026-09-11 ACCEPTED companion-single-provider: both companion apps single azure-ad-b2c (client cd34584a, ROW policy only) — by design per KB.
 - 2026-09-11 REJECTED companion-dev-auth-bypass: dev now wired to prod B2C (3db550f0, cd34584a, b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri); /api/proxy-http 401; /admin /chat 307→B2C — middleware active, prior "unwired" finding stale.
+- 2026-09-11 ACCEPTED b2c-cross-bu-token-boundary-abuse: ROW+NOAM share identical issuer URI; only acr + org claims differentiate BU; NOAM superset includes dealer PII — remains top AUTH-helped candidate.
+- 2026-09-11 ACCEPTED companion-proxy-http-ssrf-auth-required: GET→405 proves POST-only first-class handler; all other /api/* → 401/307 — SSRF candidate stands pending session.
+- 2026-09-11 REJECTED fresh-passive-probe-value: surfaces remain exhausted; proxy-http POST body, GraphQL introspection, and cross-BU token claims all require request shapes not permitted in passive mode — rejected again this cycle.
+- 2026-09-11 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, healthcheck 200 — no drift since 09-08.
+- 2026-09-11 REJECTED companion-dev-auth-bypass: dev now wired to prod B2C with PKCE S256 + state; /api/proxy-http 401; /admin /chat 307→B2C — prior "unwired" finding stale.
