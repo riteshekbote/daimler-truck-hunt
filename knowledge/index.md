@@ -272,3 +272,8 @@
 - 2026-09-11 REJECTED fresh-passive-probe-value: surfaces remain exhausted; proxy-http POST body, GraphQL introspection, and cross-BU token claims all require request shapes not permitted in passive mode — rejected again this cycle.
 - 2026-09-11 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, healthcheck 200 — no drift since 09-08.
 - 2026-09-11 REJECTED companion-dev-auth-bypass: dev now wired to prod B2C with PKCE S256 + state; /api/proxy-http 401; /admin /chat 307→B2C — prior "unwired" finding stale.
+- 2026-09-11 REJECTED fresh-passive-probe-value @ all-scoped-hosts: surfaces remain exhausted; proxy-http POST body, GraphQL introspection, and cross-BU token claims all require request shapes not permitted in passive mode — rejected 9th consecutive cycle.
+- 2026-09-11 ACCEPTED b2c-cross-bu-token-boundary-abuse: ROW+NOAM share identical issuer URI per tenant; only acr + org claims differentiate BU; NOAM superset includes dealer PII — remains top AUTH-helped candidate pending staging identities.
+- 2026-09-11 ACCEPTED graphql-object-id-bola-cross-portal: /api/graphql 307-to-B2C on all 7 portals; buildManifest + client bundle confirm object-ID route surface — stays top IDOR candidate pending ROW session.
+- 2026-09-11 ACCEPTED companion-proxy-http-ssrf-auth-required: GET→405 proves POST-only first-class handler; all other /api/* → 401/307 — SSRF candidate stands pending prod-client session (cd34584a).
+- 2026-09-11 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no drift since 09-08.
