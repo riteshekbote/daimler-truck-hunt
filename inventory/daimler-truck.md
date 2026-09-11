@@ -409,3 +409,5 @@ www.daimlertruck.com
 - CHANGED b2c-cross-bu-token-boundary: ROW+NOAM share identical issuer URI per tenant (prod 3db550f0, staging 88f558f5); only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII (FT
 - CHANGED developer-portal-dual-b2c-providers: two providers confirmed on all 7 portals — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab) — regional tenant separation at identit
 - CHANGED companion-dev-callback-in-prod-allowlist: dev callback URI registered in prod B2C client cd34584a — misconfig confirmed, persists despite auth wiring fix
+
+## 2026-09-11 03:53:01 UTC
