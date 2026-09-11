@@ -21,3 +21,12 @@
   - **Verdict: HOLD** — Valid misconfiguration but requires PoC showing actual token theft or cross-environment exploitation to be accepted. Recommend: attempt to obtain a prod token via companion-dev aut
   - | Q7 Reasonable triager? | **Yes** — if proof shows cross-BU token acceptance, this is a valid auth bypass. Requires AUTH_HELPED verification. |
   - | 3 | Companion-Dev Callback in Prod B2C | **HOLD** | Valid misconfig, needs exploitation PoC |
+
+- 7 lead(s) marked VALID at 2026-09-11 18:35:36 UTC
+  - **Verdict: VALID**
+  - | Q7 | YES | Reasonable triager accepts allowlist hygiene as a valid misconfig finding |
+  - **Verdict: VALID**
+  - **Verdict: VALID**
+  - | 1 | NextAuth.js Open Redirect (callbackUrl) | **VALID** | 6.1 |
+  - | 3 | Dev Callback in Prod Allowlist | **VALID** | 4.0 |
+  - | 4 | B2C Cross-BU Token Boundary | **VALID** | 5.3 |
