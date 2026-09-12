@@ -35,3 +35,9 @@
   - | Q2 Reachable? | AUTH_HELPED | Requires valid Azure AD B2C session to access /graphql |
   - | Q4 Provable? | NO | Requires authenticated session with valid test account to test cross-tenant access |
   - | Q2 Reachable? | AUTH_HELPED | /api/auth/session returns 200 {} unauthenticated; needs valid session to analyze JWT |
+
+- 4 lead(s) marked VALID at 2026-09-12 05:50:38 UTC
+  - **Verdict: VALID**
+  - **Verdict: VALID**
+  - | 1 | B2C Error Info Leak (companion-dev disclosure) | **VALID** | 5.3 |
+  - | 2 | Companion-Dev Exposed + CORS + Debug Features | **VALID** | 5.3–6.5 |
