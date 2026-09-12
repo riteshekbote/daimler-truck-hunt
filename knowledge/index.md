@@ -315,3 +315,4 @@
 - 2026-09-12 ACCEPTED ciam-apim-key-gate-dev-open @ api.na.ciam/api-qa.na.ciam: APIM 401 AzureApiManagementKey (realm dtna-ciam-eus2-prod-apim-shared-01.azure-api.net); api-dev.na.ciam serves JSON without key — matches existing api.businessid prod/qa 403-WAF vs dev-open 404 config-drift pattern.
 - 2026-09-12 REJECTED login.b2b-keycloak @ login.b2b(-int/-dev1): Keycloak-themed static 404 (266389B data-URI favicon) on every path incl /realms/* — placeholder/origin-behind-Front-Door, no reachable OIDC realm.
 - 2026-09-12 REJECTED cui-na-ciam-storage-listing @ cui.na.ciam(.qa/.dev): Azure Storage WebContentNotFound 404 for /, /index.html, /app/, /assets/ — no blob/list surface demonstrated; ACAO:* alone not a finding.
+- 2026-09-12 ACCEPTED stability @ developer.tst.as + companion tier: healthcheck 200/70B, graphql 307/30B, proxy-http GET 405/30B, signin 302 uniform — zero drift since 09-12 build-roll; passive surface remains exhausted 11th consecutive cycle.

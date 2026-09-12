@@ -4198,3 +4198,40 @@ testability: AUTH_HELPED
 [LEARN] REJECTED login.b2b-keycloak @ login.b2b(-int/-dev1): Keycloak-themed static 404 (266389B data-URI favicon) on every path incl /realms/* — placeholder/origin-behind-Front-Door, no reachable OIDC realm.
 [LEARN] REJECTED cui-na-ciam-storage-listing @ cui.na.ciam(.qa/.dev): Azure Storage WebContentNotFound 404 for /, /index.html, /app/, /assets/ — no blob/list surface demonstrated; ACAO:* alone not a finding.
 [RISK] daimler-truck: 78. Unchanged core blocker — two login-qa staging identities (tenant 88f558f5) still outstanding since 09-04; top-2 Critical-class hypotheses remain AUTH_HELPED-blocked. This cycle added inventory breadth only: NA CIAM APIM (key-gated, parked), businessid/clara dev-open JSON APIs (54B 404 catch-all, no paths), Keycloak-themed placeholder on login.b2b (rejected). No new anonymous exploitable surface; no mutating touch; read-only GET <=1 rps; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist), HOLD pending exploitation PoC.
+## 2026-09-12 23:07:18 UTC [target] (model bigpickle)
+[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.00,portal-GraphQL-BOLA (a6/b9/t9/g2/c5/f1)
+[PRIO] login-qa.ciam.daimlertruck.com,5.75,identity-B2C-cross-BU (a5/b10/t8/g2/c4/f1)
+[PRIO] companion.app.daimlertruck.com/api/proxy-http,5.25,SSRF-handler (a5/b7/t7/g2/c8/f1)
+[PRIO] api.na.ciam.daimlertruck.com,6.15,NA-CIAM-APIM-key-gate (a4/b8/t7/g2/c8/f10) [parked — no passive key path]
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)+NOAM(acr=noam) share identical issuer URI per tenant; only acr+org-shape claims differentiate BU; NOAM claim superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephone, street, SapCode). Same-issuer collision confirmed anonymously on both tenants; gateway layer (NA APIM key-gate) is the only regional wall — weak at identity, strong at gateway. No drift this cycle.
+evidence_needed: two staging identities → decoded claim diff; NOAM token executes ROW-scoped /api/graphql op → 200 vs 403.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql (developer.tst.na) ROW query with NOAM bearer → diff acr/org claims vs status.
+impact: cross-BU privilege collapse → dealer-network PII exposure — Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307→B2C verified live this cycle (30B, all portals same). Ownership-check gap would replicate across 7 portals.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa) → introspection → baseline IDs → swap object IDs across portals → diff status/body.
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405(30B) proves POST-only first-class handler exempt from 401/307 catch-all on current prod build; istio-envoy on AKS → 169.254.169.254 reachable class; auth active prod (+dev). Re-verified 405 this cycle, no build motion.
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL → diff status/body.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal host → external URL; diff.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[PARKED] na-ciam-apim-subkey-gate: 401 key-gate + api-dev.na.ciam open (config-drift) confirmed anonymously, but Ocp-Apim-Subscription-Key has no passive discovery path (WAF/APIM layer, absent from reachable client JS) — unexploitable without key/credentials. Revisit on NA staging grant.
+[FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
+[NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Unchanged blocker since 09-04; one grant unblocks both top-2 FINALs plus proxy-http SSRF via prod-client cd34584a chain. Secondary optional: NA CIAM APIM subscription key for api.na.ciam (realm dtna-ciam-eus2-prod-apim-shared-01) to size the NA identity-API surface.
+[LEARN] ACCEPTED stability @ developer.tst.as + companion tier: healthcheck 200/70B, graphql 307/30B, proxy-http GET 405/30B, signin 302 uniform — zero drift since 09-12 build-roll; passive surface remains exhausted 11th consecutive cycle.
+[RISK] daimler-truck: 78. Unchanged. Core blocker is the same two login-qa staging identities (tenant 88f558f5), outstanding since 09-04; top-2 Critical-class hypotheses remain AUTH_HELPED-blocked and the SSRF chain needs a prod companion session. Zero new anonymous exploitable surface this cycle; no mutating touch — read-only GET/HEAD only, <=1 rps. Reportable items remain info-level (tst.as NA-provider POST-signin OAuthSignin abort + companion dev-callback-in-prod B2C allowlist misconfig), HOLD pending post-auth PoC.
