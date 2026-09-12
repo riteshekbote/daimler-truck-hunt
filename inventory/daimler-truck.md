@@ -427,3 +427,36 @@ www.daimlertruck.com
 ## 2026-09-12 05:04:35 UTC
 
 ## 2026-09-12 09:29:05 UTC
+
+## 2026-09-12 13:21:49 UTC
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/ad
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/ad
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- CHANGED developer.tst.na.api.daimlertruck.com: /api/auth/session GET returns 200 {} (empty session, not 400) — endpoint alive, expected empty when unauthenticated
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW /api/auth/providers reveals 2 OAuth providers on all portals: azure-ad-b2c-dt (ROW) + azure-ad-b2c-dtna (North America, policy b2c_1a_signin_oidc_noam)
+- NEW buildManifest route structure revealed: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe, rewrites /docs/:slug*, /ap
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW companion-app-build-roll @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both deployed NEW builds (first since 09-06 go-live) — prod buildId pVVz9XMK0MvBn72k4YswS, dev AO7VvIOpK
+- CHANGED companion.app /api/auth/callback/azure-ad-b2c GET: 400 -> 302->/api/auth/error?error=OAuthCallback (now uniform with developer.* portals); correlates with new deploy; standard NextAuth missing-params 
+- CHANGED companion-dev /api/proxy-http GET: 401 -> 405 (now homogeneous with prod 405 first-class-handler signal).
+- NEW developer.tst.as.api.daimlertruck.com `/api/auth/signin/azure-ad-b2c-dt` and `/api/auth/signin/azure-ad-b2c-dtna` endpoints hanging/no response (prod developer.as.api same) — previously returned B2C a
+- NEW companion-dev.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` returns 504 Gateway Timeout (was redirecting to prod B2C)
+- CHANGED companion.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` hangs/no response (was returning B2C authorize JSON)
