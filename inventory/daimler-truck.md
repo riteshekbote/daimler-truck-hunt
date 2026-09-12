@@ -460,3 +460,13 @@ www.daimlertruck.com
 - NEW developer.tst.as.api.daimlertruck.com `/api/auth/signin/azure-ad-b2c-dt` and `/api/auth/signin/azure-ad-b2c-dtna` endpoints hanging/no response (prod developer.as.api same) — previously returned B2C a
 - NEW companion-dev.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` returns 504 Gateway Timeout (was redirecting to prod B2C)
 - CHANGED companion.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` hangs/no response (was returning B2C authorize JSON)
+
+## 2026-09-12 16:28:31 UTC
+- NEW companion-dev.app /api/auth/signin/azure-ad-b2c still hangs (timeout 10s, 0B) while prod companion + all portal signin endpoints now return standard NextAuth 302 error-redirects — prior 13:21 "hanging
+- CHANGED companion.app signin GET: hang→302 `/?callbackUrl=...&error=azure-ad-b2c` (uniform NextAuth GET-signin error handling, matches developer portals).
+- CHANGED developer.tst.as signin GET (dt+dtna): hang→302 error=azure-ad-b2c-dt/-dtna — NA-provider OAuthSignin abort (09-08, POST path) not re-tested (POST out of passive bounds); GET-side hang resolved.
+- NEW developer.tst.as.api.daimlertruck.com `/api/auth/signin/azure-ad-b2c-dt` and `/api/auth/signin/azure-ad-b2c-dtna` endpoints hanging/no response (prod developer.as.api.daimlertruck.com same) — previous
+- NEW companion-dev.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` returns 504 Gateway Timeout (was redirecting to prod B2C)
+- CHANGED companion.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` hangs/no response (was returning B2C authorize JSON)
+- CHANGED developer.as.api.daimlertruck.com root + /graphql content-length changed from 196649 to 196341 bytes (prod build ID `JCvrnrykV_KYBk7pu0Npq` still) — possible new deploy or config change
+- CHANGED companion.app.daimlertruck.com `/api/auth/callback/azure-ad-b2c` remains 400 (standard NextAuth missing-params)
