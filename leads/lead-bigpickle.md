@@ -3723,3 +3723,38 @@ impact: cloud-metadata IAM keys / mesh lateral — High
 testability: AUTH_HELPED
 [NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) for developer.tst.na.api.daimlertruck.com via bugs.olivermaicher.eu — (1) b2c_1a_signin_oidc_row via broker e39fd9b6, (2) b2c_1a_signin_oidc_noam. Unchanged single blocker since 2026-09-04; one grant unblocks all three FINAL hypotheses. No anonymous probe adds signal; none run beyond the stability checks above.
 [RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 2026-09-04; passive map complete with no bypass/mutation path; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only this cycle.
+## 2026-09-12 05:03:35 UTC [target] (model bigpickle)
+[PRIO] login-qa.ciam.daimlertruck.com,5.75,identity-layer (a5/b10/t8/g2/c4/f1)
+[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.00,portal-GraphQL (a6/b9/t9/g2/c5/f1)
+[PRIO] companion.app.daimlertruck.com/api/proxy-http,5.25,SSRF-handler (a5/b7/t7/g2/c8/f1)
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)+NOAM(acr=noam) policies per tenant share identical issuer URI; only acr+org-shape claims differentiate BU; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); ROW client 205f35f7 vs NA client c387a5ab on same tenant issuer.
+evidence_needed: two staging identities → decoded claim diffs; whether NOAM-bearer ROW-scoped GraphQL op at /api/graphql resolves 200 vs 403.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql ROW query w/ NOAM token → diff acr/org claims vs status.
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307→B2C all 7 portals.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa) → introspection → baseline IDs → swap across portals → diff.
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405(30B) proves POST-only first-class handler exempt from 401 catch-all; prod istio-envoy on AKS = 169.254.169.254 reachable class; auth active; needs prod session client cd34584a / b2c_1a_signin_oidc_row.
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh host → external URL; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[FINAL] 1) b2c-cross-bu-token-boundary-abuse (75) 2) graphql-object-id-bola-cross-portal (75) 3) companion-proxy-http-metadata-ssrf (55)
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) via bugs.olivermaicher.eu for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6, (2) b2c_1a_signin_oidc_noam. Single blocker unchanged since 2026-09-04; one grant unblocks all three FINAL hypotheses. No anonymous probe adds signal (9th consecutive cycle exhausted); only anchors re-probed above.
+[LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com + companion.app.daimlertruck.com: re-probed cycle 01:xx — buildId `mS_4SiQmkiaGsx2vLoXkH`, /apis 307, healthcheck 200, companion root 3330B + /api/health 200 — no drift; passive surface unchanged.
+[RISK] daimler-truck: 78. Unchanged. Barrier remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 2026-09-04; passive map complete with no bypass/mutation path; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD only this cycle.
