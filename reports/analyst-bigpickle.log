@@ -16162,3 +16162,1844 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] daimler-truck: 78. Unchanged. Barrier remains two staging identities on login-qa (tenant 88f558f5) — single blocker since 09-04. This cycle's only dynamic (dev signin recovery to prod-uniform 302) removes an informational config-drift datapoint, adds no vulnerability, no new anonymous surface. Reportable items stay info-level (tst.as NA-provider POST-signin OAuthSignin abort + companion dev-callback-in-prod allowlist; both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, <=1 rps, GET only this cycle.
+===== ANALYST bigpickle 2026-09-12 21:26:02 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m✱ [0mGlob "**/*"[90m 100 matches[0m
+[0m% [0mWebFetch https://crt.sh/?q=%25.daimlertruck.com&output=json
+[0m
+[0m$ [0mpython3 - <<'EOF'
+import json,re
+raw=open('/home/runner/.local/share/opencode/tool-output/tool_0977deca0001O33sE8FwCVZkDZ').read()
+# tolerate junk before JSON
+start=raw.find('[')
+data=json.loads(raw[start:])
+names=set()
+for e in data:
+    for n in str(e.get('name_value','')).split('\n'):
+        n=n.strip().lower()
+        if n.endswith('daimlertruck.com'):
+            names.add(n)
+known={'api.daimlertruck.com','daimlertruck.com','www.daimlertruck.com','as.api.daimlertruck.com','authz.as.api.daimlertruck.com','authz.dev.na.api.daimlertruck.com','authz.eu.api.daimlertruck.com','authz.na.api.daimlertruck.com','authz.tst.as.api.daimlertruck.com','authz.tst.eu.api.daimlertruck.com','authz.tst.na.api.daimlertruck.com','capacitor-admin.as.api.daimlertruck.com','capacitor-admin.dev.na.api.daimlertruck.com','capacitor-admin.eu.api.daimlertruck.com','capacitor-admin.na.api.daimlertruck.com','capacitor-admin.tst.as.api.daimlertruck.com','capacitor-admin.tst.eu.api.daimlertruck.com','capacitor-admin.tst.na.api.daimlertruck.com','dev.na.api.daimlertruck.com','developer.as.api.daimlertruck.com','developer.dev.na.api.daimlertruck.com','developer.eu.api.daimlertruck.com','developer.na.api.daimlertruck.com','developer.tst.eu.api.daimlertruck.com','developer.tst.na.api.daimlertruck.com','eua.api.daimlertruck.com' if False else 'eu.api.daimlertruck.com','developer.tst.as.api.daimlertruck.com','companion.app.daimlertruck.com','companion-dev.app.daimlertruck.com','login.ciam.daimlertruck.com','login-qa.ciam.daimlertruck.com','login.businessid.daimlertruck.com','login.businessid-qa.daimlertruck.com'}
+known={k.lower() for k in known}
+new=sorted(names-known)
+print("TOTAL unique daimlertruck.com names:",len(names))
+print("NOT in known set:")
+for n in new: print(" ",n)
+EOF
+TOTAL unique daimlertruck.com names: 1079
+NOT in known set:
+  *.au.daimlertruck.com
+  *.buses.daimlertruck.com
+  *.cus.dev.csgna.csg.daimlertruck.com
+  *.cus.dev.csgna.private.csg.daimlertruck.com
+  *.cus.prd-us.platform.csg.daimlertruck.com
+  *.cus.prd-us.platform.private.csg.daimlertruck.com
+  *.daimlertruck.com
+  *.dtsa.daimlertruck.com
+  *.dynatrace.ops.runtime.csg.daimlertruck.com
+  *.dynatrace.sbx.polaris.csg.daimlertruck.com
+  *.eus.prd-us.platform.csg.daimlertruck.com
+  *.eus.prd-us.platform.private.csg.daimlertruck.com
+  *.eus2.dev.northamerica.private.csg.daimlertruck.com
+  *.int.daimlertruck.com
+  *.jpe.prd-jp.platform.csg.daimlertruck.com
+  *.jpe.prd-jp.platform.private.csg.daimlertruck.com
+  *.neu.sbx.polaris.csg.daimlertruck.com
+  *.neu.sbx.polaris.private.csg.daimlertruck.com
+  *.partsportal-test.au.daimlertruck.com
+  *.partsportal-test.dtsa.daimlertruck.com
+  *.partsportal-uat.au.daimlertruck.com
+  *.partsportal-uat.dtsa.daimlertruck.com
+  *.partsportal.au.daimlertruck.com
+  *.partsportal.dtsa.daimlertruck.com
+  *.sbx.polaris.csg.daimlertruck.com
+  *.sbx.polaris.private.csg.daimlertruck.com
+  *.scu.prd-us.platform.csg.daimlertruck.com
+  *.scu.prd-us.platform.private.csg.daimlertruck.com
+  *.tsac-dev.daimlertruck.com
+  *.tsac-staging.daimlertruck.com
+  *.tsac.daimlertruck.com
+  *.weu.cicd.runtime.private.csg.daimlertruck.com
+  *.weu.dev.fb.csg.daimlertruck.com
+  *.weu.dev.fb.private.csg.daimlertruck.com
+  *.weu.dev.fbkosmos.csg.daimlertruck.com
+  *.weu.dev.fbkosmos.private.csg.daimlertruck.com
+  *.weu.dev.kosmos.csg.daimlertruck.com
+  *.weu.dev.kosmos.private.csg.daimlertruck.com
+  *.weu.dev.platform.csg.daimlertruck.com
+  *.weu.dev.platform.private.csg.daimlertruck.com
+  *.weu.dev.shared.csg.daimlertruck.com
+  *.weu.dev.shared.private.csg.daimlertruck.com
+  *.weu.ops.runtime.csg.daimlertruck.com
+  *.weu.ops.runtime.private.csg.daimlertruck.com
+  *.weu.prd-eu.fb.csg.daimlertruck.com
+  *.weu.prd-eu.fb.private.csg.daimlertruck.com
+  *.weu.prd-eu.platform.csg.daimlertruck.com
+  *.weu.prd-eu.platform.private.csg.daimlertruck.com
+  *.weu.prd-eu.shared.csg.daimlertruck.com
+  *.weu.prd-eu.shared.private.csg.daimlertruck.com
+  *.weu.prd.platform.csg.daimlertruck.com
+  *.weu.prd.platform.private.csg.daimlertruck.com
+  *.weu.sbx.polaris.csg.daimlertruck.com
+  *.weu.sbx.polaris.private.csg.daimlertruck.com
+  *.weu.stg.fb.csg.daimlertruck.com
+  *.weu.stg.fb.private.csg.daimlertruck.com
+  *.weu.stg.platform.csg.daimlertruck.com
+  *.weu.stg.platform.private.csg.daimlertruck.com
+  *.weu.stg.shared.csg.daimlertruck.com
+  *.weu.stg.shared.private.csg.daimlertruck.com
+  *.wus3.prd-us.platform.csg.daimlertruck.com
+  *.wus3.prd-us.platform.private.csg.daimlertruck.com
+  3dprintdata.daimlertruck.com
+  3dviewer.daimlertruck.com
+  aloa.buses.daimlertruck.com
+  ambss-domain-test.treasuretest.treasure.daimlertruck.com
+  ams.buses.daimlertruck.com
+  api-dev.aws.daimlertruck.com
+  api-dev.na.ciam.daimlertruck.com
+  api-qa.na.ciam.daimlertruck.com
+  api-test.na.daimlertruck.com
+  api.buisnessid.daimlertruck.com
+  api.businessid-dev.daimlertruck.com
+  api.businessid-int.daimlertruck.com
+  api.businessid-qa.daimlertruck.com
+  api.businessid.daimlertruck.com
+  api.ciam-na.daimlertruck.com
+  api.dev.csgna.csg.daimlertruck.com
+  api.dev.fb.csg.daimlertruck.com
+  api.dev.fbkosmos.csg.daimlertruck.com
+  api.dev.kosmos.csg.daimlertruck.com
+  api.dev.northamerica.csg.daimlertruck.com
+  api.dev.platform.csg.daimlertruck.com
+  api.dev.retailnet.daimlertruck.com
+  api.dev.shared.csg.daimlertruck.com
+  api.int.retailnet.daimlertruck.com
+  api.na.ciam.daimlertruck.com
+  api.prd-eu.fb.csg.daimlertruck.com
+  api.prd-eu.platform.csg.daimlertruck.com
+  api.prd-eu.shared.csg.daimlertruck.com
+  api.prd-jp.platform.csg.daimlertruck.com
+  api.prd-us.platform.csg.daimlertruck.com
+  api.retailnet.daimlertruck.com
+  api.sbx.polaris.csg.daimlertruck.com
+  api.stg.fb.csg.daimlertruck.com
+  api.stg.platform.csg.daimlertruck.com
+  api.stg.shared.csg.daimlertruck.com
+  apic-test.na.daimlertruck.com
+  apicon.daimlertruck.com
+  apicon2.apicon-int.daimlertruck.com
+  apidev.ciam-na.daimlertruck.com
+  apiqa.ciam-na.daimlertruck.com
+  app-eve.daimlertruck.com
+  app-weu-uc-lsm136-test-03.treasuretest.treasure.daimlertruck.com
+  app.mktg.daimlertruck.com
+  app01.appgw.treasure.daimlertruck.com
+  app01.wafpoc.treasure.daimlertruck.com
+  app02.wafpoc.treasure.daimlertruck.com
+  apps-int.ch.daimlertruck.com
+  apps-test.ch.daimlertruck.com
+  apps.ch.daimlertruck.com
+  appstore-dev.weu.treasure.daimlertruck.com
+  appstore.weu.treasure.daimlertruck.com
+  archiving-prod.nl.daimlertruck.com
+  archiving-test.nl.daimlertruck.com
+  art-dtiam.t3-int.daimlertruck.com
+  art.t3-int.daimlertruck.com
+  art.t3.daimlertruck.com
+  ascent-freightliner.daimlertruck.com
+  asia.daimlertruck.com
+  asset-hoster.buses.daimlertruck.com
+  assetglobal-int.daimlertruck.com
+  assettrucks-int.daimlertruck.com
+  assettrucks.daimlertruck.com
+  au.daimlertruck.com
+  authz.authz.dev.eu.api.daimlertruck.com
+  authz.dev.as.api.daimlertruck.com
+  authz.dev.eu.api.daimlertruck.com
+  authz.developer.dev.eu.api.daimlertruck.com
+  authz.management.dev.eu.api.daimlertruck.com
+  authz.provider.dev.eu.api.daimlertruck.com
+  authz.services.dev.eu.api.daimlertruck.com
+  b2bus.daimlertruck.com
+  b2busstore.tr.daimlertruck.com
+  b2truck.daimlertruck.com
+  b2truckstore.tr.daimlertruck.com
+  backend-api.partsportal-test.au.daimlertruck.com
+  backend-api.partsportal-test.dtsa.daimlertruck.com
+  backend-api.partsportal-uat.au.daimlertruck.com
+  backend-api.partsportal-uat.dtsa.daimlertruck.com
+  backend-api.partsportal.au.daimlertruck.com
+  backend-api.partsportal.dtsa.daimlertruck.com
+  backend-gateway.partsportal-test.au.daimlertruck.com
+  backend-gateway.partsportal-test.dtsa.daimlertruck.com
+  backend-gateway.partsportal-uat.au.daimlertruck.com
+  backend-gateway.partsportal-uat.dtsa.daimlertruck.com
+  backend-gateway.partsportal.au.daimlertruck.com
+  backend-gateway.partsportal.dtsa.daimlertruck.com
+  backoffice.partsportal-test.au.daimlertruck.com
+  backoffice.partsportal-test.dtsa.daimlertruck.com
+  backoffice.partsportal-uat.au.daimlertruck.com
+  backoffice.partsportal-uat.dtsa.daimlertruck.com
+  backoffice.partsportal.au.daimlertruck.com
+  backoffice.partsportal.dtsa.daimlertruck.com
+  bdd.buses.daimlertruck.com
+  best-bus-online.events.buses.daimlertruck.com
+  bi-portal-dev.daimlertruck.com
+  bi-portal-int.daimlertruck.com
+  bi-portal.daimlertruck.com
+  biportalcv.za.daimlertruck.com
+  bis.carledi.supplier-uat.daimlertruck.com
+  bis.carledi.supplier.daimlertruck.com
+  bit-dtiam.t3-int.daimlertruck.com
+  bit.t3-int.daimlertruck.com
+  bit.t3.daimlertruck.com
+  bla-dtiam.t3-int.daimlertruck.com
+  bla.t3-int.daimlertruck.com
+  bla.t3.daimlertruck.com
+  brandwall-dev.daimlertruck.com
+  brandwall-int.daimlertruck.com
+  brandwall.daimlertruck.com
+  bus-lieferantenportal-int.daimlertruck.com
+  bus-lieferantenportal.daimlertruck.com
+  bus-sapl22.daimlertruck.com
+  bus-saplig.daimlertruck.com
+  busdoc-int.daimlertruck.com
+  busdoc.daimlertruck.com
+  businessid-dev.daimlertruck.com
+  businessid-int.daimlertruck.com
+  businessid-qa.daimlertruck.com
+  businessid.daimlertruck.com
+  calendars.buses.daimlertruck.com
+  campaign.daimlertruck.com
+  carledi.supplier-uat.daimlertruck.com
+  carledi.supplier.daimlertruck.com
+  cdn.events.buses.daimlertruck.com
+  cdn.partsportal.daimlertruck.com
+  cebid-backend-qa.daimlertruck.com
+  cebid-backend.daimlertruck.com
+  cert-service-qa.daimlertruck.com
+  cert-service.daimlertruck.com
+  certus-dev.daimlertruck.com
+  certus-dev.supplier.daimlertruck.com
+  certus-devcd.daimlertruck.com
+  certus-devcd.supplier.daimlertruck.com
+  certus-pref.daimlertruck.com
+  certus-pref.supplier.daimlertruck.com
+  certus-test.daimlertruck.com
+  certus-test.supplier.daimlertruck.com
+  certus.daimlertruck.com
+  certus.supplier.daimlertruck.com
+  charterway-miete-int.i.daimlertruck.com
+  charterway-miete.i.daimlertruck.com
+  ciam-dev.daimlertruck.com
+  ciam-dev.northamerica.daimlertruck.com
+  ciam-qa.daimlertruck.com
+  ciam-qa.northamerica.daimlertruck.com
+  ciam.daimlertruck.com
+  ciam.northamerica.daimlertruck.com
+  cico-int2.i.daimlertruck.com
+  cico.i.daimlertruck.com
+  cico2.i.daimlertruck.com
+  clara.app.daimlertruck.com
+  clara.app.dev.daimlertruck.com
+  clara.app.qa.daimlertruck.com
+  clara.app.uat.daimlertruck.com
+  cls.za.daimlertruck.com
+  cma-dev.daimlertruck.com
+  cma-int.daimlertruck.com
+  cma.carledi.supplier-uat.daimlertruck.com
+  cma.carledi.supplier.daimlertruck.com
+  cma.daimlertruck.com
+  cms-oira-int.daimlertruck.com
+  cms-oira.daimlertruck.com
+  comin.belux.daimlertruck.com
+  comin.nl.daimlertruck.com
+  compliancelatam.daimlertruck.com
+  con-dtiam.t3-int.daimlertruck.com
+  con-itbt.t3-int.daimlertruck.com
+  con-itbt.t3.daimlertruck.com
+  con-retops.t3.daimlertruck.com
+  con.t3-int.daimlertruck.com
+  con.t3.daimlertruck.com
+  connecta.daimlertruck.com
+  containers.git.t3-int.daimlertruck.com
+  containers.git.t3.daimlertruck.com
+  content-base.buses.daimlertruck.com
+  content-hub.buses.daimlertruck.com
+  coss-dev.daimlertruck.com
+  coss-int.aftersales.daimlertruck.com
+  coss-int.daimlertruck.com
+  coss.aftersales.daimlertruck.com
+  coss.daimlertruck.com
+  cov-poc.t3-int.daimlertruck.com
+  cse-chatbot.daimlertruck.com
+  cspanlyt-priceproposal-dev.weu.treasure.daimlertruck.com
+  ctp-mtc.daimlertruck.com
+  ctp-mtc.t3.daimlertruck.com
+  cui-dev.na.ciam.daimlertruck.com
+  cui-qa.na.ciam.daimlertruck.com
+  cui.na.ciam.daimlertruck.com
+  cus.dev.csgna.csg.daimlertruck.com
+  cus.dev.csgna.private.csg.daimlertruck.com
+  cus.prd-us.platform.csg.daimlertruck.com
+  cus.prd-us.platform.private.csg.daimlertruck.com
+  custom-domain-test.treasuretest.treasure.daimlertruck.com
+  custom-domain.weu.treasure.daimlertruck.com
+  customer-focus-day.events2023.daimlertruck.com
+  customer-services-parts.cz.daimlertruck.com
+  daimler.com.daimlertruck.com
+  dams-prod.daimlertruck.com
+  dams-qa.daimlertruck.com
+  dams.daimlertruck.com
+  dapt-int.daimlertruck.com
+  dapt-qual.daimlertruck.com
+  dapt.daimlertruck.com
+  dare-dev.weu.treasure.daimlertruck.com
+  dare.weu.treasure.daimlertruck.com
+  date-time-configurator-example.partsportal-test.dtsa.daimlertruck.com
+  date-time-configurator-example.partsportal-uat.dtsa.daimlertruck.com
+  date-time-configurator-example.partsportal.dtsa.daimlertruck.com
+  datistt-dev.weu.treasure.daimlertruck.com
+  datistt.weu.treasure.daimlertruck.com
+  de-integration.platon.daimlertruck.com
+  de.integration.platon.daimlertruck.com
+  dealerapps.nl.daimlertruck.com
+  dealerfocus-bene-int.daimlertruck.com
+  dealerfocus-bene.daimlertruck.com
+  demo.events.buses.daimlertruck.com
+  designnavigator.daimlertruck.com
+  dev.api.csgna.daimlertruck.com
+  dev.apicon-int.daimlertruck.com
+  dev.as.api.daimlertruck.com
+  dev.eu.api.daimlertruck.com
+  dev.events.buses.daimlertruck.com
+  dev.gpdb.daimlertruck.com
+  dev.i.tcas.daimlertruck.com
+  dev.iconbasic-cloud-int.daimlertruck.com
+  dev.platon.daimlertruck.com
+  dev.retailnet.daimlertruck.com
+  dev.swf.daimlertruck.com
+  dev1.core-t.public.vedoc.daimlertruck.com
+  dev1.i.tcas.daimlertruck.com
+  dev2.core-t.public.vedoc.daimlertruck.com
+  dev2.i.tcas.daimlertruck.com
+  devbox.platon.daimlertruck.com
+  developer-test.na.daimlertruck.com
+  developer.authz.dev.eu.api.daimlertruck.com
+  developer.dev.as.api.daimlertruck.com
+  developer.dev.eu.api.daimlertruck.com
+  developer.developer.dev.eu.api.daimlertruck.com
+  developer.management.dev.eu.api.daimlertruck.com
+  developer.provider.dev.eu.api.daimlertruck.com
+  developer.services.dev.eu.api.daimlertruck.com
+  devpgw.daimlertruck.com
+  devscep.daimlertruck.com
+  dfes-test.dtt.daimlertruck.com
+  dfes.dtt.daimlertruck.com
+  diagnosticsdeliveryportal.daimlertruck.com
+  dicv-innovate2022.daimlertruck.com
+  dicv-ticketingtool.daimlertruck.com
+  dicv.supplier-int.daimlertruck.com
+  dicv.supplier.daimlertruck.com
+  digital-manuals-staging.daimlertruck.com
+  digital-manuals.daimlertruck.com
+  digital-warehouse.ams.buses.daimlertruck.com
+  discovery-hmi.daimlertruck.com
+  dlp-api.daimlertruck.com
+  dlp-qa-api.daimlertruck.com
+  dlp-qa.daimlertruck.com
+  dlp.daimlertruck.com
+  docmaster.supplier-int.daimlertruck.com
+  docmaster.supplier.daimlertruck.com
+  docs.api.daimlertruck.com
+  dqmqmi.mq.daimlertruck.com
+  dtb.daimlertruck.com
+  dtcc.i.tcas.daimlertruck.com
+  dtna-ciam-dev-api-pip-01.ciam.daimlertruck.com
+  dtna-ciam-eus2-prod-agw-inet-01.ciam-na.daimlertruck.com
+  dtna-ciam-eus2-prod-agw-inet-01.ciam.daimlertruck.com
+  dtna-ciam-prod-api-pip-01.ciam.daimlertruck.com
+  dtna-ciam-qa-api-pip-01.ciam.daimlertruck.com
+  dtna-ciam-wus2-dev-agw-inet-01.ciam.daimlertruck.com
+  dtna-ciam-wus2-prod-agw-inet-01.ciam-na.daimlertruck.com
+  dtna-ciam-wus2-prod-agw-inet-01.ciam.daimlertruck.com
+  dtna-ciam-wus2-qa-agw-inet-01.ciam.daimlertruck.com
+  dtsa.daimlertruck.com
+  dttcweudevvmum01.platon.daimlertruck.com
+  dynatrace.ops.runtime.csg.daimlertruck.com
+  dynatrace.sbx.polaris.csg.daimlertruck.com
+  econ-int.daimlertruck.com
+  econ-test.daimlertruck.com
+  edex-qa.daimlertruck.com
+  edex.daimlertruck.com
+  editor-mbtportal.de.daimlertruck.com
+  eft.it.daimlertruck.com
+  enter.daimlertruck.com
+  env00.training.platon.daimlertruck.com
+  env01.training.platon.daimlertruck.com
+  env02.training.platon.daimlertruck.com
+  env03.training.platon.daimlertruck.com
+  env04.training.platon.daimlertruck.com
+  env05.training.platon.daimlertruck.com
+  env06.training.platon.daimlertruck.com
+  env07.training.platon.daimlertruck.com
+  env08.training.platon.daimlertruck.com
+  env09.training.platon.daimlertruck.com
+  env10.training.platon.daimlertruck.com
+  env11.training.platon.daimlertruck.com
+  env12.training.platon.daimlertruck.com
+  env13.training.platon.daimlertruck.com
+  env14.training.platon.daimlertruck.com
+  env15.training.platon.daimlertruck.com
+  env16.training.platon.daimlertruck.com
+  env17.training.platon.daimlertruck.com
+  env18.training.platon.daimlertruck.com
+  env19.training.platon.daimlertruck.com
+  env20.training.platon.daimlertruck.com
+  env21.training.platon.daimlertruck.com
+  env22.training.platon.daimlertruck.com
+  env23.training.platon.daimlertruck.com
+  env24.training.platon.daimlertruck.com
+  env25.training.platon.daimlertruck.com
+  env26.training.platon.daimlertruck.com
+  env27.training.platon.daimlertruck.com
+  env28.training.platon.daimlertruck.com
+  env29.training.platon.daimlertruck.com
+  env30.training.platon.daimlertruck.com
+  env31.training.platon.daimlertruck.com
+  env32.training.platon.daimlertruck.com
+  env33.training.platon.daimlertruck.com
+  env34.training.platon.daimlertruck.com
+  env35.training.platon.daimlertruck.com
+  env36.training.platon.daimlertruck.com
+  env37.training.platon.daimlertruck.com
+  env38.training.platon.daimlertruck.com
+  env39.training.platon.daimlertruck.com
+  env40.training.platon.daimlertruck.com
+  eorder-int.daimlertruck.com
+  eorder.daimlertruck.com
+  eorderplus-int.daimlertruck.com
+  eorderplus.daimlertruck.com
+  erm.daimlertruck.com
+  esep-int.app.daimlertruck.com
+  esep-int.daimlertruck.com
+  esep.app.daimlertruck.com
+  esep.supplier-int.daimlertruck.com
+  esep.supplier.daimlertruck.com
+  esign-uat.daimlertruck.com
+  esign.daimlertruck.com
+  esignature.daimlertruck.com
+  etldashboard.weu.treasure.daimlertruck.com
+  eus.prd-us.platform.csg.daimlertruck.com
+  eus.prd-us.platform.private.csg.daimlertruck.com
+  eus2.dev.northamerica.private.csg.daimlertruck.com
+  eve.daimlertruck.com
+  events.buses.daimlertruck.com
+  evsec.daimlertruck.com
+  extranet.it.daimlertruck.com
+  finance-api.za.daimlertruck.com
+  finance.za.daimlertruck.com
+  fiori-spain-sap-hcm-dev.daimlertruck.com
+  fiori-spain-sap-hcm.daimlertruck.com
+  formcycle-int.daimlertruck.com
+  formcycle.daimlertruck.com
+  fritz-dev.i.daimlertruck.com
+  fritz-int.i.daimlertruck.com
+  fritz.i.daimlertruck.com
+  frs.daimlertruck.com
+  galaxi.za.daimlertruck.com
+  gateway.dev.eu.vehicle-health.daimlertruck.com
+  gateway.eu.vehicle-health.daimlertruck.com
+  gateway.staging.eu.vehicle-health.daimlertruck.com
+  gcc-connect.daimlertruck.com
+  gdprdata.daimlertruck.com
+  git-dtiam.t3-int.daimlertruck.com
+  git.t3-int.daimlertruck.com
+  git.t3.daimlertruck.com
+  global-afm-dev.weu.treasure.daimlertruck.com
+  global-afm.weu.treasure.daimlertruck.com
+  global-jobboard-api-int.daimlertruck.com
+  global-jobboard-api-jobsearch-staging.daimlertruck.com
+  global-jobboard-api-jobsearch.daimlertruck.com
+  global-jobboard-api.daimlertruck.com
+  glue-backend.partsportal-test.au.daimlertruck.com
+  glue-backend.partsportal-test.dtsa.daimlertruck.com
+  glue-backend.partsportal-uat.au.daimlertruck.com
+  glue-backend.partsportal-uat.dtsa.daimlertruck.com
+  glue-backend.partsportal.au.daimlertruck.com
+  glue-backend.partsportal.dtsa.daimlertruck.com
+  glue-storefront.partsportal-test.au.daimlertruck.com
+  glue-storefront.partsportal-test.dtsa.daimlertruck.com
+  glue-storefront.partsportal-uat.au.daimlertruck.com
+  glue-storefront.partsportal-uat.dtsa.daimlertruck.com
+  glue-storefront.partsportal.au.daimlertruck.com
+  glue-storefront.partsportal.dtsa.daimlertruck.com
+  glue.partsportal-test.au.daimlertruck.com
+  glue.partsportal-test.dtsa.daimlertruck.com
+  glue.partsportal-uat.au.daimlertruck.com
+  glue.partsportal-uat.dtsa.daimlertruck.com
+  glue.partsportal.au.daimlertruck.com
+  glue.partsportal.dtsa.daimlertruck.com
+  gmc-domain-test.treasuretest.treasure.daimlertruck.com
+  gms.aftersales.daimlertruck.com
+  gms.daimlertruck.com
+  gpdb.daimlertruck.com
+  gra.t3.daimlertruck.com
+  hackathon.daimlertruck.com
+  hcm.app.daimlertruck.com
+  hebeo-int.daimlertruck.com
+  hebeo.daimlertruck.com
+  herstellerbescheinigung-int.daimlertruck.com
+  herstellerbescheinigung.daimlertruck.com
+  hfx.proq.daimlertruck.com
+  high.carledi.supplier-uat.daimlertruck.com
+  high.carledi.supplier.daimlertruck.com
+  icon.aftersales.daimlertruck.com
+  icon.cloud.daimlertruck.com
+  icon.daimlertruck.com
+  iconbasic-cloud-int.daimlertruck.com
+  iconbasic-dev.daimlertruck.com
+  iconbasic-int.daimlertruck.com
+  iconbasic.daimlertruck.com
+  icongd-int.daimlertruck.com
+  icongd.daimlertruck.com
+  ikeys-dev.daimlertruck.com
+  ikeys.daimlertruck.com
+  ikeystest.daimlertruck.com
+  ikeystest2.daimlertruck.com
+  ikeytest56.daimlertruck.com
+  images.mktg.daimlertruck.com
+  in-integration.platon.daimlertruck.com
+  in.integration.platon.daimlertruck.com
+  indirect-procurement.daimlertruck.com
+  infravalidation.platon.daimlertruck.com
+  inspectionscv.za.daimlertruck.com
+  int-esignature.daimlertruck.com
+  int-pgw.daimlertruck.com
+  int.apicon-int.daimlertruck.com
+  int.daimlertruck.com
+  int.iconbasic-cloud-int.daimlertruck.com
+  int.it.daimlertruck.com
+  int.mps.daimlertruck.com
+  int.proq.daimlertruck.com
+  int.retailnet.daimlertruck.com
+  int.swan.daimlertruck.com
+  int1.core-i.public.vedoc.daimlertruck.com
+  integral.fr.daimlertruck.com
+  integration.platon.daimlertruck.com
+  internal-jobs-int.daimlertruck.com
+  internal-jobs.daimlertruck.com
+  internal-jobsearch-int.daimlertruck.com
+  internal-jobsearch-staging.daimlertruck.com
+  internal-jobsearch.daimlertruck.com
+  iona.icon.daimlertruck.com
+  ipmspartner-int.daimlertruck.com
+  ipmspartner.daimlertruck.com
+  ipsonline-int.daimlertruck.com
+  ipsonline.daimlertruck.com
+  iquote-int.daimlertruck.com
+  iquote.daimlertruck.com
+  it.daimlertruck.com
+  jaeger.cec.apps.daimlertruck.com
+  jen-ctp.t3.daimlertruck.com
+  jen-dive.t3.daimlertruck.com
+  jen-dtiam.t3-int.daimlertruck.com
+  jen.t3-int.daimlertruck.com
+  jen.t3.daimlertruck.com
+  jir-cpjir.t3-int.daimlertruck.com
+  jir-dtfs.t3-int.daimlertruck.com
+  jir-dtfs.t3.daimlertruck.com
+  jir-dtiam.t3-int.daimlertruck.com
+  jir-itbt.t3-int.daimlertruck.com
+  jir-itbt.t3.daimlertruck.com
+  jir-qmcrm.t3-int.daimlertruck.com
+  jir-qmcrm.t3.daimlertruck.com
+  jir-retops.t3.daimlertruck.com
+  jir-tiep.t3.daimlertruck.com
+  jir.t3-int.daimlertruck.com
+  jir.t3.daimlertruck.com
+  jnet.daimlertruck.com
+  jobs-int.daimlertruck.com
+  jobs.daimlertruck.com
+  jobsearch-staging.daimlertruck.com
+  jobsearch.daimlertruck.com
+  join.apac.vc.daimlertruck.com
+  join.vc-int.daimlertruck.com
+  join.vc.daimlertruck.com
+  jp-integration.platon.daimlertruck.com
+  jp.integration.platon.daimlertruck.com
+  jpe.prd-jp.platform.csg.daimlertruck.com
+  jpe.prd-jp.platform.private.csg.daimlertruck.com
+  key.t3-int.daimlertruck.com
+  key.t3.daimlertruck.com
+  kris-int.daimlertruck.com
+  kris.daimlertruck.com
+  lambda.customer-focus-day.events2023.daimlertruck.com
+  leads-dtsa.daimlertruck.com
+  leads.dtsa.daimlertruck.com
+  legal-at.buses.daimlertruck.com
+  legal-be.buses.daimlertruck.com
+  legal-ch.buses.daimlertruck.com
+  legal-cz.buses.daimlertruck.com
+  legal-de.buses.daimlertruck.com
+  legal-dk.buses.daimlertruck.com
+  legal-es.buses.daimlertruck.com
+  legal-fr.buses.daimlertruck.com
+  legal-it.buses.daimlertruck.com
+  legal-nl.buses.daimlertruck.com
+  legal-pl.buses.daimlertruck.com
+  legal-pt.buses.daimlertruck.com
+  legal-re.buses.daimlertruck.com
+  legal-se.buses.daimlertruck.com
+  legal-uk.buses.daimlertruck.com
+  lisa.daimlertruck.com
+  lisa4ao-temp.daimlertruck.com
+  lisa4ao.daimlertruck.com
+  locate-dev.weu.treasure.daimlertruck.com
+  locate.weu.treasure.daimlertruck.com
+  locations-staging.daimlertruck.com
+  locations.daimlertruck.com
+  logbus-edu.trucklog.daimlertruck.com
+  logbus-int.trucklog.daimlertruck.com
+  logbus-prod.trucklog.daimlertruck.com
+  login-dev.ciam.daimlertruck.com
+  login-dev.na.ciam.daimlertruck.com
+  login-qa.na.ciam.daimlertruck.com
+  login.b2b-dev.daimlertruck.com
+  login.b2b-dev1.daimlertruck.com
+  login.b2b-int.daimlertruck.com
+  login.b2b.daimlertruck.com
+  login.businessid-dev.daimlertruck.com
+  login.businessid-int.daimlertruck.com
+  login.na.ciam.daimlertruck.com
+  lre.daimlertruck.com
+  mailing.daimlertruck.com
+  mailings.daimlertruck.com
+  managament.businessid-dev.daimlertruck.com
+  managament.businessid-int.daimlertruck.com
+  management.as.api.daimlertruck.com
+  management.authz.dev.eu.api.daimlertruck.com
+  management.businessid-dev.daimlertruck.com
+  management.businessid-int.daimlertruck.com
+  management.businessid-qa.daimlertruck.com
+  management.businessid.daimlertruck.com
+  management.dev.as.api.daimlertruck.com
+  management.dev.eu.api.daimlertruck.com
+  management.dev.na.api.daimlertruck.com
+  management.developer.dev.eu.api.daimlertruck.com
+  management.eu.api.daimlertruck.com
+  management.management.dev.eu.api.daimlertruck.com
+  management.na.api.daimlertruck.com
+  management.provider.dev.eu.api.daimlertruck.com
+  management.services.dev.eu.api.daimlertruck.com
+  management.tst.as.api.daimlertruck.com
+  management.tst.eu.api.daimlertruck.com
+  management.tst.na.api.daimlertruck.com
+  manuals.daimlertruck.com
+  mars-bus.daimlertruck.com
+  mars-int.daimlertruck.com
+  mars.daimlertruck.com
+  mbag-test.core-t.public.vedoc.daimlertruck.com
+  mbtportal.de.daimlertruck.com
+  mdtool-dev.weu.treasure.daimlertruck.com
+  mdtool.weu.treasure.daimlertruck.com
+  media-ch.daimlertruck.com
+  media-int.daimlertruck.com
+  media.be.daimlertruck.com
+  media.daimlertruck.com
+  media.fr.daimlertruck.com
+  media.it.daimlertruck.com
+  media.nl.daimlertruck.com
+  media2.daimlertruck.com
+  medianews.daimlertruck.com
+  merchandising.buses.daimlertruck.com
+  mfe.tb-dealerlocator-dev.daimlertruck.com
+  mfe.tb-dealerlocator-int.daimlertruck.com
+  mfe.tb-dealerlocator.daimlertruck.com
+  mftbc-nbo-dev.ejp.treasure.daimlertruck.com
+  mftbc-nbo.ejp.treasure.daimlertruck.com
+  mgmtpoc.dev.na.api.daimlertruck.com
+  migration.platon.daimlertruck.com
+  milesweb-dtfsbene-dev.daimlertruck.com
+  milesweb-dtfsbene-int.daimlertruck.com
+  milesweb-dtfsbene.daimlertruck.com
+  mk-plattform.daimlertruck.com
+  mngmtapi-test.na.daimlertruck.com
+  mp.partsportal-test.au.daimlertruck.com
+  mp.partsportal-test.dtsa.daimlertruck.com
+  mp.partsportal-uat.au.daimlertruck.com
+  mp.partsportal-uat.dtsa.daimlertruck.com
+  mp.partsportal.au.daimlertruck.com
+  mp.partsportal.dtsa.daimlertruck.com
+  mp.weu.treasure.daimlertruck.com
+  mps.daimlertruck.com
+  msft-emea-prd-fra-emea.daimlertruck.com
+  mtls.as.api.daimlertruck.com
+  mtls.authz.dev.eu.api.daimlertruck.com
+  mtls.dev.as.api.daimlertruck.com
+  mtls.dev.eu.api.daimlertruck.com
+  mtls.dev.na.api.daimlertruck.com
+  mtls.developer.dev.eu.api.daimlertruck.com
+  mtls.eu.api.daimlertruck.com
+  mtls.management.dev.eu.api.daimlertruck.com
+  mtls.na.api.daimlertruck.com
+  mtls.provider.dev.eu.api.daimlertruck.com
+  mtls.services.dev.eu.api.daimlertruck.com
+  mtls.tst.as.api.daimlertruck.com
+  mtls.tst.eu.api.daimlertruck.com
+  mtls.tst.na.api.daimlertruck.com
+  myrequest.privacy.daimlertruck.com
+  na.api.daimlertruck.com
+  networkacademy.dtna.daimlertruck.com
+  neu.sbx.polaris.csg.daimlertruck.com
+  neu.sbx.polaris.private.csg.daimlertruck.com
+  newsletter.ro.daimlertruck.com
+  nl.daimlertruck.com
+  nodes.echoes.cec.apps.daimlertruck.com
+  northamerica.daimlertruck.com
+  oep.daimlertruck.com
+  ogr-dtici-apac.daimlertruck.com
+  ogr-gdc-emea-int.daimlertruck.com
+  ogr-gdc-emea.daimlertruck.com
+  oira-int.daimlertruck.com
+  oira.daimlertruck.com
+  omologazioni-int.it.daimlertruck.com
+  omologazioni.it.daimlertruck.com
+  origin.echoes.cec.apps.daimlertruck.com
+  pages.git.t3-int.daimlertruck.com
+  pages.git.t3.daimlertruck.com
+  partnerconnect.daimlertruck.com
+  partsportal-test.au.daimlertruck.com
+  partsportal-test.dtsa.daimlertruck.com
+  partsportal-uat.au.daimlertruck.com
+  partsportal-uat.dtsa.daimlertruck.com
+  partsportal.au.daimlertruck.com
+  partsportal.dtsa.daimlertruck.com
+  payablesdtici.daimlertruck.com
+  payfs.za.daimlertruck.com
+  pbi.weu.treasure.daimlertruck.com
+  pegasus-int.daimlertruck.com
+  pegasus-test.daimlertruck.com
+  pegasus.daimlertruck.com
+  pel-int.aftersales.daimlertruck.com
+  pel.aftersales.daimlertruck.com
+  permission.buses.daimlertruck.com
+  pgw.daimlertruck.com
+  ping.app.cec.apps.daimlertruck.com
+  pit-author.buses.daimlertruck.com
+  pit-login.buses.daimlertruck.com
+  pit.buses.daimlertruck.com
+  platon.daimlertruck.com
+  poc.dev.na.api.daimlertruck.com
+  portal-example.tb-dealerlocator-dev.daimlertruck.com
+  portal-example.tb-dealerlocator-int.daimlertruck.com
+  portal-example.tb-dealerlocator.daimlertruck.com
+  portal.businessid-dev.daimlertruck.com
+  portal.businessid-int.daimlertruck.com
+  portal.businessid-qa.daimlertruck.com
+  portal.businessid.daimlertruck.com
+  portal.carledi.supplier-uat.daimlertruck.com
+  portal.carledi.supplier.daimlertruck.com
+  powerbi-dtfs-bene-int.daimlertruck.com
+  powerbi-dtfs-bene.daimlertruck.com
+  powertrainreport.weu.treasure.daimlertruck.com
+  predoc-dev.daimlertruck.com
+  predoc-int.daimlertruck.com
+  predoc.daimlertruck.com
+  preprod.apicon-int.daimlertruck.com
+  privacy.daimlertruck.com
+  private.dev.truckwallet.daimlertruck.com
+  prm-int.daimlertruck.com
+  prm.daimlertruck.com
+  procurement-api-dev.daimlertruck.com
+  procurement-api-test.daimlertruck.com
+  procurement-api.daimlertruck.com
+  prod.api.csgna.daimlertruck.com
+  prod.proq.daimlertruck.com
+  prod.swan.daimlertruck.com
+  proq-buyersearchdev.proq.daimlertruck.com
+  proq-buyersearchprod.proq.daimlertruck.com
+  proq-s2c.supplier-dev.daimlertruck.com
+  proq-s2c.supplier-uat.daimlertruck.com
+  proq-s2c.supplier.daimlertruck.com
+  provider.as.api.daimlertruck.com
+  provider.dev.as.api.daimlertruck.com
+  provider.dev.eu.api.daimlertruck.com
+  provider.dev.na.api.daimlertruck.com
+  provider.eu.api.daimlertruck.com
+  provider.na.api.daimlertruck.com
+  provider.tst.as.api.daimlertruck.com
+  provider.tst.eu.api.daimlertruck.com
+  provider.tst.na.api.daimlertruck.com
+  pushed-int.daimlertruck.com
+  pushed-int.i.daimlertruck.com
+  pushed.daimlertruck.com
+  qa.api.csgna.daimlertruck.com
+  ramscv.za.daimlertruck.com
+  reach.daimlertruck.com
+  registration-hmi.daimlertruck.com
+  registration.hmi.daimlertruck.com
+  reliabilityweibullprod.weu.treasure.daimlertruck.com
+  rentnerportal-dev.daimlertruck.com
+  rentnerportal-int.daimlertruck.com
+  rentnerportal.daimlertruck.com
+  retailcommunity.daimlertruck.com
+  retailnet-core.daimlertruck.com
+  retailnet.daimlertruck.com
+  retailportal-dev-temp.de.daimlertruck.com
+  retailportal-dev.de.daimlertruck.com
+  retailportal-int-temp.de.daimlertruck.com
+  retailportal-int.de.daimlertruck.com
+  retailportal-redaktion-dev-temp.de.daimlertruck.com
+  retailportal-redaktion-dev.de.daimlertruck.com
+  retailportal-redaktion-int-temp.de.daimlertruck.com
+  retailportal-redaktion-int.de.daimlertruck.com
+  retailportal-redaktion-temp.de.daimlertruck.com
+  retailportal-redaktion.de.daimlertruck.com
+  retailportal-temp.de.daimlertruck.com
+  retailportal.de.daimlertruck.com
+  rtm.t3-int.daimlertruck.com
+  rtm.t3.daimlertruck.com
+  s4int.proq.daimlertruck.com
+  s4prod.proq.daimlertruck.com
+  sandbox.platon.daimlertruck.com
+  santest.daimlertruck.com
+  santest2.daimlertruck.com
+  sbx.polaris.csg.daimlertruck.com
+  sbx.polaris.private.csg.daimlertruck.com
+  scp.daimlertruck.com
+  scu.prd-us.platform.csg.daimlertruck.com
+  scu.prd-us.platform.private.csg.daimlertruck.com
+  sdb-api.daimlertruck.com
+  sdb-dev-api.daimlertruck.com
+  sdb-dev.daimlertruck.com
+  sdb-int-api.daimlertruck.com
+  sdb-int.daimlertruck.com
+  sdb-pref-api.daimlertruck.com
+  sdb-pref.daimlertruck.com
+  sdb-test-api.daimlertruck.com
+  sdb-test.daimlertruck.com
+  sdb.daimlertruck.com
+  secnav.daimlertruck.com
+  sentry.int.daimlertruck.com
+  serlogprod-dicv.daimlertruck.com
+  serloguat-dicv.daimlertruck.com
+  serviceinside-dev.daimlertruck.com
+  serviceinside-int.daimlertruck.com
+  serviceinside.daimlertruck.com
+  serviceinside.i.daimlertruck.com
+  services.as.api.daimlertruck.com
+  services.authz.dev.eu.api.daimlertruck.com
+  services.dev.as.api.daimlertruck.com
+  services.dev.eu.api.daimlertruck.com
+  services.dev.na.api.daimlertruck.com
+  services.developer.dev.eu.api.daimlertruck.com
+  services.eu.api.daimlertruck.com
+  services.management.dev.eu.api.daimlertruck.com
+  services.na.api.daimlertruck.com
+  services.provider.dev.eu.api.daimlertruck.com
+  services.services.dev.eu.api.daimlertruck.com
+  services.tst.as.api.daimlertruck.com
+  services.tst.eu.api.daimlertruck.com
+  services.tst.na.api.daimlertruck.com
+  share.cec.apps.daimlertruck.com
+  shg-cache.as.api.daimlertruck.com
+  shg-cache.dev.as.api.daimlertruck.com
+  shg-cache.dev.na.api.daimlertruck.com
+  shg-cache.eu.api.daimlertruck.com
+  shg-cache.na.api.daimlertruck.com
+  shg-cache.tst.as.api.daimlertruck.com
+  shg-cache.tst.eu.api.daimlertruck.com
+  shg-cache.tst.na.api.daimlertruck.com
+  shg-config.as.api.daimlertruck.com
+  shg-config.dev.as.api.daimlertruck.com
+  shg-config.dev.na.api.daimlertruck.com
+  shg-config.eu.api.daimlertruck.com
+  shg-config.na.api.daimlertruck.com
+  shg-config.tst.as.api.daimlertruck.com
+  shg-config.tst.eu.api.daimlertruck.com
+  shg-config.tst.na.api.daimlertruck.com
+  signfs.za.daimlertruck.com
+  smb-int.daimlertruck.com
+  smb-test.daimlertruck.com
+  smb.daimlertruck.com
+  smss-domain-test.treasuretest.treasure.daimlertruck.com
+  son-dtiam.t3-int.daimlertruck.com
+  son.t3-int.daimlertruck.com
+  son.t3.daimlertruck.com
+  spps-dev.daimlertruck.com
+  spps-int.daimlertruck.com
+  spps.daimlertruck.com
+  srs-dev.daimlertruck.com
+  srs-int.daimlertruck.com
+  srs.daimlertruck.com
+  stable.apicon-int.daimlertruck.com
+  stable.iconbasic-cloud-int.daimlertruck.com
+  stable.iconbasic-int.daimlertruck.com
+  stable.uicon-int.daimlertruck.com
+  stage.swf.daimlertruck.com
+  staging.customer-focus-day.events2023.daimlertruck.com
+  staging.urbanscience-fv.daimlertruck.com
+  standalone.tb-dealerlocator-dev.daimlertruck.com
+  standalone.tb-dealerlocator-int.daimlertruck.com
+  status.api.daimlertruck.com
+  stg.iconbasic-cloud-int.daimlertruck.com
+  stg.iconbasic-int.daimlertruck.com
+  stg.uicon-int.daimlertruck.com
+  supplier-academy.daimlertruck.com
+  supplier-int.daimlertruck.com
+  supplier-portal.daimlertruck.com
+  supplier.daimlertruck.com
+  supply-truck.sysu-int.daimlertruck.com
+  supply-truck.sysu.daimlertruck.com
+  supply020.sysu-int.daimlertruck.com
+  supply034.sysu-int.daimlertruck.com
+  supply060.sysu-int.daimlertruck.com
+  supply060.sysu.daimlertruck.com
+  supply069.sysu-int.daimlertruck.com
+  supply152.sysu-int.daimlertruck.com
+  supplytrk.sysu-int.daimlertruck.com
+  support.api.daimlertruck.com
+  survey-ch.daimlertruck.com
+  survey.daimlertruck.com
+  svhc.daimlertruck.com
+  swan.daimlertruck.com
+  swf.daimlertruck.com
+  sysu-truck-int.daimlertruck.com
+  t3-int.daimlertruck.com
+  t3.daimlertruck.com
+  tabl-int.weu.treasure.daimlertruck.com
+  tabl-stage.weu.treasure.daimlertruck.com
+  tabl.weu.treasure.daimlertruck.com
+  tad-int.aftersales.daimlertruck.com
+  tad.aftersales.daimlertruck.com
+  talents.daimlertruck.com
+  talpy-documentation.weu.treasure.daimlertruck.com
+  tasp-dev1.daimlertruck.com
+  tasp-dev2.daimlertruck.com
+  tasp-int1.daimlertruck.com
+  tasp-int2.daimlertruck.com
+  tasp.daimlertruck.com
+  tb-dealerlocator-dev.daimlertruck.com
+  tb-dealerlocator-int.daimlertruck.com
+  tb-dealerlocator.daimlertruck.com
+  tb2bus.daimlertruck.com
+  tb2truck.daimlertruck.com
+  tcas.daimlertruck.com
+  tclogin-nonprod.platon.daimlertruck.com
+  team-network-portal-es.daimlertruck.com
+  telematicspresafe.daimlertruck.com
+  test.apicon-int.daimlertruck.com
+  test.daimlertruck.com
+  test.platon.daimlertruck.com
+  test.swf.daimlertruck.com
+  test1.core-t.public.vedoc.daimlertruck.com
+  test1.i.tcas.daimlertruck.com
+  test2.core-t.public.vedoc.daimlertruck.com
+  test2.i.tcas.daimlertruck.com
+  testing.customer-focus-day.events2023.daimlertruck.com
+  tps.daimlertruck.com
+  train.i.tcas.daimlertruck.com
+  training-dev.buses.daimlertruck.com
+  training-int.buses.daimlertruck.com
+  training-stage.buses.daimlertruck.com
+  training-test.buses.daimlertruck.com
+  training.buses.daimlertruck.com
+  training.platon.daimlertruck.com
+  translation.tb-dealerlocator-dev.daimlertruck.com
+  translation.tb-dealerlocator-int.daimlertruck.com
+  translation.tb-dealerlocator.daimlertruck.com
+  translationservice-int.daimlertruck.com
+  trk.daimlertruck.com
+  trn.ch.daimlertruck.com
+  truck-privilege.daimlertruck.com
+  truckbase.daimlertruck.com
+  trucktraining-int.daimlertruck.com
+  trucktraining-test.daimlertruck.com
+  trucktraining.daimlertruck.com
+  tsac-dev.daimlertruck.com
+  tsac-staging.daimlertruck.com
+  tsac.daimlertruck.com
+  tst.as.api.daimlertruck.com
+  tst.eu.api.daimlertruck.com
+  tst.na.api.daimlertruck.com
+  uat.it.daimlertruck.com
+  uatascent-freightliner.daimlertruck.com
+  uicon-dev.daimlertruck.com
+  uicon-dev.iconbasic-cloud-int.daimlertruck.com
+  uicon-int.daimlertruck.com
+  uicon-int.iconbasic-cloud-int.daimlertruck.com
+  uicon-stable.iconbasic-cloud-int.daimlertruck.com
+  uicon-stg.iconbasic-cloud-int.daimlertruck.com
+  uicon.daimlertruck.com
+  uinfo.cec.apps.daimlertruck.com
+  uisvc.t3.daimlertruck.com
+  uprefs.cec.apps.daimlertruck.com
+  urbanscience-fv.daimlertruck.com
+  us-integration.platon.daimlertruck.com
+  us.integration.platon.daimlertruck.com
+  vc-int.daimlertruck.com
+  vcaapi.gpki.daimlertruck.com
+  vcs-int.daimlertruck.com
+  vcs-uat.daimlertruck.com
+  vcs.daimlertruck.com
+  vdfb-dev.weu.treasure.daimlertruck.com
+  vdfb.weu.treasure.daimlertruck.com
+  vertrieb-originalteile.daimlertruck.com
+  vgw-inet-15p-01.vc.daimlertruck.com
+  vgw-inet-15p-02.vc.daimlertruck.com
+  vgw-inet-15p-cluster.vc.daimlertruck.com
+  vgw-inet-16i-01.vc-int.daimlertruck.com
+  vgw-inet-16i-cluster.vc-int.daimlertruck.com
+  video01-apac1.apac.vc.daimlertruck.com
+  video02-apac1.apac.vc.daimlertruck.com
+  web-analytics.daimlertruck.com
+  webadmin.customer-services-parts.cz.daimlertruck.com
+  webedi.carledi.supplier-uat.daimlertruck.com
+  webedi.carledi.supplier.daimlertruck.com
+  weibullanalysis-frontend.weu.treasure.daimlertruck.com
+  weu.cicd.runtime.private.csg.daimlertruck.com
+  weu.dev.fb.csg.daimlertruck.com
+  weu.dev.fb.private.csg.daimlertruck.com
+  weu.dev.fbkosmos.csg.daimlertruck.com
+  weu.dev.fbkosmos.private.csg.daimlertruck.com
+  weu.dev.kosmos.csg.daimlertruck.com
+  weu.dev.kosmos.private.csg.daimlertruck.com
+  weu.dev.platform.csg.daimlertruck.com
+  weu.dev.platform.private.csg.daimlertruck.com
+  weu.dev.shared.csg.daimlertruck.com
+  weu.dev.shared.private.csg.daimlertruck.com
+  weu.ops.runtime.csg.daimlertruck.com
+  weu.ops.runtime.private.csg.daimlertruck.com
+  weu.prd-eu.fb.csg.daimlertruck.com
+  weu.prd-eu.fb.private.csg.daimlertruck.com
+  weu.prd-eu.platform.csg.daimlertruck.com
+  weu.prd-eu.platform.private.csg.daimlertruck.com
+  weu.prd-eu.shared.csg.daimlertruck.com
+  weu.prd-eu.shared.private.csg.daimlertruck.com
+  weu.prd.platform.csg.daimlertruck.com
+  weu.prd.platform.private.csg.daimlertruck.com
+  weu.sbx.polaris.csg.daimlertruck.com
+  weu.sbx.polaris.private.csg.daimlertruck.com
+  weu.stg.fb.csg.daimlertruck.com
+  weu.stg.fb.private.csg.daimlertruck.com
+  weu.stg.platform.csg.daimlertruck.com
+  weu.stg.platform.private.csg.daimlertruck.com
+  weu.stg.shared.csg.daimlertruck.com
+  weu.stg.shared.private.csg.daimlertruck.com
+  wips.be.daimlertruck.com
+  wus3.prd-us.platform.csg.daimlertruck.com
+  wus3.prd-us.platform.private.csg.daimlertruck.com
+  www-dev.daimlertruck.com
+  www-int.daimlertruck.com
+  www-test.daimlertruck.com
+  www.app-eve.daimlertruck.com
+  www.comet-int.daimlertruck.com
+  www.comet.daimlertruck.com
+  www.ctp-mtc.daimlertruck.com
+  www.customer-services-parts.cz.daimlertruck.com
+  www.erm.daimlertruck.com
+  www.esign-uat.daimlertruck.com
+  www.esign.daimlertruck.com
+  www.eve.daimlertruck.com
+  www.gateway.dev.eu.vehicle-health.daimlertruck.com
+  www.hcm.daimlertruck.com
+  www.integral.fr.daimlertruck.com
+  www.jnet.daimlertruck.com
+  www.mars-bus.daimlertruck.com
+  www.media.daimlertruck.com
+  www.northamerica.daimlertruck.com
+  www.oep.daimlertruck.com
+  www.pit.buses.daimlertruck.com
+  www.platon.daimlertruck.com
+  www.staging.urbanscience-fv.daimlertruck.com
+  www.supplier.daimlertruck.com
+  www.swf.daimlertruck.com
+  www.t3-int.daimlertruck.com
+  www.t3.daimlertruck.com
+  www.talents.daimlertruck.com
+  www.truck-privilege.daimlertruck.com
+  www.truckbase.daimlertruck.com
+  www.urbanscience-fv.daimlertruck.com
+  www.vertrieb-originalteile.daimlertruck.com
+  xdtmw2rmsadmw01.ot.northamerica.daimlertruck.com
+  xdtmw2rmsfrew01.ot.northamerica.daimlertruck.com
+  xdtmw2rmsotdw01.ot.northamerica.daimlertruck.com
+  xentry-api-dev1.daimlertruck.com
+  xentry-api-dev2.daimlertruck.com
+  xentry-api-int1.daimlertruck.com
+  xentry-api-int2.daimlertruck.com
+  xentry-api-play1.daimlertruck.com
+  xentry-api-play2.daimlertruck.com
+  xentry-api.daimlertruck.com
+  xentry-dev1.daimlertruck.com
+  xentry-dev2.daimlertruck.com
+  xentry-int1.daimlertruck.com
+  xentry-int2.daimlertruck.com
+  xentry-play1.daimlertruck.com
+  xentry-play2.daimlertruck.com
+  xentry.daimlertruck.com
+  zone-mbtportal.de.daimlertruck.com
+  zone2-mbtportal.de.daimlertruck.com
+  zone3-mbtportal.de.daimlertruck.com
+  zone4-mbtportal.de.daimlertruck.com
+[0m
+Subdomain attack surface expanded massively (1079 CT names vs 23-host inventory). Probing the highest-value new business/identity/API hosts read-only.
+[0m$ [0mfor h in \
+ api.businessid.daimlertruck.com \
+ api.businessid-qa.daimlertruck.com \
+ api.businessid-dev.daimlertruck.com \
+ login.b2b.daimlertruck.com \
+ login.b2b-int.daimlertruck.com \
+ login.b2b-dev.daimlertruck.com \
+ docs.api.daimlertruck.com \
+ status.api.daimlertruck.com \
+ support.api.daimlertruck.com \
+ gateway.eu.vehicle-health.daimlertruck.com \
+ gateway.staging.eu.vehicle-health.daimlertruck.com \
+ gateway.dev.eu.vehicle-health.daimlertruck.com \
+ management.businessid.daimlertruck.com \
+ management.businessid-qa.daimlertruck.com \
+ portal.businessid-qa.daimlertruck.com \
+ clara.app.daimlertruck.com \
+ clara.app.dev.daimlertruck.com \
+ clara.app.qa.daimlertruck.com \
+ developer-test.na.daimlertruck.com \
+ na.api.daimlertruck.com \
+ tst.na.api.daimlertruck.com \
+ xentry-api.daimlertruck.com \
+ apicon.daimlertruck.com \
+ login-dev.ciam.daimlertruck.com ; do \
+ r=$(curl -sk -A "Mozilla/5.0" --max-time 7 -o /dev/null -w "%{http_code}|%{size_download}|%{redirect_url}|%{content_type}|%{time_total}" "https://$h/" 2>/dev/null); \
+ echo "$h => $r"; \
+ sleep 1; done
+api.businessid.daimlertruck.com => 403|1484||text/html|0.049684
+api.businessid-qa.daimlertruck.com => 403|1484||text/html|0.055236
+api.businessid-dev.daimlertruck.com => 404|54||application/json|1.255911
+login.b2b.daimlertruck.com => 404|266389||text/html|0.045547
+login.b2b-int.daimlertruck.com => 404|266389||text/html|0.100867
+login.b2b-dev.daimlertruck.com => 404|103||text/html|0.320257
+docs.api.daimlertruck.com => 000|0|||0.063562
+status.api.daimlertruck.com => 000|0|||0.007297
+support.api.daimlertruck.com => 000|0|||0.015361
+gateway.eu.vehicle-health.daimlertruck.com => 000|0|||0.063585
+gateway.staging.eu.vehicle-health.daimlertruck.com => 000|0|||7.002267
+gateway.dev.eu.vehicle-health.daimlertruck.com => 000|0|||7.002093
+management.businessid.daimlertruck.com => 000|0|||0.015379
+management.businessid-qa.daimlertruck.com => 000|0|||0.031440
+portal.businessid-qa.daimlertruck.com => 000|0|||0.015372
+clara.app.daimlertruck.com => 404|54||application/json|0.252550
+clara.app.dev.daimlertruck.com => 404|54||application/json|0.257056
+clara.app.qa.daimlertruck.com => 404|54||application/json|0.399778
+developer-test.na.daimlertruck.com => 000|0|||0.007311
+na.api.daimlertruck.com => 404|442||application/json|0.206261
+tst.na.api.daimlertruck.com => 404|442||application/json|0.203161
+xentry-api.daimlertruck.com => 404|0|||0.307951
+apicon.daimlertruck.com => 000|0|||7.002949
+login-dev.ciam.daimlertruck.com => 404|103||text/html|0.307998
+[0m
+Several fresh live surfaces: `login.b2b.*`, `api.businessid(-qa/-dev)`, `clara.app(.dev/.qa)`, `na.api`. Dumping bodies + probing OIDC well-known on the identity hosts.
+[0m$ [0mprobe(){ h="$1"; p="$2"; echo "=== $h $p ==="; curl -sk -A "Mozilla/5.0" --max-time 7 -D - "https://$h$p" 2>/dev/null | head -c 1200; echo; sleep 1; }
+probe api.businessid-dev.daimlertruck.com /
+probe clara.app.daimlertruck.com /
+probe clara.app.dev.daimlertruck.com /
+probe api.businessid.daimlertruck.com /
+probe na.api.daimlertruck.com /
+probe xentry-api.daimlertruck.com /
+=== api.businessid-dev.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:21:54 GMT
+content-type: application/json
+content-length: 54
+x-azure-ref: 20260912T212154Z-r16cc4dfbb5njmwzhC1IAD7kcg0000000zf00000000055zp
+x-cache: CONFIG_NOCACHE
+
+{ "statusCode": 404, "message": "Resource not found" }
+=== clara.app.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:21:55 GMT
+content-type: application/json
+content-length: 54
+cache-control: no-cache, must-revalidate, max-age=0, no-store, private
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: default-src 'self'; object-src 'none'; require-trusted-types-for 'script';
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+request-context: appId=cid-v1:665891be-1916-4d53-8c8a-7e8b575cbe9d
+
+{ "statusCode": 404, "message": "Resource not found" }
+=== clara.app.dev.daimlertruck.com / ===
+HTTP/1.1 404 Resource Not Found
+Date: Sat, 12 Sep 2026 21:21:56 GMT
+Content-Type: application/json
+Content-Length: 54
+Connection: keep-alive
+Cache-Control: no-cache, must-revalidate, max-age=0, no-store, private
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Content-Security-Policy: default-src 'self'; object-src 'none'; require-trusted-types-for 'script';
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Request-Context: appId=cid-v1:f7fe5d2d-2640-46f7-b92c-fdd0194cddff
+
+{ "statusCode": 404, "message": "Resource not found" }
+=== api.businessid.daimlertruck.com / ===
+HTTP/2 403 
+date: Sat, 12 Sep 2026 21:21:57 GMT
+content-type: text/html
+content-length: 1484
+cache-control: no-store
+x-azure-ref: 20260912T212157Z-r16cc4dfbb5njmwzhC1IAD7kcg0000000zg000000000bbyw
+x-cache: CONFIG_NOCACHE
+
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+
+<head>
+    <meta content='text/html; charset=utf-8' http-equiv='content-type' />
+    <style type='text/css'>
+        body {
+            font-family: Arial;
+            margin-left: 40px;
+        }
+
+        img {
+            border: 0 none;
+        }
+
+        #content {
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        #message h1 {
+            font-size: 24px;
+            font-weight: normal;
+            color: #000000;
+            margin: 34px 0px 0px 0px
+        }
+
+        #message h2 {
+            font-size: 20px;
+            font-weight: normal;
+            color: #000000;
+            margin: 34px 0px 0px 0px
+        }
+
+        #message p {
+            font-size: 16px;
+            color: #000000;
+            margin: 8px 0px 0px 0px
+        }
+
+        #message
+=== na.api.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:21:59 GMT
+content-type: application/json
+content-length: 442
+x-error-origin: config
+request-context: appId=cid-v1:57de6141-b36b-46d2-a1a2-6f55aab9fcb7
+strict-transport-security: max-age=31536000
+
+{
+  "statusCode": "404",
+  "message": "Unknown operation requested",
+  "reason": "Unable to match incoming request to an operation.",
+  "origin": "config",
+  "traceId": "no-trace-id",
+  "errorDetails": {
+    "scope": null,
+    "section": "backend",
+    "policyId": null,
+    "source": "configuration",
+    "reason": "OperationNotFound",
+    "message": "Unable to match incoming request to an operation.",
+    "path": null
+  }
+}
+=== xentry-api.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:22:00 GMT
+content-length: 0
+content-security-policy: frame-ancestors 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.google-analytics.com https://www.googletagmanager.com https://app.usercentrics.eu https://cdn.userlane.com https://instana.xentry.tbinter.net https://instana-non-prod.xentry.tbinter.net; object-src 'none';
+x-frame-options: sameorigin
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+referrer-policy: no-referrer
+x-download-options: noopen
+strict-transport-security: max-age=31536000; preload;
+server: xentry
+[0m
+Fresh identity/API surfaces confirmed live (`login.b2b`, `api.businessid-dev`, `clara.app*`). Probing OIDC well-known + common API paths read-only.
+[0m$ [0mprobe(){ h="$1"; p="$2"; echo "=== $h $p ==="; curl -sk -A "Mozilla/5.0" --max-time 7 -w "\n[%{http_code}|%{size_download}|%{content_type}]\n" "https://$h$p" 2>/dev/null | head -c 900; echo; sleep 1; }
+probe login.b2b.daimlertruck.com /.well-known/openid-configuration
+probe login.b2b.daimlertruck.com /oidc/.well-known/openid-configuration
+probe login.b2b.daimlertruck.com /connect/authorize
+probe login.b2b.daimlertruck.com /
+probe login.b2b-dev.daimlertruck.com /
+probe api.businessid-dev.daimlertruck.com /.well-known/openid-configuration
+probe api.businessid-dev.daimlertruck.com /health
+probe api.businessid-dev.daimlertruck.com /swagger
+probe api.businessid-dev.daimlertruck.com /api
+probe clara.app.dev.daimlertruck.com /.well-known/openid-configuration
+probe clara.app.dev.daimlertruck.com /health
+probe clara.app.dev.daimlertruck.com /swagger
+probe clara.app.dev.daimlertruck.com /docs/
+=== login.b2b.daimlertruck.com /.well-known/openid-configuration ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.b2b.daimlertruck.com /oidc/.well-known/openid-configuration ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.b2b.daimlertruck.com /connect/authorize ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.b2b.daimlertruck.com / ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.b2b-dev.daimlertruck.com / ===
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[404|103|text/html]
+
+=== api.businessid-dev.daimlertruck.com /.well-known/openid-configuration ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== api.businessid-dev.daimlertruck.com /health ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== api.businessid-dev.daimlertruck.com /swagger ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== api.businessid-dev.daimlertruck.com /api ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== clara.app.dev.daimlertruck.com /.well-known/openid-configuration ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== clara.app.dev.daimlertruck.com /health ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== clara.app.dev.daimlertruck.com /swagger ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+
+=== clara.app.dev.daimlertruck.com /docs/ ===
+{ "statusCode": 404, "message": "Resource not found" }
+[404|54|application/json]
+[0m
+Keycloak fingerprint on `login.b2b` (data-URI favicon + "Page not found" = Keycloak 404). Probing realm discovery + the misspelled/typo hosts from the CT list.
+[0m$ [0mprobe(){ h="$1"; p="$2"; echo "=== $h $p ==="; curl -sk -A "Mozilla/5.0" --max-time 7 -w "\n[%{http_code}|%{size_download}|%{redirect_url}]\n" "https://$h$p" 2>/dev/null | head -c 700; echo; sleep 1; }
+probe login.b2b.daimlertruck.com /realms/master/.well-known/openid-configuration
+probe login.b2b.daimlertruck.com /auth/realms/master/.well-known/openid-configuration
+probe login.b2b.daimlertruck.com /robots.txt
+probe api.buisnessid.daimlertruck.com /
+probe managament.businessid-dev.daimlertruck.com /
+probe managament.businessid-int.daimlertruck.com /
+probe api.businessid-qa.daimlertruck.com /.well-known/openid-configuration
+probe login.b2b-dev1.daimlertruck.com /
+probe login.businessid-dev.daimlertruck.com /
+probe login.businessid-int.daimlertruck.com /
+probe login.na.ciam.daimlertruck.com /
+probe api.na.ciam.daimlertruck.com /
+=== login.b2b.daimlertruck.com /realms/master/.well-known/openid-configuration ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.b2b.daimlertruck.com /auth/realms/master/.well-known/openid-configuration ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.b2b.daimlertruck.com /robots.txt ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== api.buisnessid.daimlertruck.com / ===
+
+[000|0|]
+
+=== managament.businessid-dev.daimlertruck.com / ===
+
+[000|0|]
+
+=== managament.businessid-int.daimlertruck.com / ===
+
+[000|0|]
+
+=== api.businessid-qa.daimlertruck.com /.well-known/openid-configuration ===
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Transitional//EN' 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+
+<head>
+    <meta content='text/html; charset=utf-8' http-equiv='content-type' />
+    <style type='text/css'>
+        body {
+            font-family: Arial;
+            margin-left: 40px;
+        }
+
+        img {
+            border: 0 none;
+        }
+
+        #content {
+            margin-left: auto;
+            margin-right: auto
+        }
+
+        #message h1 {
+            font-size: 24px;
+            font-weight: normal;
+            color: #000000;
+            margin: 34px 0px 0px 0px
+        }
+
+        #message h2 {
+        
+=== login.b2b-dev1.daimlertruck.com / ===
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Page not found</title>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-config" content="none" />
+    <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AAABAAQAQEAAAAEAIAAoQgAARgAAADAwAAABACAAqCUAAG5CAAAgIAAAAQAgAKgQAAAWaAAAEBAAAAEAIABoBAAAvngAACgAAABAAAAAgAAAAAEAIAAAAAAAAEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+=== login.businessid-dev.daimlertruck.com / ===
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[404|103|]
+
+=== login.businessid-int.daimlertruck.com / ===
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[404|103|]
+
+=== login.na.ciam.daimlertruck.com / ===
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[404|103|]
+
+=== api.na.ciam.daimlertruck.com / ===
+{ "statusCode": 401, "message": "Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API." }
+[401|152|]
+[0m
+`api.na.ciam` returns APIM **401 missing-subscription-key** (unique vs `as.api`/`eu.api` OperationNotFound). Fingerprinting the NA CIAM API family with full headers.
+[0m$ [0mprobe(){ h="$1"; p="$2"; echo "=== $h $p ==="; curl -sk -A "Mozilla/5.0" --max-time 7 -D - -o /dev/null "https://$h$p" 2>/dev/null | head -c 800; echo; sleep 1; }
+probe api.na.ciam.daimlertruck.com /
+probe api.na.ciam.daimlertruck.com /swagger
+probe api-dev.na.ciam.daimlertruck.com /
+probe api-qa.na.ciam.daimlertruck.com /
+probe cui.na.ciam.daimlertruck.com /
+probe cui-qa.na.ciam.daimlertruck.com /
+probe cui-dev.na.ciam.daimlertruck.com /
+probe login-qa.na.ciam.daimlertruck.com /
+probe login-dev.na.ciam.daimlertruck.com /
+probe login-dev.ciam.daimlertruck.com /
+probe api.ciam-na.daimlertruck.com /
+=== api.na.ciam.daimlertruck.com / ===
+HTTP/2 401 
+date: Sat, 12 Sep 2026 21:23:28 GMT
+content-type: application/json
+content-length: 152
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+www-authenticate: AzureApiManagementKey realm="https://dtna-ciam-eus2-prod-apim-shared-01.azure-api.net/",name="Ocp-Apim-Subscription-Key",type="header"
+x-azure-ref: 20260912T212328Z-186c45cf576q8c44hC1MNZsrp00000000qeg00000000krqr
+x-cache: CONFIG_NOCACHE
+
+
+=== api.na.ciam.daimlertruck.com /swagger ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:29 GMT
+content-type: application/json
+content-length: 54
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+x-azure-ref: 20260912T212329Z-186c45cf576hcn68hC1MNZ3fg40000000rf00000000005g7
+x-cache: CONFIG_NOCACHE
+
+
+=== api-dev.na.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:30 GMT
+content-type: application/json
+content-length: 54
+x-azure-ref: 20260912T212330Z-186c45cf576xsvjkhC1MNZbzeg0000000qwg000000005r7x
+x-cache: CONFIG_NOCACHE
+
+
+=== api-qa.na.ciam.daimlertruck.com / ===
+HTTP/2 401 
+date: Sat, 12 Sep 2026 21:23:31 GMT
+content-type: application/json
+content-length: 152
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+www-authenticate: AzureApiManagementKey realm="https://dtna-ciam-eus2-prod-apim-shared-01.azure-api.net/",name="Ocp-Apim-Subscription-Key",type="header"
+x-azure-ref: 20260912T212331Z-186c45cf576htkbwhC1MNZx3tc0000000pu000000000msc1
+x-cache: CONFIG_NOCACHE
+
+
+=== cui.na.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:33 GMT
+content-type: text/html
+content-length: 321
+x-ms-error-code: WebContentNotFound
+x-ms-request-id: d7793721-f01e-0053-76fc-42a622000000
+x-ms-version: 2018-03-28
+access-control-expose-headers: Content-Length,Content-Type,Date,Server,x-ms-error-code,x-ms-request-id,x-ms-version
+access-control-allow-origin: *
+x-azure-ref: 20260912T212332Z-186c45cf576hcn68hC1MNZ3fg40000000r0000000000f206
+x-cache: TCP_MISS
+x-fd-int-roxy-purgeid: 58541625
+
+
+=== cui-qa.na.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:34 GMT
+content-type: text/html
+content-length: 321
+x-ms-error-code: WebContentNotFound
+x-ms-request-id: 3d704644-601e-0016-2ffc-42ea69000000
+x-ms-version: 2018-03-28
+access-control-expose-headers: Content-Length,Content-Type,Date,Server,x-ms-error-code,x-ms-request-id,x-ms-version
+access-control-allow-origin: *
+x-azure-ref: 20260912T212334Z-186c45cf576q8c44hC1MNZsrp00000000qw0000000004ahe
+x-cache: TCP_MISS
+x-fd-int-roxy-purgeid: 56951344
+
+
+=== cui-dev.na.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:36 GMT
+content-type: text/html
+content-length: 321
+x-ms-error-code: WebContentNotFound
+x-ms-request-id: 910e5cb0-e01e-0017-0bfc-424fdb000000
+x-ms-version: 2018-03-28
+access-control-expose-headers: Content-Length,Content-Type,Date,Server,x-ms-error-code,x-ms-request-id,x-ms-version
+access-control-allow-origin: *
+x-azure-ref: 20260912T212335Z-r16cc4dfbb5njmwzhC1IAD7kcg0000000zg000000000bkwf
+x-cache: TCP_MISS
+x-fd-int-roxy-purgeid: 56938664
+
+
+=== login-qa.na.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:37 GMT
+content-type: text/html
+content-length: 103
+x-ms-gateway-requestid: 9dbc1f7d-d572-40d8-b884-ed2bf513db26
+x-frame-options: DENY
+public: OPTIONS,TRACE,GET,HEAD,POST
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+allow: OPTIONS
+allow: TRACE
+allow: GET
+allow: HEAD
+allow: POST
+x-azure-ref: 20260912T212337Z-r16cc4dfbb5wbjljhC1IAD1g2n0000000ccg00000000enrh
+x-cache: CONFIG_NOCACHE
+
+
+=== login-dev.na.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:38 GMT
+content-type: text/html
+content-length: 103
+x-ms-gateway-requestid: f511e938-a136-4280-9e29-1a1f22e55f00
+x-frame-options: DENY
+public: OPTIONS,TRACE,GET,HEAD,POST
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+allow: OPTIONS
+allow: TRACE
+allow: GET
+allow: HEAD
+allow: POST
+x-azure-ref: 20260912T212338Z-186c45cf576xsvjkhC1MNZbzeg0000000qmg00000000hggq
+x-cache: CONFIG_NOCACHE
+
+
+=== login-dev.ciam.daimlertruck.com / ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:23:39 GMT
+content-type: text/html
+content-length: 103
+x-ms-gateway-requestid: 21caf443-042e-4603-ba7d-01128656a9e5
+x-frame-options: DENY
+public: OPTIONS,TRACE,GET,HEAD,POST
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+allow: OPTIONS
+allow: TRACE
+allow: GET
+allow: HEAD
+allow: POST
+x-azure-ref: 20260912T212339Z-186c45cf576q8c44hC1MNZsrp00000000qxg000000001xza
+x-cache: CONFIG_NOCACHE
+
+
+=== api.ciam-na.daimlertruck.com / ===
+[0m
+NA CIAM APIM family confirmed (`dtna-ciam-eus2-prod-apim-shared-01` realm leak, 401 key-gated). Checking for a statically-hosted NA CIAM SPA (`cui.*`) that may embed APIM subscription keys, and key-gate behavior.
+[0m$ [0mprobe(){ h="$1"; p="$2"; shift 2; echo "=== $h $p ==="; curl -sk -A "Mozilla/5.0" --max-time 7 -D - -o /dev/null "https://$h$p" "$@" 2>/dev/null | head -c 700; echo; sleep 1; }
+probe cui.na.ciam.daimlertruck.com /index.html
+probe cui.na.ciam.daimlertruck.com /app/
+probe cui.na.ciam.daimlertruck.com /assets/
+probe api.na.ciam.daimlertruck.com /health
+probe api.na.ciam.daimlertruck.com /v1/
+probe api.na.ciam.daimlertruck.com / -H "Ocp-Apim-Subscription-Key: 0xdeadbeef0xdeadbeef0xdeadbeef0xdeadbeef"
+probe login.na.ciam.daimlertruck.com /.well-known/openid-configuration
+probe login-qa.na.ciam.daimlertruck.com /login
+probe login.b2b.daimlertruck.com /realms/dt/.well-known/openid-configuration
+probe login.b2b.daimlertruck.com /template/
+=== cui.na.ciam.daimlertruck.com /index.html ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:12 GMT
+content-type: text/html
+content-length: 321
+x-ms-error-code: WebContentNotFound
+x-ms-request-id: c9f42673-a01e-0003-1ffd-426472000000
+x-ms-version: 2018-03-28
+access-control-expose-headers: Content-Length,Content-Type,Date,Server,x-ms-error-code,x-ms-request-id,x-ms-version
+access-control-allow-origin: *
+x-azure-ref: 20260912T212412Z-186c45cf576q8c44hC1MNZsrp00000000qug000000004uu4
+x-cache: TCP_MISS
+x-fd-int-roxy-purgeid: 58541625
+
+
+=== cui.na.ciam.daimlertruck.com /app/ ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:14 GMT
+content-type: text/html
+content-length: 321
+x-ms-error-code: WebContentNotFound
+x-ms-request-id: 9dc60402-701e-0000-4bfd-428516000000
+x-ms-version: 2018-03-28
+access-control-expose-headers: Content-Length,Content-Type,Date,Server,x-ms-error-code,x-ms-request-id,x-ms-version
+access-control-allow-origin: *
+x-azure-ref: 20260912T212413Z-186c45cf576q8c44hC1MNZsrp00000000qs000000000a4yu
+x-cache: TCP_MISS
+x-fd-int-roxy-purgeid: 58541625
+
+
+=== cui.na.ciam.daimlertruck.com /assets/ ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:15 GMT
+content-type: text/html
+content-length: 321
+x-ms-error-code: WebContentNotFound
+x-ms-request-id: c7361761-e01e-003d-26fd-42f30d000000
+x-ms-version: 2018-03-28
+access-control-expose-headers: Content-Length,Content-Type,Date,Server,x-ms-error-code,x-ms-request-id,x-ms-version
+access-control-allow-origin: *
+x-azure-ref: 20260912T212415Z-186c45cf576hcn68hC1MNZ3fg40000000reg000000000v8u
+x-cache: TCP_MISS
+x-fd-int-roxy-purgeid: 58541625
+
+
+=== api.na.ciam.daimlertruck.com /health ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:16 GMT
+content-type: application/json
+content-length: 54
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+x-azure-ref: 20260912T212416Z-r16cc4dfbb5njmwzhC1IAD7kcg0000000ztg000000002925
+x-cache: CONFIG_NOCACHE
+
+
+=== api.na.ciam.daimlertruck.com /v1/ ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:17 GMT
+content-type: application/json
+content-length: 54
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+x-azure-ref: 20260912T212417Z-186c45cf576hcn68hC1MNZ3fg40000000r500000000086me
+x-cache: CONFIG_NOCACHE
+
+
+=== api.na.ciam.daimlertruck.com / ===
+HTTP/2 401 
+date: Sat, 12 Sep 2026 21:24:18 GMT
+content-type: application/json
+content-length: 143
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+www-authenticate: AzureApiManagementKey realm="https://dtna-ciam-eus2-prod-apim-shared-01.azure-api.net/",name="Ocp-Apim-Subscription-Key",type="header"
+x-azure-ref: 20260912T212418Z-186c45cf576q8c44hC1MNZsrp00000000qwg000000004az6
+x-cache: CONFIG_NOCACHE
+
+
+=== login.na.ciam.daimlertruck.com /.well-known/openid-configuration ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:19 GMT
+content-type: text/html
+content-length: 103
+x-ms-gateway-requestid: c1d59ee1-d5a2-4663-b0a7-92516aaee4f9
+x-frame-options: DENY
+public: OPTIONS,TRACE,GET,HEAD,POST
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+allow: OPTIONS
+allow: TRACE
+allow: GET
+allow: HEAD
+allow: POST
+x-azure-ref: 20260912T212419Z-186c45cf576xsvjkhC1MNZbzeg0000000qkg00000000bysk
+x-cache: CONFIG_NOCACHE
+
+
+=== login-qa.na.ciam.daimlertruck.com /login ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:20 GMT
+content-type: text/html
+content-length: 103
+x-ms-gateway-requestid: 07717baa-9bd2-4811-9697-3d6e4bdf0f18
+x-frame-options: DENY
+public: OPTIONS,TRACE,GET,HEAD,POST
+strict-transport-security: max-age=31536000; includeSubDomains
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+allow: OPTIONS
+allow: TRACE
+allow: GET
+allow: HEAD
+allow: POST
+x-azure-ref: 20260912T212420Z-r16cc4dfbb5njmwzhC1IAD7kcg0000000zng0000000055ax
+x-cache: CONFIG_NOCACHE
+
+
+=== login.b2b.daimlertruck.com /realms/dt/.well-known/openid-configuration ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:21 GMT
+content-type: text/html
+content-length: 266389
+vary: Accept-Encoding
+cache-control: no-store
+x-azure-ref: 20260912T212421Z-r16cc4dfbb5njmwzhC1IAD7kcg0000000zc000000000nmbm
+x-cache: CONFIG_NOCACHE
+
+
+=== login.b2b.daimlertruck.com /template/ ===
+HTTP/2 404 
+date: Sat, 12 Sep 2026 21:24:22 GMT
+content-type: text/html
+content-length: 266389
+vary: Accept-Encoding
+cache-control: no-store
+x-azure-ref: 20260912T212422Z-r16cc4dfbb5wbjljhC1IAD1g2n0000000cvg000000004dqf
+x-cache: CONFIG_NOCACHE
+[0m
+Breadth sweep complete across the newly-enumerated CT surface. Consolidating into the 8-step output.
+
+## 2026-09-12 21:26:00 UTC [target/analysis] (model bigpickle)
+
+STEP 1 — DELTA
+- [NEW] crt.sh enumeration (1079 daimlertruck.com names vs 23-host inventory) surfaced a live NA CIAM APIM family never probed before: `api.na.ciam` + `api-qa.na.ciam` return **401 AzureApiManagementKey** with realm leak `dtna-ciam-eus2-prod-apim-shared-01.azure-api.net`; `api-dev.na.ciam` returns 54B JSON 404 (no key gate) — dev-tier config drift again.
+- [NEW] `api.businessid` prod+qa = 403 Azure-Front-Door WAF block (1484B); `api.businessid-dev` = live 54B JSON API (404 catch-all, no WAF); `clara.app` / `.dev` / `.qa` = same live JSON API family (request-context cid-v1:665891be prod / f7fe5d2d dev).
+- [NEW] `login.b2b.daimlertruck.com` (+`-int`, `-dev1`) = Keycloak-themed static "Page not found" 404 (266389B, data-URI favicon) on ALL paths incl `/realms/master` and `/oidc/.well-known/openid-configuration` — not a reachable Keycloak; `login.b2b-dev` = IIS 404/103.
+- [NEW] `cui.na.ciam`/`-qa`/`-dev` = Azure Storage `WebContentNotFound` 404 (ACAO:* on error); `login.na.ciam`/`-qa`/`-dev` + `login-dev.ciam` = App-Gateway 404/103; `na.api`/`tst.na.api` = APIM OperationNotFound (appId cid-v1:57de6141…); `xentry-api` = live (server:xentry) 404/0B. No new anonymous OIDC/GraphQL/docs surface on any.
+
+STEP 2 — PRIORITIZE
+[PRIO] api.na.ciam.daimlertruck.com + api-qa.na.ciam,6.15,NA-CIAM-APIM-key-gate (a4/b8/t7/g2/c8/f10)
+[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.00,portal-GraphQL (a6/b9/t9/g2/c5/f1)
+[PRIO] login-qa.ciam.daimlertruck.com,5.75,identity-layer (a5/b10/t8/g2/c4/f1)
+[PRIO] companion.app.daimlertruck.com/api/proxy-http,5.25,SSRF-handler (a5/b7/t7/g2/c8/f1)
+
+STEP 3 + STEP 4 — HYPOTHESES / SELF-CRITIQUE
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)+NOAM(acr=noam) share identical issuer URI per tenant; only acr+org-shape claims differentiate BU; NOAM superset carries dealer PII. No drift this cycle; NA CIAM APIM now also key-gated — regional isolation weak at identity layer, strong at gateway layer.
+evidence_needed: two staging identities -> decoded claim diffs; NOAM token executes ROW-scoped /api/graphql op = 200 vs 403.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa -> POST /api/graphql ROW query with NOAM token -> diff acr/org claims vs status.
+impact: cross-BU privilege collapse -> dealer-PII exposure — Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); /api/graphql 307->B2C on all 7 portals — ownership-gap replicates widely.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa) -> introspection -> baseline IDs -> swap object IDs across portals -> diff.
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET->405(30B) proves POST-only first-class handler exempt from catch-all; istio-envoy/AKS = metadata-PHY reachable class; build pVVz9XMK0MvBn72k4YswS unchanged post-roll.
+evidence_needed: valid B2C session -> POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP -> mesh host -> external URL; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[PARKED] na-ciam-apim-subkey-gate: 401 key-gate + dev-open (config-drift) confirmed anonymously, but Ocp-Apim-Subscription-Key has no passive discovery path (WAF/APIM layer, not in any reachable client JS); 45 — not exploitable without key/credentials. Revisit on NA staging grant.
+[FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Unchanged blocker since 09-04; unblocks both top-2 FINALs. Secondary optional ask: an NA CIAM APIM subscription key or read-only test on `api.na.ciam` (realm dtna-ciam-eus2-prod-apim-shared-01) to size the NA identity-API surface.
+
+STEP 6 — LEARNING
+[LEARN] ACCEPTED CT-breadth-expansion @ daimlertruck.com: crt.sh enumerated 1079 names vs 23-host inventory; ~12 live dedicated HTTP hosts never probed before (api.businessid[-qa|-dev], clara.app*, login.b2b*, api[-qa|-dev].na.ciam, cui*na.ciam, login*na.ciam, na.api/tst.na.api, xentry-api). All root-level catch-alls, WAF-blocks, or key/App-Gateway 404s — no new anonymous docs/GraphQL/OIDC surface.
+[LEARN] ACCEPTED ciam-apim-key-gate-dev-open @ api.na.ciam/api-qa.na.ciam: APIM 401 AzureApiManagementKey (realm dtna-ciam-eus2-prod-apim-shared-01.azure-api.net); api-dev.na.ciam serves JSON without key — matches existing api.businessid prod/qa 403-WAF vs dev-open 404 config-drift pattern.
+[LEARN] REJECTED login.b2b-keycloak @ login.b2b(-int/-dev1): Keycloak-themed static 404 (266389B data-URI favicon) on every path incl /realms/* — placeholder/origin-behind-Front-Door, no reachable OIDC realm.
+[LEARN] REJECTED cui-na-ciam-storage-listing @ cui.na.ciam(.qa/.dev): Azure Storage WebContentNotFound 404 for /, /index.html, /app/, /assets/ — no blob/list surface demonstrated; ACAO:* alone not a finding.
+
+STEP 7 — RISK
+[RISK] daimler-truck: 78. Unchanged core blocker — two login-qa staging identities (tenant 88f558f5) still outstanding since 09-04; top-2 Critical-class hypotheses remain AUTH_HELPED-blocked. This cycle added inventory breadth only: NA CIAM APIM (key-gated, parked), businessid/clara dev-open JSON APIs (54B 404 catch-all, no paths), Keycloak-themed placeholder on login.b2b (rejected). No new anonymous exploitable surface; no mutating touch; read-only GET <=1 rps; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist), HOLD pending exploitation PoC.

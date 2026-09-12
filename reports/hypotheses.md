@@ -1378,3 +1378,21 @@
 - LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: surfaces remain exhausted after companion build roll (10th consecutive cycle); proxy-http POST body, Grap
 - LEARN: REJECTED signin-endpoint-degradation @ companion.app + developer.tst.as: 13:21 "hanging/no response" was transient — prod+portal signin GETs now return standard
 - LEARN: ACCEPTED companion-dev-signin-hang-persists @ companion-dev.app: /api/auth/signin/azure-ad-b2c still times out (000/10s/0B) while prod companion returns 302 — d
+
+## RANKED HYPOTHESES 2026-09-12 21:26:02 UTC
+- [75] login.ciam.daimlertruck.com: B2C Cross-BU Token Boundary Abuse via Shared Issuer (from art/lead_nemotron3.txt)
+- [75] login-qa.ciam.daimlertruck.com: b2c-cross-bu-token-boundary-abuse (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) via bugs.o
+- LEARN: ACCEPTED CT-breadth-expansion @ daimlertruck.com: crt.sh enumerated 1079 names vs 23-host inventory; ~12 live dedicated HTTP hosts never probed before (api.busi
+- LEARN: ACCEPTED ciam-apim-key-gate-dev-open @ api.na.ciam/api-qa.na.ciam: APIM 401 AzureApiManagementKey (realm dtna-ciam-eus2-prod-apim-shared-01.azure-api.net); api-
+- LEARN: REJECTED login.b2b-keycloak @ login.b2b(-int/-dev1): Keycloak-themed static 404 (266389B data-URI favicon) on every path incl /realms/* — placeholder/origin-beh
+- LEARN: REJECTED cui-na-ciam-storage-listing @ cui.na.ciam(.qa/.dev): Azure Storage WebContentNotFound 404 for /, /index.html, /app/, /assets/ — no blob/list surface de
+- LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
+- LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
+- LEARN: REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU;
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenan
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
+- LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
+- LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active

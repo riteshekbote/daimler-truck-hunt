@@ -4158,3 +4158,43 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED companion-dev-signin-recovered @ companion-dev.app: /api/auth/signin/azure-ad-b2c hang→302 error=azure-ad-b2c (0.29s), now uniform with prod companion + developer portals — dev identity endpoint restored since 09-07 prod-wiring state; prior 09-12 "dev-signin-hang-persists" stale. Informational config-drift only, no exploit path.
 [LEARN] ACCEPTED stability @ developer.tst.as + companion tier: healthcheck 200/70B, signin 302 uniform both tiers, build IDs unchanged — no drift since 09-12 build-roll learning.
 [RISK] daimler-truck: 78. Unchanged. Barrier remains two staging identities on login-qa (tenant 88f558f5) — single blocker since 09-04. This cycle's only dynamic (dev signin recovery to prod-uniform 302) removes an informational config-drift datapoint, adds no vulnerability, no new anonymous surface. Reportable items stay info-level (tst.as NA-provider POST-signin OAuthSignin abort + companion dev-callback-in-prod allowlist; both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, <=1 rps, GET only this cycle.
+## 2026-09-12 21:25:54 UTC [target] (model bigpickle)
+[PRIO] api.na.ciam.daimlertruck.com + api-qa.na.ciam,6.15,NA-CIAM-APIM-key-gate (a4/b8/t7/g2/c8/f10)
+[PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.00,portal-GraphQL (a6/b9/t9/g2/c5/f1)
+[PRIO] login-qa.ciam.daimlertruck.com,5.75,identity-layer (a5/b10/t8/g2/c4/f1)
+[PRIO] companion.app.daimlertruck.com/api/proxy-http,5.25,SSRF-handler (a5/b7/t7/g2/c8/f1)
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)+NOAM(acr=noam) share identical issuer URI per tenant; only acr+org-shape claims differentiate BU; NOAM superset carries dealer PII. No drift this cycle; NA CIAM APIM now also key-gated — regional isolation weak at identity layer, strong at gateway layer.
+evidence_needed: two staging identities -> decoded claim diffs; NOAM token executes ROW-scoped /api/graphql op = 200 vs 403.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa -> POST /api/graphql ROW query with NOAM token -> diff acr/org claims vs status.
+impact: cross-BU privilege collapse -> dealer-PII exposure — Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); /api/graphql 307->B2C on all 7 portals — ownership-gap replicates widely.
+evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa) -> introspection -> baseline IDs -> swap object IDs across portals -> diff.
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET->405(30B) proves POST-only first-class handler exempt from catch-all; istio-envoy/AKS = metadata-PHY reachable class; build pVVz9XMK0MvBn72k4YswS unchanged post-roll.
+evidence_needed: valid B2C session -> POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP -> mesh host -> external URL; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[PARKED] na-ciam-apim-subkey-gate: 401 key-gate + dev-open (config-drift) confirmed anonymously, but Ocp-Apim-Subscription-Key has no passive discovery path (WAF/APIM layer, not in any reachable client JS); 45 — not exploitable without key/credentials. Revisit on NA staging grant.
+[FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
+[NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Unchanged blocker since 09-04; unblocks both top-2 FINALs. Secondary optional ask: an NA CIAM APIM subscription key or read-only test on `api.na.ciam` (realm dtna-ciam-eus2-prod-apim-shared-01) to size the NA identity-API surface.
+[LEARN] ACCEPTED CT-breadth-expansion @ daimlertruck.com: crt.sh enumerated 1079 names vs 23-host inventory; ~12 live dedicated HTTP hosts never probed before (api.businessid[-qa|-dev], clara.app*, login.b2b*, api[-qa|-dev].na.ciam, cui*na.ciam, login*na.ciam, na.api/tst.na.api, xentry-api). All root-level catch-alls, WAF-blocks, or key/App-Gateway 404s — no new anonymous docs/GraphQL/OIDC surface.
+[LEARN] ACCEPTED ciam-apim-key-gate-dev-open @ api.na.ciam/api-qa.na.ciam: APIM 401 AzureApiManagementKey (realm dtna-ciam-eus2-prod-apim-shared-01.azure-api.net); api-dev.na.ciam serves JSON without key — matches existing api.businessid prod/qa 403-WAF vs dev-open 404 config-drift pattern.
+[LEARN] REJECTED login.b2b-keycloak @ login.b2b(-int/-dev1): Keycloak-themed static 404 (266389B data-URI favicon) on every path incl /realms/* — placeholder/origin-behind-Front-Door, no reachable OIDC realm.
+[LEARN] REJECTED cui-na-ciam-storage-listing @ cui.na.ciam(.qa/.dev): Azure Storage WebContentNotFound 404 for /, /index.html, /app/, /assets/ — no blob/list surface demonstrated; ACAO:* alone not a finding.
+[RISK] daimler-truck: 78. Unchanged core blocker — two login-qa staging identities (tenant 88f558f5) still outstanding since 09-04; top-2 Critical-class hypotheses remain AUTH_HELPED-blocked. This cycle added inventory breadth only: NA CIAM APIM (key-gated, parked), businessid/clara dev-open JSON APIs (54B 404 catch-all, no paths), Keycloak-themed placeholder on login.b2b (rejected). No new anonymous exploitable surface; no mutating touch; read-only GET <=1 rps; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist), HOLD pending exploitation PoC.
