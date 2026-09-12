@@ -470,3 +470,14 @@ www.daimlertruck.com
 - CHANGED companion.app.daimlertruck.com `/api/auth/signin/azure-ad-b2c` hangs/no response (was returning B2C authorize JSON)
 - CHANGED developer.as.api.daimlertruck.com root + /graphql content-length changed from 196649 to 196341 bytes (prod build ID `JCvrnrykV_KYBk7pu0Npq` still) — possible new deploy or config change
 - CHANGED companion.app.daimlertruck.com `/api/auth/callback/azure-ad-b2c` remains 400 (standard NextAuth missing-params)
+
+## 2026-09-12 18:49:11 UTC
+- CHANGED companion-dev.app /api/auth/signin/azure-ad-b2c: hang (10s/0B, persisted since 09-12 build roll) → 302 0.29s `?callbackUrl=...&error=azure-ad-b2c` — uniform NextAuth GET-signin error handling; dev ide
+- CHANGED companion.app signin: 302 same shape — no change vs 16:28.
+- CHANGED developer.tst.as /api/healthcheck: 200/70B stable — no drift.
+- NEW developer.as.api.daimlertruck.com root content-length changed from 196649 to 196341 bytes (build ID `JCvrnrykV_KYBk7pu0Npq` unchanged) — new deploy/config change confirmed
+- NEW All signin endpoints (companion.app, companion-dev.app, developer.as.api, developer.tst.as.api) now return uniform 302 error redirects (`error=azure-ad-b2c*`) instead of hanging/504 — transient degrad
+- CHANGED companion.app `/api/auth/signin/azure-ad-b2c?json=true`: hang→302 `/?callbackUrl=...&error=azure-ad-b2c` (uniform NextAuth GET-signin error handling)
+- CHANGED companion-dev.app `/api/auth/signin/azure-ad-b2c?json=true`: 504→302 `/?callbackUrl=...&error=azure-ad-b2c` (now wired to prod B2C but GET path returns error)
+- CHANGED developer.tst.as.api.daimlertruck.com `/api/auth/signin/azure-ad-b2c-dt` + `azure-ad-b2c-dtna`: hang→302 `error=azure-ad-b2c-dt/-dtna`
+- CHANGED developer.as.api.daimlertruck.com `/graphql` returns 307 (24 bytes) to B2C — real endpoint behind auth confirmed

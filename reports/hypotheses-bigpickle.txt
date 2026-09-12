@@ -1,7 +1,7 @@
-## 2026-09-12 16:24:11 UTC [target] (model bigpickle)
-[NEW] companion-dev.app /api/auth/signin/azure-ad-b2c still hangs (timeout 10s, 0B) while prod companion + all portal signin endpoints now return standard NextAuth 302 error-redirects — prior 13:21 "hanging/no response" on prod/portals was transient degradation; only dev endpoint persists as degraded (regression from 09-07 prod-wiring).
-[CHANGED] companion.app signin GET: hang→302 `/?callbackUrl=...&error=azure-ad-b2c` (uniform NextAuth GET-signin error handling, matches developer portals).
-[CHANGED] developer.tst.as signin GET (dt+dtna): hang→302 error=azure-ad-b2c-dt/-dtna — NA-provider OAuthSignin abort (09-08, POST path) not re-tested (POST out of passive bounds); GET-side hang resolved.
+## 2026-09-12 18:46:10 UTC [target] (model bigpickle)
+[CHANGED] companion-dev.app /api/auth/signin/azure-ad-b2c: hang (10s/0B, persisted since 09-12 build roll) → 302 0.29s `?callbackUrl=...&error=azure-ad-b2c` — uniform NextAuth GET-signin error handling; dev identity endpoint recovered, matches prod companion + developer portals. Prior "companion-dev-signin-hang-persists" learning now stale.
+[CHANGED] companion.app signin: 302 same shape — no change vs 16:28.
+[CHANGED] developer.tst.as /api/healthcheck: 200/70B stable — no drift.
 [PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.00,portal-GraphQL (a6/b9/t9/g2/c5/f1)
 [PRIO] login-qa.ciam.daimlertruck.com,5.75,identity-layer (a5/b10/t8/g2/c4/f1)
 [PRIO] companion.app.daimlertruck.com/api/proxy-http,5.25,SSRF-handler (a5/b7/t7/g2/c8/f1)
@@ -9,7 +9,7 @@
 class: AUTH
 asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
 confidence: 75
-reasoning: ROW(acr=row)+NOAM(acr=noam) policies per tenant share identical issuer URI (prod 3db550f0 / staging 88f558f5); only acr+org-shape claims differentiate BU; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); portal identity layer unchanged by companion build roll.
+reasoning: ROW(acr=row)+NOAM(acr=noam) policies share identical issuer URI per tenant (prod 3db550f0 / staging 88f558f5); only acr+org-shape claims differentiate BU; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode). Signin surface recovered to uniform 302 on all tiers this cycle — no impact on this hypothesis.
 evidence_needed: two staging identities -> decoded claim diffs; whether NOAM-bearer token executes ROW-scoped GraphQL op at /api/graphql resolves 200 vs 403.
 verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa -> POST /api/graphql ROW query w/ NOAM token -> diff acr/org claims vs status.
 impact: cross-BU privilege collapse -> dealer-PII exposure — Critical if isolation rests on acr only.
@@ -18,7 +18,7 @@ testability: AUTH_HELPED
 class: IDOR
 asset: developer.tst.na.api.daimlertruck.com/api/graphql
 confidence: 75
-reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307->B2C (re-verified this cycle 30B); all 7 portals same surface — any ownership-check gap replicates widely.
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307->B2C; all 7 portals same surface — ownership-check gap replicates widely.
 evidence_needed: post-auth introspection + foreign-ID swap returning 200+data vs 403.
 verify_steps: AUTH_HELPED: ROW session (login-qa) -> introspection -> baseline IDs -> swap object IDs across portals -> diff.
 impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
@@ -27,15 +27,13 @@ testability: AUTH_HELPED
 class: SSRF
 asset: companion.app.daimlertruck.com/api/proxy-http
 confidence: 55
-reasoning: GET->405(30B) proves POST-only first-class handler exempt from 401/307 catch-all on current build; prod istio-envoy on AKS = 169.254.169.254 reachable class; auth active prod+dev (/api/proxy-http GET now 405 both); prod session needs client cd34584a / b2c_1a_signin_oidc_row; prior build-roll probe unchanged post-deploy.
+reasoning: GET->405(30B) proves POST-only first-class handler exempt from 401/307 catch-all on current prod build (post-roll pVVz9XMK0MvBn72k4YswS); prod istio-envoy on AKS = 169.254.169.254 reachable class; auth active prod+dev; prod session needs client cd34584a / b2c_1a_signin_oidc_row.
 evidence_needed: valid B2C session -> POST {"url":"http://169.254.169.254/latest/meta-data/"} -> diff vs external.
 verify_steps: AUTH_HELPED: POST metadata IP -> mesh host -> external URL; diff status/body.
 impact: cloud-metadata IAM keys / mesh lateral — High.
 testability: AUTH_HELPED
-[PARKED] None — all three ≥55, AUTH_HELPED with valid verify_steps, none REJECTED-class.
 [FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
-[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Single blocker unchanged since 09-04; one grant unblocks all three FINAL hypotheses (cross-BU GraphQL exec via shared issuer, object-ID BOLA, companion SSRF). No new anonymous surface introduced by companion build roll (re-verified); dev signin hang is dev-tier only.
-[LEARN] REJECTED signin-endpoint-degradation @ companion.app + developer.tst.as: 13:21 "hanging/no response" was transient — prod+portal signin GETs now return standard NextAuth 302 error=OAuthSignin redirects; same class as DoS/availability anyway (out of scope), and GET-path cannot confirm the 09-08 NA-provider POST abort.
-[LEARN] ACCEPTED companion-dev-signin-hang-persists @ companion-dev.app: /api/auth/signin/azure-ad-b2c still times out (000/10s/0B) while prod companion returns 302 — dev identity endpoint degraded/unwired again since 09-07 prod-wiring; informational config drift only (matches dev-auth-drift class), no exploit path.
-[LEARN] ACCEPTED stability @ companion.app + developer.tst.as + developer.tst.na: buildManifest pVVz9XMK0MvBn72k4YswS 200/951B, /api/health 200 15B, /api/proxy-http 405 both tiers, healthcheck 200 70B, /api/graphql 307 — no drift since 09-12 build-roll learning.
-[RISK] daimler-truck: 78. Unchanged. Barrier remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 09-04. Companion build roll re-verified clean (buildManifest + proxy-http + health stable; dev-only signin hang informational). Reportable items stay info-level (tst.as NA-provider POST-signin OAuthSignin abort + companion-dev-callback-in-prod allowlist; both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, <=1 rps, GET/HEAD only this cycle.
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Single blocker unchanged since 09-04; one grant unblocks all three FINAL hypotheses. Dev companion signin recovered to prod-uniform 302 this cycle — no new anonymous surface; anchors re-probed above only (healthcheck 200/70B, signins 302).
+[LEARN] ACCEPTED companion-dev-signin-recovered @ companion-dev.app: /api/auth/signin/azure-ad-b2c hang→302 error=azure-ad-b2c (0.29s), now uniform with prod companion + developer portals — dev identity endpoint restored since 09-07 prod-wiring state; prior 09-12 "dev-signin-hang-persists" stale. Informational config-drift only, no exploit path.
+[LEARN] ACCEPTED stability @ developer.tst.as + companion tier: healthcheck 200/70B, signin 302 uniform both tiers, build IDs unchanged — no drift since 09-12 build-roll learning.
+[RISK] daimler-truck: 78. Unchanged. Barrier remains two staging identities on login-qa (tenant 88f558f5) — single blocker since 09-04. This cycle's only dynamic (dev signin recovery to prod-uniform 302) removes an informational config-drift datapoint, adds no vulnerability, no new anonymous surface. Reportable items stay info-level (tst.as NA-provider POST-signin OAuthSignin abort + companion dev-callback-in-prod allowlist; both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, <=1 rps, GET only this cycle.
