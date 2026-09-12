@@ -336,3 +336,6 @@ https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 40
 
 ## 2026-09-12 05:04:37 UTC
 https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-12 09:29:06 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400

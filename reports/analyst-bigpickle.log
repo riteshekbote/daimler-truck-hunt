@@ -14863,3 +14863,98 @@ STEP 6 — LEARNING:
 
 STEP 7 — RISK:
 [RISK] daimler-truck: 78. Unchanged. Barrier remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 2026-09-04; passive map complete with no bypass/mutation path; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD only this cycle.
+===== ANALYST bigpickle 2026-09-12 09:29:05 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor u in \
+ "https://developer.tst.as.api.daimlertruck.com/" \
+ "https://developer.tst.as.api.daimlertruck.com/apis" \
+ "https://developer.tst.as.api.daimlertruck.com/api/healthcheck" \
+ "https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js" \
+ "https://companion.app.daimlertruck.com/" \
+ "https://companion.app.daimlertruck.com/api/health" \
+ "https://companion.app.daimlertruck.com/api/proxy-http" ; do
+  code=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 15 -A "Mozilla/5.0" "$u" 2>/dev/null)
+  len=$(wc -c < /tmp/body.txt 2>/dev/null)
+  bid=$(grep -o 'buildId[^,]*' /tmp/body.txt 2>/dev/null | head -c 80)
+  echo "$code|len=$len|bid=$bid|$u"
+  sleep 1
+done
+200|len=196341|bid=buildId":"mS_4SiQmkiaGsx2vLoXkH"|https://developer.tst.as.api.daimlertruck.com/
+307|len=21|bid=|https://developer.tst.as.api.daimlertruck.com/apis
+200|len=70|bid=|https://developer.tst.as.api.daimlertruck.com/api/healthcheck
+200|len=2999|bid=|https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js
+200|len=3330|bid=buildId":"pVVz9XMK0MvBn72k4YswS"|https://companion.app.daimlertruck.com/
+200|len=15|bid=|https://companion.app.daimlertruck.com/api/health
+405|len=30|bid=|https://companion.app.daimlertruck.com/api/proxy-http
+[0m
+[0m$ [0mfor u in \
+ "https://companion.app.daimlertruck.com/_next/static/pVVz9XMK0MvBn72k4YswS/_buildManifest.js" \
+ "https://companion-dev.app.daimlertruck.com/" \
+ "https://companion-dev.app.daimlertruck.com/api/auth/providers" \
+ "https://companion-dev.app.daimlertruck.com/api/proxy-http" ; do
+  code=$(curl -s -o /tmp/body.txt -w "%{http_code}" --max-time 15 -A "Mozilla/5.0" "$u" 2>/dev/null)
+  len=$(wc -c < /tmp/body.txt 2>/dev/null)
+  bid=$(grep -o 'buildId[^,]*' /tmp/body.txt 2>/dev/null | head -c 80)
+  echo "== $code|len=$len|bid=$bid|$u"
+  head -c 600 /tmp/body.txt; echo; echo "---"
+  sleep 1
+done
+== 200|len=951|bid=|https://companion.app.daimlertruck.com/_next/static/pVVz9XMK0MvBn72k4YswS/_buildManifest.js
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/27ervvy-i6vjw.js"
+  ],
+  "/_error": [
+    "static/chunks/11ti9bhmhzrrf.js"
+  ],
+  "/admin": [
+    "static/chunks/0cv3s4d0o3aof.js"
+  ],
+  "/chat": [
+    "static/chunks/2755dl1um52iu.js"
+  ],
+  "/explore-topics": [
+    "static/chunks/0z6bokqjdez7s.js"
+  ],
+  "/how-to-use": [
+    "static/chunks/3n0ij-h1vfxxz.js"
+  ],
+  "/terms-of-use": [
+    "static/chunks/3kfobt-07-ahz.js"
+  ],
+  "/widget-host": [
+    "static/chunks/0ad3zkc330x_r.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": 
+---
+== 200|len=3341|bid=buildId":"AO7VvIOpKp-TqU5HF-ZTR"|https://companion-dev.app.daimlertruck.com/
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8" data-next-head=""/><meta name="viewport" content="width=device-width" data-next-head=""/><script>
+                globalThis.window.__IS_API_MOCKING__ = false;
+              </script><link data-next-font="" rel="preconnect" href="/" crossorigin="anonymous"/><link rel="preload" href="/_next/static/chunks/1jpdnd6i6h5ty.css" as="style"/><link rel="stylesheet" href="/_next/static/chunks/1jpdnd6i6h5ty.css" data-n-g=""/><noscript data-n-css=""></noscript><script src="/_next/static/chunks/28k68josp5jgy.js" defer=""></script><script src="/_nex
+---
+== 200|len=265|bid=|https://companion-dev.app.daimlertruck.com/api/auth/providers
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion-dev.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+---
+== 405|len=30|bid=|https://companion-dev.app.daimlertruck.com/api/proxy-http
+{"error":"Method not allowed"}
+---
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mfor u in \
+ "https://companion.app.daimlertruck.com/_next/static/pVVz9XMK0MvBn72k4YswS/_buildManifest.js|prod" \
+ "https://companion-dev.app.daimlertruck.com/_next/static/AO7VvIOpKp-TqU5HF-ZTR/_buildManifest.js|dev" ; do
+  curl -s -o /tmp/man.txt --max-time 15 -A "Mozilla/5.0" "${u%%|*}" 2>/dev/null
+  echo "== ${u##*|} buildManifest len=$(wc -c < /tmp/man.txt)"
+  cat /tmp/man.txt | tr ',' '\n' | grep -E '"/' 
+  echo "---"
+  sleep 1
+done failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
+Companion apps redeployed with new build IDs. Let me diff the new route maps.
