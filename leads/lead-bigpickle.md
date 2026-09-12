@@ -3693,3 +3693,33 @@ evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/lates
 verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body/redirects
 impact: cloud-metadata IAM keys / mesh lateral — High
 testability: AUTH_HELPED
+## 2026-09-12 00:37:43 UTC [target] (model bigpickle)
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share identical issuer URI (prod 3db550f0 / staging 88f558f5); only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII (FTLOrg* contact/street/SAP); ROW client 205f35f7 vs NA client c387a5ab
+evidence_needed: two staging identities → decoded claim sets; NOAM-bearer token (acr=noam) executing ROW-scoped GraphQL ops at /api/graphql
+verify_steps: AUTH_HELPED: obtain ROW+NOAM tokens from login-qa → POST /api/graphql with ROW query using NOAM token → diff by acr/org claims vs expected 403/401
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[...]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307→B2C on all 7 portals
+evidence_needed: post-auth introspection + foreign-ID swap → 200+data vs 403
+verify_steps: AUTH_HELPED: ROW session (login-qa) → POST /api/graphql introspection → baseline IDs → swap object IDs across portals → diff status/body
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405(30B) proves POST-only first-class handler exempt from 401 catch-all; prod istio-envoy on AKS = 169.254.169.254 reachable class; auth active prod+dev; prod session needs client cd34584a / b2c_1a_signin_oidc_row
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL
+verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body/redirects
+impact: cloud-metadata IAM keys / mesh lateral — High
+testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) for developer.tst.na.api.daimlertruck.com via bugs.olivermaicher.eu — (1) b2c_1a_signin_oidc_row via broker e39fd9b6, (2) b2c_1a_signin_oidc_noam. Unchanged single blocker since 2026-09-04; one grant unblocks all three FINAL hypotheses. No anonymous probe adds signal; none run beyond the stability checks above.
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 2026-09-04; passive map complete with no bypass/mutation path; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only this cycle.

@@ -14730,3 +14730,74 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 2026-09-04; passive map complete with no bypass/mutation path. Reportable items stay info-level (tst.as NA-provider OAuthSignin wiring defect + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only this cycle.
+===== ANALYST bigpickle 2026-09-12 00:38:57 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -m 15 -o /tmp/opencode/health_tstas.txt -w "healthcheck: %{http_code} %{size_download}B\n" https://developer.tst.as.api.daimlertruck.com/api/healthcheck; sleep 1; curl -s -m 15 -o /dev/null -D - -w "\napis: %{http_code}\n" https://developer.tst.as.api.daimlertruck.com/apis 2>&1 | grep -E "HTTP/+|location:|apis:"
+healthcheck: 200 70B
+HTTP/2 307 
+location: /?callbackUrl=%2Fapis
+apis: 307
+[0m
+[0m$ [0msleep 1; curl -s -m 15 -o /dev/null -w "companion-health: %{http_code} %{size_download}B\n" https://companion.app.daimlertruck.com/api/health; sleep 1; curl -s -m 15 -o /dev/null -w "companion-root: %{http_code} %{size_download}B\n" https://companion.app.daimlertruck.com/
+companion-health: 200 15B
+companion-root: 200 3330B
+[0m
+[0m→ [0mRead /tmp/opencode/health_tstas.txt
+STEP 1 — DELTA
+- NEW uptime @ developer.tst.as/api/healthcheck: `uptime=187164s` (~2.2d, deploy ≈2026-09-09 22:30Z) vs `124427s` recorded 2026-09-04 — process restarted between cycles; route surface (200 health / 307 /apis→`/?callbackUrl=%2Fapis`) unchanged. Informational only; no build/route drift.
+- NO_DELTA @ companion.app: root 200 len=3330, /api/health 200 15B — identical to last probe (09-11); no new anonymous surface.
+
+STEP 2 — PRIORITIZE
+- [PRIO] login-qa.ciam.daimlertruck.com (tenant 88f558f5), surface=6,biz=9,tech=8,gate=1,cloud=7,fresh=2 → 5.35 — only asset that unblocks exploit-class test
+- [PRIO] developer.tst.na.api.daimlertruck.com/api/graphql, surface=5,biz=8,tech=9,gate=1,cloud=7,fresh=2 → 5.20 — BOLA surface confirmed by buildManifest, gated by session
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http, surface=4,biz=7,tech=8,gate=1,cloud=9,fresh=2 → 4.90 — POST-only SSRF handler, gated by prod session
+- [PRIO] developer.tst.as.api.daimlertruck.com, surface=4,biz=6,tech=7,gate=10,cloud=6,fresh=3 → 6.00 — only portal with a public 200 route; stability confirmed
+
+STEP 3 — HYPOTHESES
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login.ciam.daimlertruck.com
+confidence: 75
+reasoning: ROW+NOAM per tenant share identical issuer URI (prod 3db550f0 / staging 88f558f5); only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII (FTLOrg* contact/street/SAP); ROW client 205f35f7 vs NA client c387a5ab
+evidence_needed: two staging identities → decoded claim sets; NOAM-bearer token (acr=noam) executing ROW-scoped GraphQL ops at /api/graphql
+verify_steps: AUTH_HELPED: obtain ROW+NOAM tokens from login-qa → POST /api/graphql with ROW query using NOAM token → diff by acr/org claims vs expected 403/401
+impact: cross-BU privilege collapse → dealer-PII exposure — Critical if isolation rests on acr only
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: buildManifest across all 3 build IDs exposes object-ID routes (/apis/[apiId], /apps/[...]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); client bundle carries tenant-scoped GraphQL ops; /api/graphql 307→B2C on all 7 portals
+evidence_needed: post-auth introspection + foreign-ID swap → 200+data vs 403
+verify_steps: AUTH_HELPED: ROW session (login-qa) → POST /api/graphql introspection → baseline IDs → swap object IDs across portals → diff status/body
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405(30B) proves POST-only first-class handler exempt from 401 catch-all; prod istio-envoy on AKS = 169.254.169.254 reachable class; auth active prod+dev; prod session needs client cd34584a / b2c_1a_signin_oidc_row
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} → diff vs external URL
+verify_steps: AUTH_HELPED: POST metadata IP → internal mesh host → external URL; diff status/body/redirects
+impact: cloud-metadata IAM keys / mesh lateral — High
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] fresh-passive-probe-value: 10th consecutive rejection — every anonymous GET/HEAD/OPTIONS surface re-confirmed this cycle (health /apis /companion root) as unchanged; all remaining requests require POST-body/introspection/claims shapes not permitted in passive mode.
+- [PARKED] companion-dev-auth-bypass / re-probe value: stale; no new anonymous signal.
+- [FINAL] b2c-cross-bu-token-boundary-abuse (75) — top AUTH-helped, Critical ceiling, blocker unchanged.
+- [FINAL] graphql-object-id-bola-cross-portal (75) — co-equal classic IDOR across 7 portals, same blocker.
+- [FINAL] companion-proxy-http-metadata-ssrf (55) — above 40 floor; SSRF→cloud-metadata is High.
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) for developer.tst.na.api.daimlertruck.com via bugs.olivermaicher.eu — (1) b2c_1a_signin_oidc_row via broker e39fd9b6, (2) b2c_1a_signin_oidc_noam. Unchanged single blocker since 2026-09-04; one grant unblocks all three FINAL hypotheses. No anonymous probe adds signal; none run beyond the stability checks above.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID behavior — /api/healthcheck 200 (uptime 187164s), /apis 307→'/?callbackUrl=%2Fapis', dual-provider surface intact — no env drift since 09-08.
+- [LEARN] ACCEPTED companion-app-stable @ companion.app: root 200 len=3330 + /api/health 200 unchanged — no new anonymous exposure; proxy-http remains auth-gated.
+- [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: surfaces remain exhausted; proxy-http POST body, GraphQL introspection, and cross-BU token claims all require request shapes not permitted in passive mode — rejected 10th consecutive cycle.
+
+STEP 7 — RISK
+[RISK] daimler-truck: 78. Unchanged. Barrier to exploitation remains two staging identities on login-qa (tenant 88f558f5) — unchanged since 2026-09-04; passive map complete with no bypass/mutation path; reportable items stay info-level (tst.as NA-provider OAuthSignin abort + companion dev-callback-in-prod allowlist, both HOLD pending exploitation PoC). Zero mutating touch on customer/employee data; read-only, ≤1 rps, GET/HEAD/OPTIONS only this cycle.
