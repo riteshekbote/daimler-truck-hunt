@@ -327,3 +327,53 @@ TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 ## REPOSCAN 2026-09-13 01:24:16 UTC
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-13 06:48:29 UTC
+class: SECRET
+asset: daimlertruck/SRC-LibreChat/.devcontainer/docker-compose.yml:60
+confidence: 85
+reasoning: Real SHA-256 hex key `5c71cf56d672d009e36070b5bc5e47b743535ae55c818ae3b735bb6ebfb4ba63` is hardcoded. This grants full admin read/write access to the MeiliSearch index. DevContainer configs are frequently copy-pasted into production or staging compose files (the main docker-compose.yml uses `${MEILI_MASTER_KEY}` from env, but the devcontainer does not).
+impact: High — if reused in any staging/prod deployment, attacker gains full search index admin access (read, write, delete, settings)
+verify_steps: 1) Check if any live MeiliSearch instance at *.api.daimlertruck.com or internal infra accepts this key against port 7700 or `/health` endpoint. 2) Passively check if any compose file in the org references this same key value.
+class: SECRET
+asset: daimlertruck/SRC-rag_api/docker-compose.yaml:5-7, db-compose.yaml:7-9, daimlertruck/SRC-LibreChat/docker-compose.yml (vectordb), deploy-compose.yml (vectordb)
+confidence: 85
+reasoning: `POSTGRES_PASSWORD: mypassword`, `POSTGRES_USER: myuser`, `POSTGRES_DB: mydatabase` are hardcoded in docker-compose files and mirrored in Python config defaults (`config.py:57-59`). Both the RAG API repo and the main LibreChat docker-compose ship these identical defaults. If a deployment omits the `.env` override (common in quick-start or CI setups), the PostgreSQL/pgvector database holding document embeddings is accessible with known credentials.
+impact: High — unauthorized access to vector database containing corporate document embeddings and chat data
+verify_steps: 1) Check if any live pgvector instance on *.daimlertruck.com or internal infra accepts connections with `myuser:mypassword` on port 5432/5433. 2) Passively scan for exposed PostgreSQL ports on Daimler subdomains.
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/main.py:74-80
+confidence: 80
+reasoning: `CORSMiddleware(allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])` — allows any origin to make credentialed cross-origin requests. The RAG API handles document uploads, vector queries, and embeddings for corporate data. Combined with the JWT bypass (see below), this creates an unauthenticated CORS-open API.
+impact: Medium — cross-origin data exfiltration from RAG endpoints; if JWT_SECRET is also unset (see below), any webpage can exfiltrate all document embeddings
+verify_steps: 1) Check if RAG API is deployed on any *.api.daimlertruck.com subdomain. 2) Send `Origin: https://evil.com` request with `credentials: include` — if `Access-Control-Allow-Origin: https://evil.com` is returned, finding confirmed.
+class: MISCONFIG
+asset: daimlertruck/SRC-rag_api/app/middleware.py:18-21
+confidence: 85
+reasoning: When `JWT_SECRET` env var is not set, `security_middleware` logs a warning and calls `next_middleware_call()` — skipping all token validation. Every protected endpoint (document CRUD, query, upload) becomes fully unauthenticated. This is the upstream default; no indication Daimler modified it.
+impact: High — full unauthenticated access to all RAG API document endpoints if deployed without JWT_SECRET
+verify_steps: 1) Deploy SRC-rag_api without setting JWT_SECRET. 2) Hit any protected endpoint (e.g., GET /documents) without a Bearer token — should return 200.
+class: MISCONFIG
+asset: daimlertruck/SRC-LibreChat/api/server/index.js:338
+confidence: 70
+reasoning: `app.use(cors())` with no origin restrictions. LibreChat handles authentication (JWT, OpenID Connect), chat sessions, user data, and AI model API keys. Additionally, `setHeaders.js:6` sets `Access-Control-Allow-Origin: '*'* for streaming/SSE endpoints. If deployed internally (likely, given Daimler's AI tooling investment), any malicious webpage visited by an employee could exfiltrate session tokens or chat data.
+impact: Medium — session hijacking, chat data exfiltration via CSRF from any origin if deployed without a reverse-proxy CORS layer
+verify_steps: 1) Check if LibreChat is deployed on any *.daimlertruck.com domain. 2) Passively observe if Access-Control-Allow-Origin header reflects requesting origin.
+class: MISCONFIG
+asset: daimlertruck/SRC-openai-aca-lb/infra/core/database/sqlserver/sqlserver.bicep:40-41
+confidence: 75
+reasoning: Firewall rule `startIpAddress: '0.0.0.1'`, `endIpAddress: '255.255.255.254'` allows connections from any public IP. Comment says "debugging purposes" but the template is committed. `publicNetworkAccess: 'Enabled'` (line 24) compounds this.
+impact: Medium — if deployed to a real Azure subscription, the SQL Server is exposed to the entire internet
+verify_steps: 1) Deploy the Bicep template and inspect SQL Server firewall rules in Azure portal. 2) Check if any Azure subscription under daimlertruck.com has this template deployed.
+class: OTHER
+asset: daimlertruck/SRC-rag_api/main.py:93-94, app/routes/pgvector_routes.py
+confidence: 60
+reasoning: `pgvector_routes.router` is included only when `DEBUG_RAG_API=True` (main.py:93). The pgvector routes include admin endpoints for checking indexes, listing tables. If debug mode is accidentally enabled in production (common during troubleshooting), these administrative routes become accessible.
+impact: Medium — database schema enumeration and admin vector DB operations if debug mode enabled in prod
+verify_steps: 1) Check if any live deployment has `DEBUG_RAG_API=true` in environment. 2) Passively check if `/test/check_index` endpoint responds on the live RAG API.
+class: MISCONFIG
+asset: daimlertruck/SRC-LibreChat/docker-compose.yml:68, deploy-compose.yml:93
+confidence: 75
+reasoning: `command: mongod --noauth` runs MongoDB without authentication. The devcontainer compose also uses `--noauth`. While the port is not exposed externally in production compose files (commented out), any container on the Docker network can access MongoDB unauthenticated, and any misconfiguration exposing port 27017/27018 grants full access.
+impact: Medium — unauthenticated access to MongoDB containing all chat sessions, user data, and conversations if port is exposed
+verify_steps: 1) Check if any MongoDB instance at *.daimlertruck.com accepts connections without auth on port 27017. 2) Passively scan for exposed MongoDB ports.
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
