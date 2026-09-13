@@ -10440,3 +10440,561 @@ testability: AUTH_HELPED
 
 ## STEP 7 — RISK
 [RISK] daimler-truck: 78 — 7 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C (dual providers ROW/NA); companion.app + companion-dev.app add parallel surface with proxy-http/[...slug] catch-all routes (middleware-exempt, SSRF/BOLA candidates); prod B2C tenant issues ROW+NOAM under same issuer — cross-BU token boundary relies solely on acr/org claim validation by downstream APIs; companion-dev callback registered in prod B2C client allowlist; identical build manifests across prod/dev companion and across prod/test developer portals suggest same authz logic — any flaw replicates widely
+===== ANALYST nemotron3 2026-09-13 01:29:32 UTC =====
+[0m
+> build · nemotron-3-ultra-free
+[0m
+[0m$ [0mcurl -s -I https://developer.as.api.daimlertruck.com/ 2>&1 | head -20
+HTTP/2 200 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+x-powered-by: Next.js
+etag: "6j0bp2csn147hx"
+content-type: text/html; charset=utf-8
+content-length: 196341
+vary: Accept-Encoding
+date: Sun, 13 Sep 2026 01:10:10 GMT
+[0m
+[0m$ [0mcurl -s -I https://developer.as.api.daimlertruck.com/graphql 2>&1 | head -20
+HTTP/2 307 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+location: /?callbackUrl=%2Fgraphql
+date: Sun, 13 Sep 2026 01:10:37 GMT
+[0m
+[0m$ [0mcurl -s -I https://companion.app.daimlertruck.com/ 2>&1 | head -20
+HTTP/1.1 200 OK
+Date: Sun, 13 Sep 2026 01:11:01 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 3330
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+set-cookie: __Host-next-auth.csrf-token=4a051f55faa6b7759961ca4a258a4dc017c7eaf5efeb8564036bb9d34c51ae66%7Ceb11d90e0d8e00504980209722b946e52f09cf9fc6163d24d9be002f4953b856; Path=/; HttpOnly; Secure; SameSite=Lax
+set-cookie: __Secure-next-auth.callback-url=https%3A%2F%2Fcompanion.app.daimlertruck.com; Path=/; HttpOnly; Secure; SameSite=Lax
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+x-powered-by: Next.js
+etag: "ip4ti3t3ai2kh"
+vary: Accept-Encoding
+x-envoy-upstream-service-time: 11
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -I "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" 2>&1 | head -20
+HTTP/1.1 400 Bad Request
+Date: Sun, 13 Sep 2026 01:11:22 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 13
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/api/auth/signin/azure-ad-b2c?json=true" 2>&1 | head -20
+HTTP/1.1 400 Bad Request
+Date: Sun, 13 Sep 2026 01:12:07 GMT
+Content-Length: 65
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net;
+etag: "uqvs2d7v1c1t"
+x-envoy-upstream-service-time: 15
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -I "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" 2>&1 | head -20
+HTTP/2 400 
+x-frame-options: SAMEORIGIN
+strict-transport-security: max-age=31536000; includeSubDomains; preload
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+etag: "uqvs2d7v1c1t"
+content-length: 65
+date: Sun, 13 Sep 2026 01:12:34 GMT
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt?json=true" 2>&1
+(no output)
+[0m
+[0m$ [0mcurl -s "https://developer.as.api.daimlertruck.com/api/auth/providers" 2>&1
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/api/auth/providers" 2>&1
+{"azure-ad-b2c":{"id":"azure-ad-b2c","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://companion.app.daimlertruck.com/api/auth/signin/azure-ad-b2c","callbackUrl":"https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c"}}
+[0m
+[0m$ [0mcurl -s -I -X GET "https://companion.app.daimlertruck.com/api/proxy-http" 2>&1 | head -20
+HTTP/1.1 405 Method Not Allowed
+Date: Sun, 13 Sep 2026 01:13:44 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 30
+Connection: keep-alive
+content-security-policy: font-src 'self'; img-src 'self' data: *.daimlertruck.com; object-src 'self' blob:; style-src 'self' 'unsafe-inline'; frame-ancestors https://*.daimlertruck.com https://dt-proplan.cplace.cloud https://daimlertruck-prod.icertis.com https://daimlertruck-uat.icertis.com https://apps.powerapps.com https://daimlertruck-cmk-2.atlassian.net https://corptb.sharepoint.com;
+etag: "gz8ozgte0mu"
+vary: Accept-Encoding
+x-envoy-upstream-service-time: 14
+server: istio-envoy
+[0m
+[0m$ [0mcurl -s -I -X POST "https://companion.app.daimlertruck.com/api/proxy-http" -H "Content-Type: application/json" -d '{}' 2>&1 | head -20
+(no output)
+[0m
+[0m$ [0mcurl -v -X POST "https://companion.app.daimlertruck.com/api/proxy-http" -H "Content-Type: application/json" -d '{}' 2>&1 | head -30
+Note: Unnecessary use of -X or --request, POST is already inferred.
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0* Host companion.app.daimlertruck.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 9.163.68.3
+*   Trying 9.163.68.3:443...
+* Connected to companion.app.daimlertruck.com (9.163.68.3) port 443
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [512 bytes data]
+*  CAfile: /etc/ssl/certs/ca-certificates.crt
+*  CApath: /etc/ssl/certs
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [122 bytes data]
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+{ [25 bytes data]
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+{ [3967 bytes data]
+* TLSv1.3 (IN), TLS handshake, CERT verify (15):
+{ [264 bytes data]
+* TLSv1.3 (IN), TLS handshake, Finished (20):
+{ [52 bytes data]
+* TLSv1.3 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Finished (20):
+} [52 bytes data]
+* SSL connection using TLSv1.3 / TLS_AES_256_GCM_SHA384 / X25519 / RSASSA-PSS
+[0m
+[0m$ [0mcurl --max-time 10 -X POST "https://companion.app.daimlertruck.com/api/proxy-http" -H "Content-Type: application/json" -d '{}' 2>&1
+% Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100    26  100    24  100     2     51      4 --:--:-- --:--:-- --:--:--    56
+{"error":"Unauthorized"}
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/3db550f0-1234-5678-90ab-cdef12345678/v2.0/.well-known/openid-configuration?p=b2c_1a_signin_oidc_row" 2>&1 | head -50
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/3db550f0-d9a0-4f35-b4c7-33615d4c4e8a/v2.0/.well-known/openid-configuration?p=b2c_1a_signin_oidc_row" 2>&1 | head -80
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/.well-known/openid-configuration?p=b2c_1a_signin_oidc_row" 2>&1 | head -80
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login-qa.ciam.daimlertruck.com/.well-known/openid-configuration?p=b2c_1a_signin_oidc_row" 2>&1 | head -100
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/3db550f0-d9a0-4f35-b4c7-33615d4c4e8a/v2.0/.well-known/openid-configuration?p=b2c_1a_signin_oidc_row" 2>&1
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/tfp/3db550f0-d9a0-4f35-b4c7-33615d4c4e8a/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1 | head -100
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login-qa.ciam.daimlertruck.com/tfp/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1 | head -100
+{
+  "issuer": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/",
+  "authorization_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/oauth2/v2.0/logout",
+  "jwks_uri": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "clientId",
+    "oid",
+    "directoryId",
+    "uid",
+    "sub",
+    "tid",
+    "idp",
+    "TokenProvider",
+    "AppClientID",
+    "OIDCScopes",
+    "OriginalAppClientID",
+    "AppRoles",
+    "name",
+    "given_name",
+    "family_name",
+    "amr",
+    "adSid",
+    "adUpn",
+    "authorizations",
+    "businessAllocationLevel1",
+    "businessCategory",
+    "city",
+    "communities",
+    "companyId",
+    "costCenter",
+    "country",
+    "dealerHomeOrganization",
+    "dealerHomeOrganizationAlias",
+    "department",
+    "email",
+    "emailAttribute",
+    "employeeNumber",
+    "employeeType",
+    "entitlements",
+    "externalEmail",
+    "faxNumber",
+    "givenNameInNationalLanguage",
+    "givenNamePart",
+    "givenPhonenumber",
+    "groupType",
+    "homeOrganization",
+    "identStatusList",
+    "internalPostCode",
+    "locationId",
+    "locationName",
+    "locationRoomNumber",
+    "mailStatus",
+    "managementLevel",
+    "middleInitial",
+    "mobile",
+    "namePrefix",
+    "nonScopedEntitlements",
+    "organizationalUnit",
+    "organizationalStatus",
+    "organizations",
+    "organizationStructureId",
+    "phoneNumber",
+    "phoneNumberVerified",
+    "plant1",
+    "plant2",
+    "postalCode",
+    "preferredLanguage",
+    "securityBlocked",
+    "scopedEntitlements",
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/tfp/3db550f0-d9a0-4f35-b4c7-33615d4c4e8a/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1 | head -100
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/3db550f0-d9a0-4f35-b4c7-33615d4c4e8a/b2c_1a_signin_oidc_row/v2.0/.well-known/openid-configuration" 2>&1 | head -100
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login.ciam.daimlertruck.com/tfp/3db550f0-d9a0-4f35-b4c7-33615d4c4e8a/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration" 2>&1 | head -100
+The resource you are looking for has been removed, had its name changed, or is temporarily unavailable.
+[0m
+[0m$ [0mcurl -s "https://login-qa.ciam.daimlertruck.com/tfp/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/v2.0/.well-known/openid-configuration" 2>&1 | head -100
+{
+  "issuer": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/",
+  "authorization_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/authorize",
+  "token_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/token",
+  "end_session_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/oauth2/v2.0/logout",
+  "jwks_uri": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/discovery/v2.0/keys",
+  "userinfo_endpoint": "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/openid/v2.0/userinfo",
+  "response_modes_supported": [
+    "query",
+    "fragment",
+    "form_post"
+  ],
+  "response_types_supported": [
+    "code",
+    "code id_token",
+    "code token",
+    "code id_token token",
+    "id_token",
+    "id_token token",
+    "token",
+    "token id_token"
+  ],
+  "scopes_supported": [
+    "openid"
+  ],
+  "subject_types_supported": [
+    "pairwise"
+  ],
+  "id_token_signing_alg_values_supported": [
+    "RS256"
+  ],
+  "token_endpoint_auth_methods_supported": [
+    "client_secret_post",
+    "client_secret_basic"
+  ],
+  "claims_supported": [
+    "sub",
+    "IdentityType",
+    "isXOrg",
+    "issuerUserId",
+    "signinname",
+    "TokenProvider",
+    "tid",
+    "OIDCScopes",
+    "idp",
+    "amr",
+    "email",
+    "mobile",
+    "otherMails",
+    "UserAppRoles",
+    "city",
+    "phone_number",
+    "address",
+    "given_name",
+    "family_name",
+    "name",
+    "middle_name",
+    "UserID",
+    "uid",
+    "SM_USER",
+    "PrimaryOrgCode",
+    "AdditionalBusinessRoles",
+    "PrimaryBusinessRole",
+    "Zipcode",
+    "State",
+    "c",
+    "UserVisibilities",
+    "business_roles",
+    "visibilities",
+    "UserType",
+    "corptbUpn",
+    "organizationUnit",
+    "companyCode",
+    "departmentName",
+    "companyName",
+    "Plant1",
+    "departmentAbbreviation",
+    "Plant2",
+    "mobilePhone",
+    "managementLevel",
+    "globalCostCenter",
+    "employeeType",
+    "AppRoles",
+    "cn_Org",
+    "createTimeStamp_Org",
+    "FTLOrgAlternateWarrantyCode",
+    "FTLOrgCAN_Org",
+    "FTLOrgDCVCM",
+    "FTLOrgDDCID",
+    "FTLOrgDMSType_Org",
+    "FTLOrgDWCSOC",
+    "FTLOrgGSSNCompanyID",
+    "FTLOrgGSSNOutletID",
+    "FTLOrgIsActive",
+    "FTLOrgIsDealerSponsored_Org",
+    "FTLOrgIsDelegated",
+    "FTLOrgIsExport_Org",
+    "FTLOrgIsITAR_Org",
+    "FTLOrgIsMexico_Org",
+    "FTLOrgIsOwnershipGroup",
+[0m
+[0m$ [0mcurl -s "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_row/discovery/v2.0/keys" 2>&1 | head -50
+{
+  "keys": [
+    {"kid":"GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo","use":"sig","kty":"RSA","e":"AQAB","n":"pEjvsp4hQE6i58v_6ULjJOuaUNMtey_iPfpY6wHp4_W7j_3Q9047oUU0smOQl-o17TVMZX1-9o0JGWtsg63udew8NNi6BHg7kuYDYGARn44OTMGTnXt0KE__qaqfi2WeoyO3eIiTaX9f3gKMi2KPLiZNo-kQiWhzYwer9NedvC7AHKG8uBkYPaNXdpvTyAEpYd40i99k0xlOgQs49XC3l0sAdindEnTP9BATYgbwoOAhiCKuJZFB-y2GZWJdUtKptAGWKWRs_dhPIlgAhCiUBJGUeJZYuAh3Az_GzLAT8oPMphHDDHTuQXfFk3yKEdLn_ciViUkz9lCnwd5r9LjuIQ"}
+  ]
+}
+[0m
+[0m$ [0mcurl -s "https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/b2c_1a_signin_oidc_noam/discovery/v2.0/keys" 2>&1 | head -50
+{
+  "keys": [
+    {"kid":"GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo","use":"sig","kty":"RSA","e":"AQAB","n":"pEjvsp4hQE6i58v_6ULjJOuaUNMtey_iPfpY6wHp4_W7j_3Q9047oUU0smOQl-o17TVMZX1-9o0JGWtsg63udew8NNi6BHg7kuYDYGARn44OTMGTnXt0KE__qaqfi2WeoyO3eIiTaX9f3gKMi2KPLiZNo-kQiWhzYwer9NedvC7AHKG8uBkYPaNXdpvTyAEpYd40i99k0xlOgQs49XC3l0sAdindEnTP9BATYgbwoOAhiCKuJZFB-y2GZWJdUtKptAGWKWRs_dhPIlgAhCiUBJGUeJZYuAh3Az_GzLAT8oPMphHDDHTuQXfFk3yKEdLn_ciViUkz9lCnwd5r9LjuIQ"}
+  ]
+}
+[0m
+[0m$ [0mcurl -s "https://developer.tst.as.api.daimlertruck.com/api/auth/providers" 2>&1
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.tst.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+[0m
+[0m$ [0mcurl -s "https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js" 2>&1 | head -100
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/1j3mqsb6eepxr.js"
+  ],
+  "/404": [
+    "static/chunks/1m8i2oywdo3iq.js"
+  ],
+  "/_error": [
+    "static/chunks/1632m14g8ppbg.js"
+  ],
+  "/apis": [
+    "static/chunks/2v489gknzu7q_.js"
+  ],
+  "/apis/[apiId]": [
+    "static/chunks/0ixhx25il_7u0.js"
+  ],
+  "/apps": [
+    "static/chunks/3s6nhq0rp9mta.js"
+  ],
+  "/apps/[appId]/[[...tab]]": [
+    "static/chunks/2001uamq9btvn.js"
+  ],
+  "/apps/[appId]/authentications/new": [
+    "static/chunks/3npk81ailenk1.js"
+  ],
+  "/apps/[appId]/edit": [
+    "static/chunks/26-2lbpljvmrm.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]": [
+    "static/chunks/0tby_g5kcs_2z.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]/edit": [
+    "static/chunks/2fj62qzh0gnnf.js"
+  ],
+  "/apps/new": [
+    "static/chunks/3p9hhnbbu4u0y.js"
+  ],
+  "/legal": [
+    "static/chunks/1u1gcj92j71zz.js"
+  ],
+  "/legal/consent": [
+    "static/chunks/3jpo3a77_vy39.js"
+  ],
+  "/legal/imprint": [
+    "static/chunks/1_lnl5uj3vdoz.js"
+  ],
+  "/legal/legal-notice": [
+    "static/chunks/45c3eczpy6x4d.js"
+  ],
+  "/legal/privacy-statement": [
+    "static/chunks/161dzkpawqkbs.js"
+  ],
+  "/products": [
+    "static/chunks/0v8o7bni3114f.js"
+  ],
+  "/products/[productId]": [
+    "static/chunks/2dq2zqk_zmqc8.js"
+  ],
+  "/products/[productId]/subscribe": [
+    "static/chunks/0p5zs2y3ly5xm.js"
+  ],
+  "/teams": [
+    "static/chunks/0ybgggiwbqssz.js"
+  ],
+  "/teams/[teamId]/[[...tab]]": [
+    "static/chunks/00bypmifr0z5p.js"
+  ],
+  "/teams/[teamId]/edit": [
+    "static/chunks/1ib7izy1n4k4a.js"
+  ],
+  "/teams/[teamId]/members/invite": [
+    "static/chunks/408isulu76z59.js"
+  ],
+  "/teams/[teamId]/system-users/associate": [
+    "static/chunks/2b1bhp7szm3c_.js"
+  ],
+  "/teams/new": [
+    "static/chunks/1wymi_qn7ur60.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [
+      {
+        "source": "/docs/:slug*"
+      },
+      {
+        "source": "/api/healthcheck",
+        "destination": "/healthcheck"
+      },
+      {
+        "source": "/api/metrics",
+        "destination": "/metrics"
+      }
+    ],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/404",
+    "/_app",
+[0m
+[0m$ [0mcurl -s "https://companion.app.daimlertruck.com/_next/static/pVVz9XMK0MvBn72k4YswS/_buildManifest.js" 2>&1 | head -100
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/27ervvy-i6vjw.js"
+  ],
+  "/_error": [
+    "static/chunks/11ti9bhmhzrrf.js"
+  ],
+  "/admin": [
+    "static/chunks/0cv3s4d0o3aof.js"
+  ],
+  "/chat": [
+    "static/chunks/2755dl1um52iu.js"
+  ],
+  "/explore-topics": [
+    "static/chunks/0z6bokqjdez7s.js"
+  ],
+  "/how-to-use": [
+    "static/chunks/3n0ij-h1vfxxz.js"
+  ],
+  "/terms-of-use": [
+    "static/chunks/3kfobt-07-ahz.js"
+  ],
+  "/widget-host": [
+    "static/chunks/0ad3zkc330x_r.js"
+  ],
+  "__rewrites": {
+    "afterFiles": [],
+    "beforeFiles": [],
+    "fallback": []
+  },
+  "sortedPages": [
+    "/",
+    "/_app",
+    "/_error",
+    "/admin",
+    "/api/auth/force-logout",
+    "/api/auth/[...nextauth]",
+    "/api/health",
+    "/api/proxy-http",
+    "/api/ready",
+    "/api/[...slug]",
+    "/chat",
+    "/explore-topics",
+    "/how-to-use",
+    "/terms-of-use",
+    "/widget-host"
+  ]
+};self.__BUILD_MANIFEST_CB && self.__BUILD_MANIFEST_CB()
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/_next/static/AO7VvIOpKp-TqU5HF-ZTR/_buildManifest.js" 2>&1 | head -100
+<html>
+<head><title>504 Gateway Time-out</title></head>
+<body>
+<center><h1>504 Gateway Time-out</h1></center>
+<hr><center>Microsoft-Azure-Application-Gateway/v2</center>
+</body>
+</html>
+[0m
+[0m$ [0mcurl -s "https://companion-dev.app.daimlertruck.com/_next/static/IqPB_zhGzw2eQTiap3_bK/_buildManifest.js" 2>&1 | head -100
+Not Found
+[0m
+[0m$ [0mcurl -s -I "https://companion-dev.app.daimlertruck.com/" 2>&1 | head -20
+HTTP/1.1 504 Gateway Time-out
+Server: Microsoft-Azure-Application-Gateway/v2
+Date: Sun, 13 Sep 2026 01:27:29 GMT
+Content-Type: text/html
+Content-Length: 193
+Connection: keep-alive
+[0m

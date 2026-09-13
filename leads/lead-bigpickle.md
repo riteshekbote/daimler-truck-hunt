@@ -4235,3 +4235,35 @@ testability: AUTH_HELPED
 [NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Unchanged blocker since 09-04; one grant unblocks both top-2 FINALs plus proxy-http SSRF via prod-client cd34584a chain. Secondary optional: NA CIAM APIM subscription key for api.na.ciam (realm dtna-ciam-eus2-prod-apim-shared-01) to size the NA identity-API surface.
 [LEARN] ACCEPTED stability @ developer.tst.as + companion tier: healthcheck 200/70B, graphql 307/30B, proxy-http GET 405/30B, signin 302 uniform — zero drift since 09-12 build-roll; passive surface remains exhausted 11th consecutive cycle.
 [RISK] daimler-truck: 78. Unchanged. Core blocker is the same two login-qa staging identities (tenant 88f558f5), outstanding since 09-04; top-2 Critical-class hypotheses remain AUTH_HELPED-blocked and the SSRF chain needs a prod companion session. Zero new anonymous exploitable surface this cycle; no mutating touch — read-only GET/HEAD only, <=1 rps. Reportable items remain info-level (tst.as NA-provider POST-signin OAuthSignin abort + companion dev-callback-in-prod B2C allowlist misconfig), HOLD pending post-auth PoC.
+## 2026-09-13 01:12:16 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: Fleet just unified on mS_4 across all 6+1 portals incl prod; the object-ID surface (apis/[apiId], apps/…/subscriptions/[subscriptionId], teams/[teamId]/system-users/associate, teams/[teamId]/members/invite) is identical in every buildManifest; /api/graphql POST introspection → 307 B2C on all hosts incl dev.na new build. Ownership-gap would replicate cross-portal and cross-BU.
+evidence_needed: post-auth introspection; foreign-ID swap returns 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql introspection → baseline own IDs → swap to second-tenant IDs → diff status/body on tst.na (now same build as prod).
+impact: cross-tenant webhook/key-rotation hijack + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)+NOAM(acr=noam) share identical issuer URI per tenant; only acr+org claims differentiate BU; NOAM superset carries dealer PII. Same-issuer collision confirmed anonymously both tenants. Fleet roll to mS_4 does not change identity layer; gateway (NA APIM key-gate) remains the only regional wall.
+evidence_needed: two staging identities → decoded claim diff; NOAM token executes ROW-scoped /api/graphql op → 200 vs 403.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql (developer.tst.na) ROW query with NOAM bearer → diff acr/org vs status.
+impact: cross-BU privilege collapse → dealer-network PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 first-class POST-only handler; 401/307 catch-all otherwise; istio-envoy on AKS → 169.254.169.254 reachable class; companion build pVVz9XMK0MvBn72k4YswS unchanged this cycle.
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal host → external URL; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[PARKED] na-ciam-apim-subkey-gate: 401 key-gate + dev-open drift confirmed; Ocp-Apim-Subscription-Key has no passive discovery path — unexploitable without key; revisit on NA staging grant.
+[FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
+[NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Unchanged since 09-04; now urgent: tst.na runs the SAME build rolled to prod this cycle, so one ROW+NOAM grant proves both top-2 FINALs at the exact production build/behavior. Secondary optional: NA CIAM APIM subscription key (realm dtna-ciam-eus2-prod-apim-shared-01) for api.na.ciam sizing.
+[RISK] daimler-truck: 80. Unchanged core blocker (two login-qa staging identities, outstanding 09-04→now). The mS_4 fleet roll is the operational event: prod is now on a previously test-only build whose NA-provider POST-signin abort was logged as tst.as-specific — NA sign-in may now be broken on prod (info-level, AUTH_HELPED to confirm via POST+CSRF; not flagged as vuln). Zero new anonymous exploitable surface; probes read-only GET ≤1 rps; reportables remain info-level (tst.as NA-provider OAuthSignin abort now fleet-config, companion dev-callback-in-prod allowlist), HOLD pending post-auth PoC.

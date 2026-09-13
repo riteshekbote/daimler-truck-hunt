@@ -497,3 +497,5 @@ www.daimlertruck.com
 - CHANGED companion.app `/api/auth/signin/azure-ad-b2c?json=true`: hang→302 `/?callbackUrl=...&error=azure-ad-b2c` (uniform NextAuth GET-signin error handling)
 - CHANGED companion-dev.app `/api/auth/signin/azure-ad-b2c?json=true`: 504→302 `/?callbackUrl=...&error=azure-ad-b2c` (now wired to prod B2C but GET path returns error)
 - CHANGED developer.tst.as.api.daimlertruck.com `/api/auth/signin/azure-ad-b2c-dt` + `azure-ad-b2c-dtna`: hang→302 `error=azure-ad-b2c-dt/-dtna`
+
+## 2026-09-13 01:29:32 UTC

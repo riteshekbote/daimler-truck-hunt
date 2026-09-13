@@ -1411,3 +1411,7 @@
 - LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
 - LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
 - LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+
+## RANKED HYPOTHESES 2026-09-13 01:29:32 UTC
+- [75] developer.tst.na.api.daimlertruck.com/api/graphql: graphql-object-id-bola-cross-portal (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a
