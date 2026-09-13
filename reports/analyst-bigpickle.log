@@ -18627,3 +18627,120 @@ STEP 6 — LEARNING
 STEP 7 — RISK
 [RISK] daimler-truck: 80
 Reason: core blocker unchanged (two login-qa staging identities, requested 09-04→09-13). mS_4 fleet unification is an operational marker, not a vuln — prod developer.as now runs the build whose NA-provider POST-signin abort (OAuthSignin) was previously tst.as-specific; possible info-level "NA signin broken on prod" but unconfirmable via GET. Zero new anonymous exploitable surface; probes read-only GET ≤1rps; reportables stay info-level (tst.as/tst-provider NA OAuthSignin abort now fleet-config, companion dev-callback-in-prod allowlist). HOLD all reporting until AUTH_HELPED PoC via the requested staging identities.
+===== ANALYST bigpickle 2026-09-13 16:38:58 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mecho "== api-dev.na.ciam root =="
+curl -s --max-time 20 -A "Mozilla/5.0 (compatible; recon/1.0)" -D - "https://api-dev.na.ciam.daimlertruck.com/" -o /tmp/opencode/devroot.txt -w "\nstatus:%{http_code} size:%{size_download}\n" | grep -iE 'HTTP/|content-type|x-error|www-authenticat|apim|request-context|status:|location' | head -20
+echo "--- body head ---"
+head -c 500 /tmp/opencode/devroot.txt; echo
+sleep 1
+echo "== companion /api/proxy-http headers =="
+curl -s --max-time 20 -A "Mozilla/5.0 (compatible; recon/1.0)" -D - -o /dev/null "https://companion.app.daimlertruck.com/api/proxy-http" | grep -iE 'HTTP/|allow:|content-type|content-length|location' | head -10
+== api-dev.na.ciam root ==
+HTTP/2 404 
+content-type: application/json
+status:404 size:54
+--- body head ---
+{ "statusCode": 404, "message": "Resource not found" }
+== companion /api/proxy-http headers ==
+HTTP/1.1 405 Method Not Allowed
+Content-Type: application/json; charset=utf-8
+Content-Length: 30
+[0m
+[0m$ [0mfor h in developer.as.api.daimlertruck.com developer.eu.api.daimlertruck.com developer.na.api.daimlertruck.com developer.tst.na.api.daimlertruck.com; do
+  echo "== $h =="
+  curl -s --max-time 20 -A "Mozilla/5.0 (compatible; recon/1.0)" "https://$h/" -o /tmp/opencode/root_$$.html -w "root: %{http_code} %{size_download} bytes\n"
+  grep -oE '_next/static/[A-Za-z0-9_~-]+/_buildManifest' /tmp/opencode/root_$$.html | head -1 | sed 's/^/manifest: /'
+  rm -f /tmp/opencode/root_$$.html
+  sleep 2
+done
+== developer.as.api.daimlertruck.com ==
+root: 200 196341 bytes
+manifest: _next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest
+== developer.eu.api.daimlertruck.com ==
+root: 200 196341 bytes
+manifest: _next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest
+== developer.na.api.daimlertruck.com ==
+root: 200 196341 bytes
+manifest: _next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest
+== developer.tst.na.api.daimlertruck.com ==
+root: 200 196341 bytes
+manifest: _next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest
+[0m
+Fleet build probe done. Prod tier (as/eu/na) all flipped to `mS_4SiQmkiaGsx2vLoXkH` since 06:31 cycle. api-dev.na.ciam returned plain `{"statusCode":404,"message":"Resource not found"}` (54B, no APIM headers) — not the APIM-format 404 seen elsewhere; only root was ever probed on this host. Bounded depth check:
+[0m$ [0mfor p in /openapi.json /swagger /v1/ /api/v1/ /health /status-0123456789abcdef; do
+  curl -s --max-time 15 -A "Mozilla/5.0 (compatible; recon/1.0)" -o /tmp/opencode/nac.txt -w "%{http_code} %{size_download}B $p\n" "https://api-dev.na.ciam.daimlertruck.com$p"
+  sed -i 's/^/  body: /' /tmp/opencode/nac.txt 2>/dev/null || true
+  head -c 200 /tmp/opencode/nac.txt; echo
+  sleep 1
+done
+404 54B /openapi.json
+  body: { "statusCode": 404, "message": "Resource not found" }
+404 54B /swagger
+  body: { "statusCode": 404, "message": "Resource not found" }
+404 54B /v1/
+  body: { "statusCode": 404, "message": "Resource not found" }
+404 54B /api/v1/
+  body: { "statusCode": 404, "message": "Resource not found" }
+404 54B /health
+  body: { "statusCode": 404, "message": "Resource not found" }
+200 0B /status-0123456789abcdef
+[0m
+STEP 1 — DELTA
+- CHANGED developer.{as,eu,na}.api.daimlertruck.com: prod tier fully flipped to build `mS_4SiQmkiaGsx2vLoXkH` (root 200/196341B, manifest trait shared) — `JCvrnrykV…` retired fleet-wide; tst.na/tst.as already mS_4, so all probed portals now run one identical build. (Verified by direct root probes this cycle — prior cycles confirmed only developer.as.)
+- NEW api-dev.na.ciam.daimlertruck.com: APIM status beacon `/status-0123456789abcdef` answers 200/0B while every app path returns uniform custom `{"statusCode":404,...}` 54B — anonymous op surface closed despite key-gate-off drift; root 404 ≠ prod 401-key / qa-401 shape, matching prior dev-open-config-drift class.
+- NO_DELTA companion.app(+dev): proxy-http 405/30B no `Allow` header, root unchanged; dev signin uniform 302.
+- NO_DELTA login.ciam / login-qa.ciam identity layer; broker + ciam hostnames stable.
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.tst.na/api/graphql,6.3,axis=GraphQL-BOLA fleet-unified (a5 b9 t10 g2 c2 f8)
+- [PRIO] login-qa.ciam.B2C,5.25,axis=cross-BU-acr-collision (a4 b9 t8 g2 c2 f3)
+- [PRIO] api-dev.na.ciam,5.65,axis=key-gate-off+no-anon-ops (a3 b9 t6 g7 c2 f5) — listed for honesty; see PARKED
+- [PRIO] companion.app/api/proxy-http,4.2,axis=SSRF-metadata (a4 b6 t6 g2 c3 f2)
+
+STEP 3 — HYPOTHESES
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW/NOAM policies share identical issuer+aud per tenant; only acr+org-shape claims separate BU; NOAM superset carries dealer PII (FTLOrg*). mS_4 unification does not touch identity layer; NA CIAM key-gate (dev 404 vs prod 401) remains the only regional wall and is closed to anonymous ops.
+evidence_needed: two staging identities → decoded diff acr/org; NOAM bearer executes ROW-scoped /api/graphql op → 200 vs 403.
+verify_steps: AUTH_HELPED: tokens from login-qa → POST /api/graphql (developer.tst.na, verified mS_4 == prod build) ROW op with NOAM bearer → diff status/body.
+impact: cross-BU privilege collapse → dealer-network PII — Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 78
+reasoning: This cycle directly verified as/eu/na/tst.na all serve build mS_4 (196341B root, identical manifest trait) — single authz code path across the whole fleet; object-ID routes (apis/[apiId], subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) identical per buildManifest. One ownership gap replicates prod-wide by construction.
+evidence_needed: post-auth introspection; foreign-ID swap → 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql introspection → baseline own IDs → cross-tenant ID swap → diff status/body.
+impact: cross-tenant webhook/key rotation + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B proves first-class POST-only handler exempt from catch-all; no Allow header; istio-envoy on AKS class → 169.254.169.254 reachability plausible; build pVVz9XMK0MvBn72k4YswS unchanged.
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] na-ciam-apim-subkey-gate: Ocp-Apim-Subscription-Key has no passive discovery path; api-dev 200/0B beacon is default gateway probe, not an operation; all app paths uniform 404 — no anonymous op to reach even with key-gate off.
+- [PARKED] apim-beacon-200 @ api-dev.na.ciam: standard Azure APIM health probe, matches as/eu rejection class — not a finding.
+- [FINAL] 1. graphql-object-id-bola-cross-portal (78, fleet-unified verified) 2. b2c-cross-bu-token-boundary-abuse (75) 3. companion-proxy-http-metadata-ssrf (55)
+
+STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam — for developer.tst.na.api since THIS cycle verified tst.na (mS_4) is byte-identical to fully-unified prod: one ROW+NOAM grant validates both top FINALs at exact production build/authz.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED fleet build unification @ developer.{as,eu,na,tst.na}: all probed portals now on `mS_4SiQmkiaGsx2vLoXkH` 200/196341B; JCvrnrykV retired fleet-wide; single build = single authz surface across prod+TST — BOLA blast radius widened by construction.
+- [LEARN] ACCEPTED no-anonymous-op @ api-dev.na.ciam: key-gate-off config drift confirmed again (root 404 vs prod 401/qa-beacon) but every app path returns uniform custom 404; `/status-0123456789abcdef` 200/0B is default APIM probe — no anonymous operations; class closed.
+- [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 13th consecutive cycle; only delta was kube-manifest unification (already learned) + NA CIAM dev-tier closure (learned above); proxy-http POST body, GraphQL introspection, and cross-BU token claims all still require request shapes not permitted in passive mode.
+
+STEP 7 — RISK
+[RISK] daimler-truck: 80 — fleet build unification verified raises blast radius if the BOLA/authz-gap hypothesis holds (single mS_4 code path across all 7 portals), and NOAM-dealer-PII claim superset keeps cross-BU candidate Critical; but both remain AUTH_HELPED and unverified, and anonymous surface stayed fully closed — no confirmed high-severity exploit yet.
