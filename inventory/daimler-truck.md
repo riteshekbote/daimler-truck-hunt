@@ -517,3 +517,11 @@ www.daimlertruck.com
 - CHANGED developer.as.api.daimlertruck.com `/api/auth/providers` confirms dual providers: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab)
 - CHANGED companion.app.daimlertruck.com `/api/auth/providers` confirms single provider: `azure-ad-b2c` (ROW only, client cd34584a)
 - CHANGED companion.app build manifest (pVVz9XMK0MvBn72k4YswS) shows 6 API routes including `/api/proxy-http` and `/api/[...slug]` catch-all — both middleware-exempt (return 401 not 307); new pages `/explore-to
+
+## 2026-09-13 12:11:44 UTC
+- NEW developer.as.api.daimlertruck.com now serves build ID `mS_4SiQmkiaGsx2vLoXkH` (previously `JCvrnrykV_KYBk7pu0Npq`) — third distinct build ID, previously only on developer.tst.as; root content-length 1
+- NEW developer.as.api.daimlertruck.com `/graphql` returns 307 (24 bytes) to Azure AD B2C — real GraphQL endpoint behind auth confirmed (was inconsistent, now stable)
+- CHANGED All signin endpoints (companion.app, companion-dev.app, developer.as.api, developer.tst.as.api) now return uniform 302 error redirects (`error=azure-ad-b2c*`) instead of hanging/504 — transient degrad
+- CHANGED developer.as.api.daimlertruck.com `/api/auth/providers` confirms dual providers: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab)
+- CHANGED companion.app.daimlertruck.com `/api/auth/providers` confirms single provider: `azure-ad-b2c` (ROW only, client cd34584a)
+- CHANGED companion.app build manifest (pVVz9XMK0MvBn72k4YswS) shows 6 API routes including `/api/proxy-http` and `/api/[...slug]` catch-all — both middleware-exempt (return 401 not 307); new pages `/explore-to

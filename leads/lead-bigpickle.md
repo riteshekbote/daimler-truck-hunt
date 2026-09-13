@@ -4295,3 +4295,40 @@ evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/lates
 verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
 impact: cloud-metadata IAM keys / mesh lateral — High.
 testability: AUTH_HELPED
+## 2026-09-13 12:07:47 UTC [target] (model bigpickle)
+[PRIO] developer.tst.na/api/graphql,5.7,axis=GraphQL-BOLA (a5 b9 t10 g2 c2 f2)
+[PRIO] login-qa.ciam.B2C,5.3,axis=cross-BU-acr-collision (a4 b9 t8 g2 c2 f3)
+[PRIO] companion.app/api/proxy-http,4.2,axis=SSRF-metadata (a4 b6 t6 g2 c3 f2)
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)/NOAM(acr=noam) share identical issuer URI per tenant; only acr+org claims separate BU; NOAM superset carries dealer PII (FTLOrg*). mS_4 fleet consolidation does not alter identity layer; NA APIM key-gate is the only regional wall. No drift this cycle.
+evidence_needed: two staging identities → decoded claim diff; NOAM bearer executes ROW-scoped /api/graphql op → 200 vs 403.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql (developer.tst.na, now same build as prod) ROW query with NOAM bearer → diff acr/org vs status.
+impact: cross-BU privilege collapse → dealer-network PII — Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: mS_4 buildManifest on prod + all test hosts shows identical object-ID routes (apis/[apiId], apps/[appId]/subscriptions/[subscriptionId], teams/[teamId]/system-users/associate); /api/graphql 307→B2C on all hosts. BuildManifest len 2999B dev.as == test — zero diff fleet-wide. Ownership-gap replicates across the unified fleet.
+evidence_needed: post-auth introspection; foreign-ID swap → 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql introspection → baseline own IDs → cross-tenant ID swap → diff status/body.
+impact: cross-tenant webhook/key rotation + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 first-class POST-only handler exempt from 401/307 catch-all; istio-envoy on AKS → 169.254.169.254 class; build pVVz9XMK0MvBn72k4YswS unchanged this cycle (root 3330B, 405 30B verified).
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+[PARKED] na-ciam-apim-subkey-gate: 401 key-gate + dev-open drift confirmed; Ocp-Apim-Subscription-Key has no passive discovery path — unexploitable without key; revisit on NA staging grant.
+[FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
+[NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam. Blocked since 09-04; now decisive: tst.na runs the SAME mS_4 build as newly-unified prod, so one ROW+NOAM grant proves both top FINALs at exact production build/behavior. Secondary optional: NA CIAM APIM subscription key (realm dtna-ciam-eus2-prod-apim-shared-01) for api.na.ciam sizing.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 12th consecutive cycle; dev.as mS_4 buildManifest (2999B) byte-identical to test, companion root (3330B)/proxy-http (405/30B) unchanged — post-consolidation surface fully mapped; proxy-http POST body, GraphQL introspection, and cross-BU token claims all require request shapes not permitted in passive mode.
+[LEARN] ACCEPTED stability @ developer.as.api.daimlertruck.com: mS_4 consolidation persists post-deploy — healthcheck 200/70B, buildManifest mS_4 200/2999B trait size == test; no reversion to prior build a day later.
+[RISK] daimler-truck: 80
