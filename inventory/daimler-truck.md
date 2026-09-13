@@ -533,3 +533,44 @@ www.daimlertruck.com
 - CHANGED developer.as.api.daimlertruck.com `/api/auth/providers` confirms dual providers: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab)
 - CHANGED companion.app.daimlertruck.com `/api/auth/providers` confirms single provider: `azure-ad-b2c` (ROW only, client cd34584a)
 - CHANGED companion.app build manifest (pVVz9XMK0MvBn72k4YswS) shows 6 API routes including `/api/proxy-http` and `/api/[...slug]` catch-all — both middleware-exempt (return 401 not 307); new pages `/explore-to
+
+## 2026-09-13 19:03:04 UTC
+- NEW B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/ad
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW B2C claim contracts machine-readable both policies both tenants: prod (3db550f0-...-33615d) + staging (88f558f5-...-d6ec0f) share IDENTICAL structure. ROW (89 claims) = DT-employee model (oid/adUpn/ad
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- CHANGED developer.tst.na.api.daimlertruck.com: /api/auth/session GET returns 200 {} (empty session, not 400) — endpoint alive, expected empty when unauthenticated
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW /api/auth/providers reveals 2 OAuth providers on all portals: azure-ad-b2c-dt (ROW) + azure-ad-b2c-dtna (North America, policy b2c_1a_signin_oidc_noam)
+- NEW buildManifest route structure revealed: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe, rewrites /docs/:slug*, /ap
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW OAuth initiate via POST /api/auth/signin/azure-ad-b2c-dt?json=true with valid CSRF returns B2C authorize URL as JSON: test tenant login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f, p
+- NEW OAuth initiate prod (as): tenant login.ciam.daimlertruck.com/3db550f0, policy b2c_1a_signin_oidc_row, client 205f35f7 — proper prod/staging segregation confirmed
+- NEW developer.as.api.daimlertruck.com now serves build ID `mS_4SiQmkiaGsx2vLoXkH` (was `JCvrnrykV_KYBk7pu0Npq`) — third build ID unified across prod+test+tst.as; root content-length 196341 (was 196649); b
+- NEW developer.as.api.daimlertruck.com `/graphql` returns 307 (24 bytes) to Azure AD B2C — real GraphQL endpoint behind auth confirmed (was inconsistent, now stable)
+- CHANGED All signin endpoints (companion.app, companion-dev.app, developer.as.api, developer.tst.as.api) now return uniform 302 error redirects (`error=azure-ad-b2c*`) instead of hanging/504 — transient degrad
+- CHANGED developer.as.api.daimlertruck.com `/api/auth/providers` confirms dual providers: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab)
+- CHANGED companion.app.daimlertruck.com `/api/auth/providers` confirms single provider: `azure-ad-b2c` (ROW only, client cd34584a)
+- CHANGED companion.app build manifest (pVVz9XMK0MvBn72k4YswS) shows 6 API routes including `/api/proxy-http` and `/api/[...slug]` catch-all — both middleware-exempt (return 401 not 307); new pages `/explore-to
+- NEW developer.as.api.daimlertruck.com now serves build ID `mS_4SiQmkiaGsx2vLoXkH` (was `JCvrnrykV_KYBk7pu0Npq`) — third build ID unified across prod+test+tst.as; root content-length 196341 (was 196649); b
+- NEW All 7 developer portals now unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema and route structure across AS/EU/NA/prod/test/tst.as/tst.eu/tst.na/dev.na
+- CHANGED `/graphql` returns 307 (24 bytes) to Azure AD B2C on all 7 portals — real GraphQL endpoint behind auth confirmed (was inconsistent, now stable)
+- CHANGED All signin endpoints (companion.app, companion-dev.app, developer.as.api, developer.tst.as.api) return uniform 302 error redirects (`error=azure-ad-b2c*`) — transient degradation resolved
+- CHANGED developer.as.api `/api/auth/providers` confirms dual providers: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab)
+- CHANGED companion.app `/api/auth/providers` confirms single provider: `azure-ad-b2c` (ROW only, client cd34584a)
+- CHANGED companion.app build manifest (pVVz9XMK0MvBn72k4YswS) shows 6 API routes including `/api/proxy-http` and `/api/[...slug]` catch-all — both middleware-exempt (return 401 not 307); new pages `/explore-to
+- CHANGED companion-dev.app now wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri) — auth middleware active on all routes
+- CHANGED B2C Cross-BU Token Boundary: ROW+NOAM policies per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims differentiate BU; NOAM claim superset includes de
+- CHANGED Stability re-verified: developer.tst.as build `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08; companion tier root/health/proxy-http/signin unchan

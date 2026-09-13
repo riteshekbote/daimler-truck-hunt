@@ -1477,3 +1477,46 @@
 - LEARN: ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build `mS_4SiQmkiaGsx2vLoXkH` (was JCvrnrykV_KYBk7pu0Npq) — third build ID n
 - LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
 - LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
+
+## RANKED HYPOTHESES 2026-09-13 19:03:04 UTC
+- [75] login.ciam.daimlertruck.com: B2C Cross-BU Token Boundary Abuse via Shared Issuer (from art/lead_nemotron3.txt)
+- [75] developer.as.api.daimlertruck.com: graphql-object-id-bola-team-scoped (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: obtain 2 test B2C accounts on login-qa.ciam.daimlertruck.com for developer.tst.na.api.daimlertruck.com — one under ROW policy `b2c_1a_signin_oidc_row` an
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) via bugs.o
+- LEARN: REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct
+- LEARN: REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct
+- LEARN: REJECTED apim-anonymous-op-exposure @ {as,eu}.api.daimlertruck.com: 16 anonymous-op paths all identical OperationNotFound (origin:config); /status-0123456789abc
+- LEARN: REJECTED implicit-token-fragment / code-interception @ developer.* + login.businessid(.qa): AADB2C90057 on portal app, broker prod, broker stg — implicit disabl
+- LEARN: ACCEPTED businessid-broker-surface @ login.businessid(.qa).daimlertruck.com: DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 
+- LEARN: ACCEPTED portal-blanket-auth-middleware @ developer.*: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — 
+- LEARN: REJECTED test-env-config-drift-as-vuln: CSP undefined + staging B2C tenant on test is proper environment segregation (prod uses login.ciam.daimlertruck.com, tes
+- LEARN: REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct
+- LEARN: REJECTED nextauth-broken-auth-flow: POST signin with valid CSRF returns 302 to B2C authorize with PKCE S256, state, same-origin redirect_uri — auth flow correct
+- LEARN: REJECTED apim-anonymous-op-exposure @ {as,eu}.api.daimlertruck.com: 16 anonymous-op paths all identical OperationNotFound (origin:config); /status-0123456789abc
+- LEARN: REJECTED implicit-token-fragment / code-interception @ developer.* + login.businessid(.qa): AADB2C90057 on portal app, broker prod, broker stg — implicit disabl
+- LEARN: ACCEPTED businessid-broker-surface @ login.businessid(.qa).daimlertruck.com: DT-employee corporate SSO broker (B2C tenants f266a340 prd / e39fd9b6 stg, clients 
+- LEARN: ACCEPTED portal-blanket-auth-middleware @ developer.*: /api/*, catalog, object-ID routes all 307 via wildcard middleware (fabricated + dot/case/%2f variants) — 
+- LEARN: REJECTED nextauth-broken-auth-flow-v2 @ developer.tst.na: AADB2C90117 "scope not supported" was self-induced (I dropped the `https://` scheme from the portal sc
+- LEARN: REJECTED broker-selfservice-signup @ login.businessid(.qa): only `b2c_1a_signin` policy served (metadata 200); b2c_1a_signup/signupsignin/profileedit → 404 — no
+- LEARN: ACCEPTED businessid-broker-first-hop @ login.businessid(.qa): ROW authorize on prod+staging renders broker login (tenants f266a340/e39fd9b6, clients 82559bb7/a4
+- LEARN: REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU;
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenan
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
+- LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
+- LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+- LEARN: ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build `mS_4SiQmkiaGsx2vLoXkH` (was JCvrnrykV_KYBk7pu0Npq) — third build ID n
+- LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
+- LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
+- LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 13th consecutive cycle; six re-probes (healthcheck, manifests prod+test, /api/graphql, companion root+pro
+- LEARN: ACCEPTED stability @ developer.as+tst.na.api.daimlertruck.com: mS_4 unification persists a second day — buildManifest 200/2999B on both prod and test, /api/grap
+- LEARN: REJECTED companion-dev-auth-bypass @ companion-dev.app.daimlertruck.com: dev signin now redirects to PROD B2C authorize (3db550f0, cd34584a, b2c_1a_signin_oidc_
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login.ciam + login-qa.ciam: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU;
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider azure-ad-b2c now initiates PKCE-protected flow to prod B2C tenan
+- LEARN: ACCEPTED developer-portal-dual-b2c-providers @ developer.*.api.daimlertruck.com: two providers confirmed — azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c
+- LEARN: ACCEPTED companion-single-provider @ companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com: both use single azure-ad-b2c provider (client cd34584a
+- LEARN: REJECTED companion-proxy-http-405 @ companion-dev.app.daimlertruck.com: now returns 401 (auth required), not 405 — middleware active
+- LEARN: ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build `mS_4SiQmkiaGsx2vLoXkH` (was JCvrnrykV_KYBk7pu0Npq) — third build ID n
+- LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
+- LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
+- LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 12th consecutive cycle; dev.as mS_4 buildManifest (2999B) byte-identical to test, companion root (3330B)/
