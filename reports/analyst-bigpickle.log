@@ -18376,3 +18376,189 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 [RISK] daimler-truck: 80. Unchanged core blocker (two login-qa staging identities, outstanding 09-04→now). The mS_4 fleet roll is the operational event: prod is now on a previously test-only build whose NA-provider POST-signin abort was logged as tst.as-specific — NA sign-in may now be broken on prod (info-level, AUTH_HELPED to confirm via POST+CSRF; not flagged as vuln). Zero new anonymous exploitable surface; probes read-only GET ≤1 rps; reportables remain info-level (tst.as NA-provider OAuthSignin abort now fleet-config, companion dev-callback-in-prod allowlist), HOLD pending post-auth PoC.
+===== ANALYST bigpickle 2026-09-13 06:31:30 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor h in as eu na tst.na tst.as; do host="developer.$h.api.daimlertruck.com"; b=$(grep -o '"buildId":"[^"]*"' /tmp/r_$h.html | head -1 | cut -d'"' -f4); l=$(wc -c < /tmp/r_$h.html); echo "$host len=$l buildId=$b"; done; echo "---companion---"; for h in companion.app companion-dev.app; do host="$h.daimlertruck.com"; curl -s -o /tmp/c_$h.html -w "%{http_code} " "https://$host/"; echo "$host len=$(wc -c < /tmp/c_$h.html) buildId=$(grep -o '"buildId":"[^"]*"' /tmp/c_$h.html | head -1 | cut -d'"' -f4)"; done
+grep: /tmp/r_as.html: No such file or directory
+/bin/bash: line 1: /tmp/r_as.html: No such file or directory
+grep: /tmp/r_eu.html: No such file or directory
+/bin/bash: line 1: /tmp/r_eu.html: No such file or directory
+grep: /tmp/r_na.html: No such file or directory
+/bin/bash: line 1: /tmp/r_na.html: No such file or directory
+grep: /tmp/r_tst.na.html: No such file or directory
+/bin/bash: line 1: /tmp/r_tst.na.html: No such file or directory
+grep: /tmp/r_tst.as.html: No such file or directory
+/bin/bash: line 1: /tmp/r_tst.as.html: No such file or directory
+developer.as.api.daimlertruck.com len= buildId=
+developer.eu.api.daimlertruck.com len= buildId=
+developer.na.api.daimlertruck.com len= buildId=
+developer.tst.na.api.daimlertruck.com len= buildId=
+developer.tst.as.api.daimlertruck.com len= buildId=
+---companion---
+200 companion.app.daimlertruck.com len=3330 buildId=pVVz9XMK0MvBn72k4YswS
+200 companion-dev.app.daimlertruck.com len=3341 buildId=AO7VvIOpKp-TqU5HF-ZTR
+[0m
+[0m$ [0mfor h in as eu na dev.na tst.eu tst.na tst.as; do host="developer.$h.api.daimlertruck.com"; curl -s -o /tmp/r_$h.html -w "%{http_code}" "https://$host/" ; echo " $host"; sleep 1; done
+200 developer.as.api.daimlertruck.com
+200 developer.eu.api.daimlertruck.com
+200 developer.na.api.daimlertruck.com
+200 developer.dev.na.api.daimlertruck.com
+200 developer.tst.eu.api.daimlertruck.com
+200 developer.tst.na.api.daimlertruck.com
+200 developer.tst.as.api.daimlertruck.com
+[0m
+[0m$ [0mfor h in as eu na dev.na tst.eu tst.na tst.as; do host="developer.$h.api.daimlertruck.com"; b=$(grep -o '"buildId":"[^"]*"' /tmp/r_$h.html | head -1 | cut -d'"' -f4); l=$(wc -c < /tmp/r_$h.html); echo "$host len=$l buildId=$b"; done
+developer.as.api.daimlertruck.com len=196341 buildId=mS_4SiQmkiaGsx2vLoXkH
+developer.eu.api.daimlertruck.com len=196341 buildId=mS_4SiQmkiaGsx2vLoXkH
+developer.na.api.daimlertruck.com len=196341 buildId=mS_4SiQmkiaGsx2vLoXkH
+developer.dev.na.api.daimlertruck.com len=196341 buildId=C2_l2mo-KdIa532lkDV-m
+developer.tst.eu.api.daimlertruck.com len=196341 buildId=mS_4SiQmkiaGsx2vLoXkH
+developer.tst.na.api.daimlertruck.com len=196341 buildId=mS_4SiQmkiaGsx2vLoXkH
+developer.tst.as.api.daimlertruck.com len=196341 buildId=mS_4SiQmkiaGsx2vLoXkH
+[0m
+dev.na shows a **4th build ID** `C2_l2mo-KdIa532lkDV-m` — previously unknown. Probing its surface vs the unified mS_4 roll.
+[0m$ [0mecho "=== providers: as / dev.na / tst.na ==="
+for h in as dev.na tst.na; do echo "-- $h --"; curl -s "https://developer.$h.api.daimlertruck.com/api/auth/providers"; echo; sleep 1; done
+=== providers: as / dev.na / tst.na ===
+-- as --
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.as.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.as.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+-- dev.na --
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.dev.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.dev.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.dev.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.dev.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+-- tst.na --
+{"azure-ad-b2c-dtna":{"id":"azure-ad-b2c-dtna","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dtna","callbackUrl":"https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dtna"},"azure-ad-b2c-dt":{"id":"azure-ad-b2c-dt","name":"Azure Active Directory B2C","type":"oauth","signinUrl":"https://developer.tst.na.api.daimlertruck.com/api/auth/signin/azure-ad-b2c-dt","callbackUrl":"https://developer.tst.na.api.daimlertruck.com/api/auth/callback/azure-ad-b2c-dt"}}
+[0m
+[0m$ [0mecho "=== dev.na endpoints ==="
+for p in /graphql /apis /api/healthcheck /api/proxy-http; do echo "-- $p --"; curl -s -o /dev/null -w "%{http_code} len=%{size_download} loc=%{redirect_url}\n" "https://developer.dev.na.api.daimlertruck.com$p"; sleep 1; done
+echo "=== dev.na buildManifest ==="
+curl -s "https://developer.dev.na.api.daimlertruck.com/_next/static/C2_l2mo-KdIa532lkDV-m/_buildManifest.js" | head -c 800; echo; sleep 1
+=== dev.na endpoints ===
+-- /graphql --
+307 len=24 loc=https://developer.dev.na.api.daimlertruck.com/?callbackUrl=%2Fgraphql
+-- /apis --
+307 len=21 loc=https://developer.dev.na.api.daimlertruck.com/?callbackUrl=%2Fapis
+-- /api/healthcheck --
+200 len=70 loc=
+-- /api/proxy-http --
+307 len=33 loc=https://developer.dev.na.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fproxy-http
+=== dev.na buildManifest ===
+self.__BUILD_MANIFEST = {
+  "/": [
+    "static/chunks/1j3mqsb6eepxr.js"
+  ],
+  "/404": [
+    "static/chunks/1m8i2oywdo3iq.js"
+  ],
+  "/_error": [
+    "static/chunks/1632m14g8ppbg.js"
+  ],
+  "/apis": [
+    "static/chunks/2v489gknzu7q_.js"
+  ],
+  "/apis/[apiId]": [
+    "static/chunks/0ixhx25il_7u0.js"
+  ],
+  "/apps": [
+    "static/chunks/3s6nhq0rp9mta.js"
+  ],
+  "/apps/[appId]/[[...tab]]": [
+    "static/chunks/2001uamq9btvn.js"
+  ],
+  "/apps/[appId]/authentications/new": [
+    "static/chunks/3npk81ailenk1.js"
+  ],
+  "/apps/[appId]/edit": [
+    "static/chunks/26-2lbpljvmrm.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]": [
+    "static/chunks/0tby_g5kcs_2z.js"
+  ],
+  "/apps/[appId]/subscriptions/[subscriptionId]/edit": [
+    "static/chunks/2fj62qzh0gnnf.js"
+  ],
+  "/apps/new": [
+[0m
+[0m$ [0mcurl -s "https://developer.dev.na.api.daimlertruck.com/_next/static/C2_l2mo-KdIa532lkDV-m/_buildManifest.js" > /tmp/bm_devna.js; sleep 1
+curl -s "https://developer.tst.na.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js" > /tmp/bm_ms4.js; sleep 1
+echo "=== route keys dev.na (C2_l2mo) ==="; grep -o '"/[^"]*"' /tmp/bm_devna.js | sort | tr '\n' ' '; echo
+echo "=== route keys mS_4 ==="; grep -o '"/[^"]*"' /tmp/bm_ms4.js | sort | tr '\n' ' '; echo
+echo "=== diff ==="; diff <(grep -o '"/[^"]*"' /tmp/bm_devna.js | sort) <(grep -o '"/[^"]*"' /tmp/bm_ms4.js | sort) && echo "NO ROUTE DIFF"
+=== route keys dev.na (C2_l2mo) ===
+"/" "/" "/404" "/404" "/_app" "/_error" "/_error" "/api/auth/[...nextauth]" "/api/graphql" "/api/healthcheck" "/api/healthcheck" "/api/metrics" "/api/metrics" "/apis" "/apis" "/apis/[apiId]" "/apis/[apiId]" "/apps" "/apps" "/apps/[appId]/[[...tab]]" "/apps/[appId]/[[...tab]]" "/apps/[appId]/authentications/new" "/apps/[appId]/authentications/new" "/apps/[appId]/edit" "/apps/[appId]/edit" "/apps/[appId]/subscriptions/[subscriptionId]" "/apps/[appId]/subscriptions/[subscriptionId]" "/apps/[appId]/subscriptions/[subscriptionId]/edit" "/apps/[appId]/subscriptions/[subscriptionId]/edit" "/apps/new" "/apps/new" "/docs/:slug*" "/healthcheck" "/legal" "/legal" "/legal/consent" "/legal/consent" "/legal/imprint" "/legal/imprint" "/legal/legal-notice" "/legal/legal-notice" "/legal/privacy-statement" "/legal/privacy-statement" "/metrics" "/products" "/products" "/products/[productId]" "/products/[productId]" "/products/[productId]/subscribe" "/products/[productId]/subscribe" "/teams" "/teams" "/teams/[teamId]/[[...tab]]" "/teams/[teamId]/[[...tab]]" "/teams/[teamId]/edit" "/teams/[teamId]/edit" "/teams/[teamId]/members/invite" "/teams/[teamId]/members/invite" "/teams/[teamId]/system-users/associate" "/teams/[teamId]/system-users/associate" "/teams/new" "/teams/new" 
+=== route keys mS_4 ===
+"/" "/" "/404" "/404" "/_app" "/_error" "/_error" "/api/auth/[...nextauth]" "/api/graphql" "/api/healthcheck" "/api/healthcheck" "/api/metrics" "/api/metrics" "/apis" "/apis" "/apis/[apiId]" "/apis/[apiId]" "/apps" "/apps" "/apps/[appId]/[[...tab]]" "/apps/[appId]/[[...tab]]" "/apps/[appId]/authentications/new" "/apps/[appId]/authentications/new" "/apps/[appId]/edit" "/apps/[appId]/edit" "/apps/[appId]/subscriptions/[subscriptionId]" "/apps/[appId]/subscriptions/[subscriptionId]" "/apps/[appId]/subscriptions/[subscriptionId]/edit" "/apps/[appId]/subscriptions/[subscriptionId]/edit" "/apps/new" "/apps/new" "/docs/:slug*" "/healthcheck" "/legal" "/legal" "/legal/consent" "/legal/consent" "/legal/imprint" "/legal/imprint" "/legal/legal-notice" "/legal/legal-notice" "/legal/privacy-statement" "/legal/privacy-statement" "/metrics" "/products" "/products" "/products/[productId]" "/products/[productId]" "/products/[productId]/subscribe" "/products/[productId]/subscribe" "/teams" "/teams" "/teams/[teamId]/[[...tab]]" "/teams/[teamId]/[[...tab]]" "/teams/[teamId]/edit" "/teams/[teamId]/edit" "/teams/[teamId]/members/invite" "/teams/[teamId]/members/invite" "/teams/[teamId]/system-users/associate" "/teams/[teamId]/system-users/associate" "/teams/new" "/teams/new" 
+=== diff ===
+NO ROUTE DIFF
+[0m
+[0m$ [0mfor h in as dev.na; do echo "-- $h CSP --"; curl -s -D - -o /dev/null "https://developer.$h.api.daimlertruck.com/" | grep -i "content-security-policy" | head -c 300; echo; sleep 1; done
+-- as CSP --
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+
+-- dev.na CSP --
+content-security-policy: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+[0m
+Full route surface identical between the two builds; **prod CSP now shows the test-style `undefined` config** — the mS_4 (former test-only) build shipped to prod. Verifying full CSP across portals.
+[0m$ [0mfor h in as eu na tst.eu tst.na dev.na; do host="developer.$h.api.daimlertruck.com"; csp=$(curl -s -D - -o /dev/null "https://$host/" | grep -i "content-security-policy" | sed 's/^[Cc]ontent-[Ss]ecurity-[Pp]olicy: //' | tr -d '\r'); echo "$host :: $csp"; sleep 1; done
+developer.as.api.daimlertruck.com :: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+developer.eu.api.daimlertruck.com :: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+developer.na.api.daimlertruck.com :: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+developer.tst.eu.api.daimlertruck.com :: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+developer.tst.na.api.daimlertruck.com :: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+developer.dev.na.api.daimlertruck.com :: font-src 'self'; img-src 'self' data: undefined; object-src 'self'; style-src 'self' 'unsafe-inline'; frame-src
+[0m
+## STEP 1 — DELTA
+- NEW developer.dev.na runs **4th build ID** `C2_l2mo-KdIa532lkDV-m` (was `JVF_tXHlhCfZQOkT-cULr`); buildManifest diff vs mS_4 = **NO ROUTE DIFF**; /graphql+/apis+/api/proxy-http all 307→B2C, dual providers, healthcheck 200/70B — hardened identically to prod, no weaker config.
+- CHANGED mS_4 fleet roll **live on PROD**: as/eu/na/tst.eu/tst.na/tst.as all buildId `mS_4SiQmkiaGsx2vLoXkH`, root len 196341 uniform; `JCvrnrykV`/`JVF` gone. Dual providers (`azure-ad-b2c-dt` ROW, `-dtna` NA) intact on prod + dev.
+- CHANGED **PROD CSP regression**: as/eu/na now serve the test-compiled CSP `img-src 'self' data: undefined` + EMPTY `frame-src` (was `img-src 'self' data: https://app.usercentrics.eu` + `frame-src https://companion.app.daimlertruck.com`). A test artifact (unset env var → literal `undefined`) is now in production.
+
+## STEP 2 — PRIORITIZE
+- [PRIO] login-qa.ciam (same-issuer ROW/NOAM) — 6.3 — auth/identity/prd-freshness·roll
+- [PRIO] developer.* mS_4-on-prod roll (CSP + NA-wiring regression) — 4.5 — misconfig/prod/freshness
+- [PRIO] developer.dev.na C2_l2mo build — 3.9 — fresh-build, zero exploitable delta
+
+## STEP 3 — HYPOTHESES
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW(acr=row)/NOAM(acr=noam) share identical issuer URI per tenant; only acr+org claims separate BU; NOAM superset carries dealer PII. Roll to mS_4 does not alter identity layer; NA APIM key-gate stays the only regional wall.
+evidence_needed: two staging identities → decoded claim diff; NOAM bearer executes ROW-scoped /api/graphql op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql (developer.tst.na, now same build as prod) ROW query with NOAM bearer → diff acr/org vs status.
+impact: cross-BU privilege collapse → dealer-network PII — Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 75
+reasoning: C2_l2mo buildManifest == mS_4 == object-ID surface (apis/[apiId], apps/[appId]/subscriptions/[subscriptionId], teams/[teamId]/system-users/associate) with zero diff; /api/graphql 307→B2C on all hosts. Ownership-gap would replicate across the whole just-unified fleet.
+evidence_needed: post-auth introspection; foreign-ID swap → 200+data vs 403.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql introspection → baseline IDs → cross-tenant ID swap → diff status/body.
+impact: cross-tenant webhook/key rotation + subscription PII — Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405 first-class POST-only handler exempt from 401/307 catch-all; istio-envoy on AKS → 169.254.169.254 class; build pVVz9XMK0MvBn72k4YswS unchanged this cycle.
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral — High.
+testability: AUTH_HELPED
+
+## STEP 4 — SELF-CRITIQUE
+- [PARKED] prod-csp-undefined-regression: `'undefined'` is an inert CSP host; empty frame-src removes no attacker-controlled directive (no script-src delta either way); clickjacking-class needs demonstrated exploit — info-level MISCONFIG, no hypothesis spawned.
+- [PARKED] prod-na-signin-regression: mS_4 (tst.as NA POST-signin OAuthSignin abort, 09-08) is now prod build — confirm requires CSRF+POST (out of passive bounds); functional-degradation class, not a sec vuln; repurpose as PROBE below.
+- [FINAL] 1. b2c-cross-bu-token-boundary-abuse (75) 2. graphql-object-id-bola-cross-portal (75) 3. companion-proxy-http-metadata-ssrf (55)
+
+## STEP 5 — NEXT ACTION
+- [NEXT] PROBE (operator-approved POST, CSRF+signin, no account created, no auth): 1) POST /api/auth/csrf on developer.as.api.daimlertruck.com → csrfToken; 2) POST /api/auth/signin/azure-ad-b2c-dtna with body csrfToken=<>+json=true → expect either B2C authorize JSON (NA OK on new build, kills 09-08 madness) or `{"url":"...error=OAuthSignin"}` (mS_4 NA-provider abort now reproduces on PROD — hardens the prod-on-test-artifact report). Then grant two login-qa identities (tenant 88f558f5, ROW via broker e39fd9b6/client a43f98c7 + NOAM) — unchanged blocker, now provable at exact production build.
+
+## STEP 6 — LEARNING
+- [LEARN] ACCEPTED mS_4-fleet-roll-to-prod @ developer.{as,eu,na}: all prod portals now on previously test-only build `mS_4SiQmkiaGsx2vLoXkH` (uniform len 196341, dual providers intact) — production = test-compiled artifact.
+- [LEARN] ACCEPTED prod-csp-test-config-regression @ developer.{as,eu,na}: prod now serves `img-src 'self' data: undefined` + empty `frame-src` (was app.usercentrics.eu + companion.app) — MISCONFIG/info via unset build-time env var, promoted to prod; not exploitable.
+- [LEARN] ACCEPTED dev-na-c2-l2mo-build @ developer.dev.na: 4th build ID, route surface identical to mS_4 (NO ROUTE DIFF), hardened identically (blanket 307, dual providers, healthcheck 200) — no weaker config; inventory now 4 builds: JCvrnrykV→gone, JVF→gone, mS_4, C2_l2mo.
+- [LEARN] REJECTED csp-undefined-exploit @ developer.*: inert host token, empty frame-src not exploitable, no script-src delta, clickjacking class out of scope — not actionable.
+
+## STEP 7 — RISK
+- [RISK] daimler-truck: 78. Passive surface exhausted 12th consecutive cycle on both tiers (developer.gone-uniform mS_4, companion builds static, dev.na same-hardened). The roll's real product is a confirmed PROD-on-test-artifact MISCONFIG (test CSP in prod + inherited NA-provider wiring quirk) — reportable info-level once the POST probe pins the NA sign-in path, HOLD otherwise. Core blocker unchanged: top-2 Critical-class (cross-BU token boundary, graphql BOLA) and the SSRF chain all need login-qa identities (tenant 88f558f5) or a prod companion session — outstanding since 09-04. Read-only GET/HEAD only, ≤1 rps, no new anonymous exploit surface.
