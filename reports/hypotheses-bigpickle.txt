@@ -1,4 +1,4 @@
-## 2026-09-14 07:08:11 UTC [target] (model bigpickle)
+## 2026-09-14 14:15:02 UTC [target] (model bigpickle)
 [PRIO] developer.{as,eu,na,tst.as,tst.eu,tst.na,dev.na}.api.daimlertruck.com,8.8,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=0,cloud_surface=8,freshness=9
 [PRIO] login.ciam.daimlertruck.com+login-qa.ciam.daimlertruck.com,8.2,attack_surface=9,business_value=10,tech_exposure=8,gate_ease=0,cloud_surface=7,freshness=8
 [PRIO] companion.app.daimlertruck.com,7.7,attack_surface=8,business_value=8,tech_exposure=8,gate_ease=0,cloud_surface=8,freshness=8
@@ -30,12 +30,7 @@ evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/lates
 verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
 impact: cloud-metadata IAM keys / mesh lateral → High.
 testability: AUTH_HELPED
-[PARKED] companion-dev-auth-drift / b2c-error-info-leak: informational misconfig only, no exploit path (prior acceptances, no new angle).
-[PARKED] broker-oidc-surface login.businessid: metadata 200→404 root on both prod+staging; consistent hardening, not regression.
-[FINAL] graphql-object-id-bola-cross-portal — conf 80, fleet-wide mS_4 code path, top IDOR candidate. Retained.
-[FINAL] b2c-cross-bu-token-boundary-abuse — conf 75, Critical-impact AUTH candidate. Retained.
-[FINAL] companion-proxy-http-metadata-ssrf — conf 55, first-class POST handler stands. Retained.
 [NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam in a separate FTL org. tst.na verified byte-identical to unified prod (mS_4, 2999B manifest). One ROW+NOAM grant validates both top FINALs (BOLA 80, cross-BU 75) at exact production build/authz; companion proxy-http SSRF is a third AUTH_HELPED reprobe in same session. Blocked since 09-04; no passive substitute exists.
-[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 16th consecutive cycle; re-probe set (healthcheck, mS_4 manifests, /api/graphql 307, companion root+proxy-http 405) byte-stable — post-unification surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode.
-[LEARN] ACCEPTED stability @ developer.as+tst.na.api.daimlertruck.com: mS_4 unification persists a third day — buildManifest 200/2999B prod+test, /api/graphql 307→B2C, providers 573B — no reversion to pre-consolidation builds.
-[RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable 3 days) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for an 12th day with anonymous surface fully closed — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 17th consecutive cycle; re-probe set (healthcheck, mS_4 manifests, /api/graphql 307, companion root+proxy-http 405) byte-stable — post-unification surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode.
+[LEARN] ACCEPTED stability @ developer.as+tst.na.api.daimlertruck.com: mS_4 unification persists a fourth day — buildManifest 200/2999B prod+test, /api/graphql 307→B2C, providers 573B — no reversion to pre-consolidation builds.
+[RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable 4 days) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 13th day with anonymous surface fully closed — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
