@@ -41,3 +41,11 @@
   - **Verdict: VALID**
   - | 1 | B2C Error Info Leak (companion-dev disclosure) | **VALID** | 5.3 |
   - | 2 | Companion-Dev Exposed + CORS + Debug Features | **VALID** | 5.3–6.5 |
+
+- 6 lead(s) marked VALID at 2026-09-14 07:56:45 UTC
+  - | Q4 Provable non-invasively? | Partially — requires valid B2C session (AUTH_HELPED); authenticated introspection + mutation test with cross-tenant IDs is read-only (query introspection) + low-impact 
+  - **Verdict: HOLD** — Cannot prove passively (requires valid B2C test account). Recommend obtaining 2 test accounts on `login-qa.ciam.daimlertruck.com` (ROW + NOAM policies) to complete authenticated pr
+  - | Q4 Provable non-invasively? | Partially — requires valid B2C session (AUTH_HELPED); GET requests to object-ID routes with cross-tenant IDs are read-only. Cannot prove without auth account |
+  - | Q3 Real impact? | Medium — dev environment registered as valid callback in prod B2C client. If dev environment is compromised or has weaker controls, attacker could leverage the valid callback for O
+  - **Verdict: VALID**
+  - | 6 | Dev Callback in Prod Allowlist | **VALID** | 5.3 | Report to program |
