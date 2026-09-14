@@ -1,4 +1,4 @@
-## 2026-09-13 23:34:25 UTC [target] (model nemotron3)
+## 2026-09-14 01:41:19 UTC [target] (model nemotron3)
 [NEW] developer.as.api.daimlertruck.com now serves build ID `mS_4SiQmkiaGsx2vLoXkH` (was `JCvrnrykV_KYBk7pu0Npq`) — third build ID unified across prod+test+tst.as; root content-length 196341 (was 196649); buildManifest shows full object-ID route surface (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe)
 [NEW] All 7 developer portals now unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema and route structure across AS/EU/NA/prod/test/tst.as/tst.eu/tst.na/dev.na
 [CHANGED] `/graphql` returns 307 (24 bytes) to Azure AD B2C on all 7 portals — real GraphQL endpoint behind auth confirmed (was inconsistent, now stable)

@@ -598,3 +598,15 @@ www.daimlertruck.com
 - CHANGED companion-dev.app now wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri) — auth middleware active on all routes
 - CHANGED B2C Cross-BU Token Boundary: ROW+NOAM policies per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims differentiate BU; NOAM claim superset includes de
 - CHANGED Stability re-verified: developer.tst.as build `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08; companion tier root/health/proxy-http/signin unchan
+
+## 2026-09-14 01:42:05 UTC
+- NEW developer.as.api.daimlertruck.com now serves build ID `mS_4SiQmkiaGsx2vLoXkH` (was `JCvrnrykV_KYBk7pu0Npq`) — third build ID unified across prod+test+tst.as; root content-length 196341 (was 196649); b
+- NEW All 7 developer portals now unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema and route structure across AS/EU/NA/prod/test/tst.as/tst.eu/tst.na/dev.na
+- CHANGED `/graphql` returns 307 (24 bytes) to Azure AD B2C on all 7 portals — real GraphQL endpoint behind auth confirmed (was inconsistent, now stable)
+- CHANGED All signin endpoints (companion.app, companion-dev.app, developer.as.api, developer.tst.as.api) return uniform 302 error redirects (`error=azure-ad-b2c*`) — transient degradation resolved
+- CHANGED developer.as.api `/api/auth/providers` confirms dual providers: `azure-ad-b2c-dt` (ROW, client 205f35f7) + `azure-ad-b2c-dtna` (NA, client c387a5ab)
+- CHANGED companion.app `/api/auth/providers` confirms single provider: `azure-ad-b2c` (ROW only, client cd34584a)
+- CHANGED companion.app build manifest (pVVz9XMK0MvBn72k4YswS) shows 6 API routes including `/api/proxy-http` and `/api/[...slug]` catch-all — both middleware-exempt (return 401 not 307); new pages `/explore-to
+- CHANGED companion-dev.app now wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256 + state + same-origin redirect_uri) — auth middleware active on all routes
+- CHANGED B2C Cross-BU Token Boundary: ROW+NOAM policies per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims differentiate BU; NOAM claim superset includes de
+- CHANGED Stability re-verified: developer.tst.as build `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08; companion tier root/health/proxy-http/signin unchan
