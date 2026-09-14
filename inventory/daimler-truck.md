@@ -640,3 +640,8 @@ www.daimlertruck.com
 - CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, tele
 - CHANGED Stability: developer.tst.as build `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no drift since 2026-09-08; companion tier unchanged since 09-12 build roll
 - CHANGED Fresh passive probe value REJECTED 16th consecutive cycle — surface fully mapped; proxy-http POST, GraphQL introspection, cross-BU token claims require non-passive request shapes
+
+## 2026-09-14 22:49:55 UTC
+- CHANGED All 7 developer portals (as/eu/na/tst.as/tst.eu/tst.na/dev.na) now unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema, route structure, dual B2C providers
+- CHANGED companion-dev.app.daimlertruck.com auth fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` 401, `/ad
+- CHANGED Fresh passive probe value REJECTED 18th consecutive cycle — attack surface fully mapped; remaining candidates require AUTH_HELPED request shapes
