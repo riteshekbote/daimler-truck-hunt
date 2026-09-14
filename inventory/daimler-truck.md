@@ -631,3 +631,12 @@ www.daimlertruck.com
 - CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, tele
 - CHANGED Stability: developer.tst.as build `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no drift since 2026-09-08; companion tier unchanged since 09-12 build roll
 - CHANGED Fresh passive probe value REJECTED 16th consecutive cycle — surface fully mapped; proxy-http POST, GraphQL introspection, cross-BU token claims require non-passive request shapes
+
+## 2026-09-14 19:31:48 UTC
+- CHANGED developer.as.api.daimlertruck.com now serves build `mS_4SiQmkiaGsx2vLoXkH` (was `JCvrnrykV_KYBk7pu0Npq`) — third build ID unified across prod+test+tst.as; all 7 developer portals identical
+- CHANGED `/graphql` returns 307 (24B) to Azure AD B2C on all 7 portals — real GraphQL endpoint behind auth stable
+- CHANGED All signin endpoints (companion.app, companion-dev.app, developer.as.api, developer.tst.as.api) return uniform 302 `error=azure-ad-b2c*` — transient degradation resolved
+- CHANGED companion-dev.app fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` 401, `/admin` `/chat` 307→B2C
+- CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only `acr` + org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, tele
+- CHANGED Stability: developer.tst.as build `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no drift since 2026-09-08; companion tier unchanged since 09-12 build roll
+- CHANGED Fresh passive probe value REJECTED 16th consecutive cycle — surface fully mapped; proxy-http POST, GraphQL introspection, cross-BU token claims require non-passive request shapes
