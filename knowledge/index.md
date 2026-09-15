@@ -390,3 +390,12 @@
 - 2026-09-15 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08
 - 2026-09-15 REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
 - 2026-09-15 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 18th consecutive cycle; re-probe set (tst.as healthcheck 200/70B, /api/graphql 307/30B, companion /api/ready 200/18B, proxy-http 405/30B) all byte-stable — post-unification surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode.
+- 2026-09-15 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 19th consecutive cycle; re-probe set byte-stable — post-unification surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode.
+- 2026-09-15 ACCEPTED stability @ developer.as+tst.na.api.daimlertruck.com: mS_4 unification persists — buildManifest 200/2999B prod+test, /api/graphql 307→B2C, providers 573B — no reversion to pre-consolidation builds.
+- 2026-09-15 ACCEPTED companion-dev-auth-wired-to-prod: dev companion now initiates PKCE-protected flow to prod B2C tenant; /api/proxy-http 401; auth middleware active.
+- 2026-09-15 ACCEPTED developer-portal-dual-b2c-providers: azure-ad-b2c-dt (ROW, 205f35f7) + azure-ad-b2c-dtna (NA, c387a5ab) on all 7 portals — regional tenant separation confirmed.
+- 2026-09-15 ACCEPTED b2c-cross-bu-token-boundary: ROW+NOAM share identical issuer URI per tenant; only acr + org-shape claims differentiate BU; NOAM superset includes dealer PII — confirmed passively.
+- 2026-09-15 ACCEPTED companion-single-provider: both companion apps single azure-ad-b2c (client cd34584a, ROW policy only) — by design per KB.
+- 2026-09-15 REJECTED companion-dev-auth-bypass: dev now wired to prod B2C with PKCE S256 + state; /api/proxy-http 401; /admin /chat 307→B2C — prior "unwired" finding stale.
+- 2026-09-15 ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build mS_4SiQmkiaGsx2vLoXkH — third build ID unified across prod+test+tst.as.
+- 2026-09-15 REJECTED re-probe value @ companion.app: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.

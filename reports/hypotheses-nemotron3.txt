@@ -1,8 +1,6 @@
-## 2026-09-15 01:24:07 UTC [target] (model nemotron3)
-[NEW] All 7 developer portals (as/eu/na/tst.as/tst.eu/tst.na/dev.na) unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema, route structure, dual B2C providers (azure-ad-b2c-dt ROW client 205f35f7 + azure-ad-b2c-dtna NA client c387a5ab)
-[NEW] companion-dev.app.daimlertruck.com auth fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` 401, `/admin` `/chat` 307→B2C
-[CHANGED] Fresh passive probe value REJECTED 18th consecutive cycle — attack surface fully mapped; remaining candidates (proxy-http POST body, GraphQL introspection, cross-BU token claims) require AUTH_HELPED request shapes
-[CHANGED] developer.as.api.daimlertruck.com build consolidation persists 4th day (was JCvrnrykV_KYBk7pu0Npq → mS_4SiQmkiaGsx2vLoXkH); no reversion
+## 2026-09-15 06:19:18 UTC [target] (model nemotron3)
+[NEW] None — all assets byte-stable across 18th consecutive passive probe cycle; knowledge base and inventory last updated 2026-09-15 01:24 UTC matching last leads timestamp
+[CHANGED] Fresh passive probe value REJECTED 18th consecutive cycle — surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims require AUTH_HELPED request shapes
 [PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com,8.2,attack_surface=9,business_value=10,tech_exposure=8,gate_ease=5,cloud_surface=7,freshness=8
 [PRIO] developer.as.api.daimlertruck.com + developer.eu.api.daimlertruck.com + developer.na.api.daimlertruck.com + developer.tst.as.api.daimlertruck.com + developer.dev.na.api.daimlertruck.com + developer.tst.eu.api.daimlertruck.com + developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=5,cloud_surface=7,freshness=9
 [PRIO] companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com,7.7,attack_surface=8,business_value=8,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=9
