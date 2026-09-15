@@ -661,3 +661,7 @@ www.daimlertruck.com
 ## 2026-09-15 16:40:44 UTC
 
 ## 2026-09-15 19:58:29 UTC
+
+## 2026-09-15 22:50:33 UTC
+- NEW developer + companion tiers 22nd consecutive byte-stable cycle — healthcheck 200/70B, /api/graphql 307/30B, buildManifest mS_4 200/2999B, companion /api/health 200/15B, /api/proxy-http GET 405/30B, ro
+- NEW Next.js artifact surface: _middlewareManifest.js → 404/9B (both tiers), _ssgManifest.js → 200/76B (empty Set), all probed chunks `*.js.map` → 404/9B (both tiers, incl. Turbopack runtime) — no sourcema
