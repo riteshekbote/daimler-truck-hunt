@@ -5078,3 +5078,4 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build mS_4SiQmkiaGsx2vLoXkH — third build ID unified across prod+test+tst.as.
 [LEARN] REJECTED re-probe value @ companion.app: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
 [RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable day 5+) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 16th day with anonymous surface fully closed — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
+## 2026-09-15 11:53:26 UTC [target] (model bigpickle)

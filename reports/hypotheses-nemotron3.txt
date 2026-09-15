@@ -1,12 +1,10 @@
-## 2026-09-15 06:19:18 UTC [target] (model nemotron3)
-[NEW] None — all assets byte-stable across 18th consecutive passive probe cycle; knowledge base and inventory last updated 2026-09-15 01:24 UTC matching last leads timestamp
-[CHANGED] Fresh passive probe value REJECTED 18th consecutive cycle — surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims require AUTH_HELPED request shapes
+## 2026-09-15 11:55:57 UTC [target] (model nemotron3)
 [PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com,8.2,attack_surface=9,business_value=10,tech_exposure=8,gate_ease=5,cloud_surface=7,freshness=8
 [PRIO] developer.as.api.daimlertruck.com + developer.eu.api.daimlertruck.com + developer.na.api.daimlertruck.com + developer.tst.as.api.daimlertruck.com + developer.dev.na.api.daimlertruck.com + developer.tst.eu.api.daimlertruck.com + developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=5,cloud_surface=7,freshness=9
 [PRIO] companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com,7.7,attack_surface=8,business_value=8,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=9
 [HYP] B2C Cross-BU Token Boundary Abuse via Shared Issuer
 class: AUTH
-asset: login.ciam.daimlertruck.com (prod tenant 3db550f0) + login-qa.ciam.daimlertruck.com (staging tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f)
+asset: login.ciam.daimlertruck.com (prod tenant 3db550f0) + login-qa.ciam.daimlertruck.com (staging tenant 88f558f5)
 confidence: 75
 reasoning: Both prod and staging B2C tenants issue ROW (b2c_1a_signin_oidc_row) and NOAM (b2c_1a_signin_oidc_noam) policies under IDENTICAL issuer URI per tenant. Downstream APIs validate issuer+aud+signature; acr claim and org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, telephoneNumber_Org, street_Org, FTLOrgSapCode) are the only BU differentiators. If any downstream API fails to validate acr/org claims, ROW token could access NOAM resources (dealer PII) or vice versa.
 evidence_needed: Downstream API token validation logic showing missing acr/org claim enforcement; or authenticated test presenting ROW token to NOAM-scoped endpoint (e.g., developer.na.api.daimlertruck.com/apis/<NA-apiId> with NA apiId) observing 200 vs 403
@@ -15,7 +13,7 @@ impact: Cross-business-unit token acceptance → ROW employee accesses NOAM deal
 testability: AUTH_HELPED
 [HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
 class: IDOR
-asset: developer.as.api.daimlertruck.com (representative of 7 portals, now all on build mS_4SiQmkiaGsx2vLoXkH)
+asset: developer.as.api.daimlertruck.com (representative of 7 portals, all on build mS_4SiQmkiaGsx2vLoXkH)
 confidence: 75
 reasoning: 7 portals expose GraphQL at /graphql and /api/graphql behind Azure AD B2C (307 on POST introspection). BuildManifest reveals object-ID routes: /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate, /products/[productId]/subscribe. Portal UI shows "Subscribe" card implying mutations (createSubscription, updateApiKey, revokeKey, manageWebhooks). Dual B2C providers per portal: azure-ad-b2c-dt (ROW, client 205f35f7) + azure-ad-b2c-dtna (NA, client c387a5ab). Three build IDs now consolidated (prod+test+tst.as all on mS_4SiQmkiaGsx2vLoXkH) — identical GraphQL schema across all environments.
 evidence_needed: Authenticated GraphQL introspection showing mutation types with tenant-scoped ID arguments (apiId, subscriptionId, webhookId, teamId); mutation examples from client bundle; evidence of missing authorization checks when using cross-tenant IDs (AS user mutating EU apiId)
@@ -45,5 +43,5 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build `mS_4SiQmkiaGsx2vLoXkH` (was JCvrnrykV_KYBk7pu0Npq) — third build ID now unified across prod+test+tst.as; full object-ID route surface confirmed in buildManifest
 [LEARN] ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08
 [LEARN] REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
-[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 18th consecutive cycle; re-probe set (tst.as healthcheck 200/70B, /api/graphql 307/30B, companion /api/ready 200/18B, proxy-http 405/30B) all byte-stable — post-unification surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 19th consecutive cycle; re-probe set byte-stable — post-unification surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode.
 [RISK] daimler-truck: 78 — 7 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C (dual providers ROW/NA); companion.app + companion-dev.app add parallel surface with proxy-http/[...slug] catch-all routes (middleware-exempt, SSRF/BOLA candidates); prod B2C tenant issues ROW+NOAM under same issuer — cross-BU token boundary relies solely on acr/org claim validation by downstream APIs; companion-dev callback registered in prod B2C client allowlist; identical build manifests across prod/dev companion and across all 7 developer portals (now unified on mS_4SiQmkiaGsx2vLoXkH) suggest same authz logic — any flaw replicates widely.
