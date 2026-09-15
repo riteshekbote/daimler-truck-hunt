@@ -399,3 +399,5 @@
 - 2026-09-15 REJECTED companion-dev-auth-bypass: dev now wired to prod B2C with PKCE S256 + state; /api/proxy-http 401; /admin /chat 307→B2C — prior "unwired" finding stale.
 - 2026-09-15 ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build mS_4SiQmkiaGsx2vLoXkH — third build ID unified across prod+test+tst.as.
 - 2026-09-15 REJECTED re-probe value @ companion.app: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
+- 2026-09-15 ACCEPTED stability @ developer.* + companion tier: 20th consecutive byte-stable cycle — healthcheck 200/70B across all 7 portals, graphql 307/24B, proxy-http 405/30B, buildManifest mS_4 200/2999B, companion health 200/15B + ready 200/18B — post-unification surface fully mapped.
+- 2026-09-15 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 20th consecutive cycle; all re-probes byte-stable — proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
