@@ -645,3 +645,9 @@ www.daimlertruck.com
 - CHANGED All 7 developer portals (as/eu/na/tst.as/tst.eu/tst.na/dev.na) now unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema, route structure, dual B2C providers
 - CHANGED companion-dev.app.daimlertruck.com auth fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` 401, `/ad
 - CHANGED Fresh passive probe value REJECTED 18th consecutive cycle — attack surface fully mapped; remaining candidates require AUTH_HELPED request shapes
+
+## 2026-09-15 01:24:16 UTC
+- NEW All 7 developer portals (as/eu/na/tst.as/tst.eu/tst.na/dev.na) unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema, route structure, dual B2C providers (azure-ad-b2c-dt ROW client 205f
+- NEW companion-dev.app.daimlertruck.com auth fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); `/api/proxy-http` 401, `/ad
+- CHANGED Fresh passive probe value REJECTED 18th consecutive cycle — attack surface fully mapped; remaining candidates (proxy-http POST body, GraphQL introspection, cross-BU token claims) require AUTH_HELPED r
+- CHANGED developer.as.api.daimlertruck.com build consolidation persists 4th day (was JCvrnrykV_KYBk7pu0Npq → mS_4SiQmkiaGsx2vLoXkH); no reversion

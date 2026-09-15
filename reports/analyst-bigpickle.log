@@ -19875,3 +19875,71 @@ testability: AUTH_HELPED
 
 **STEP 7 — RISK**
 [RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable day 5) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 15th day with anonymous surface fully closed — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
+===== ANALYST bigpickle 2026-09-15 01:24:16 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor u in "https://developer.tst.as.api.daimlertruck.com/api/healthcheck" "https://developer.tst.as.api.daimlertruck.com/api/graphql" "https://companion.app.daimlertruck.com/api/ready" "https://companion.app.daimlertruck.com/api/proxy-http" "https://developer.tst.na.api.daimlertruck.com/api/auth/providers"; do curl -sS -o /dev/null -w "%{http_code} %{size_download} %{time_total}s $u\n" --max-time 10 "$u"; sleep 1; done
+200 70 0.389714s https://developer.tst.as.api.daimlertruck.com/api/healthcheck
+307 30 0.351719s https://developer.tst.as.api.daimlertruck.com/api/graphql
+200 18 0.457574s https://companion.app.daimlertruck.com/api/ready
+405 30 0.456977s https://companion.app.daimlertruck.com/api/proxy-http
+200 573 0.152874s https://developer.tst.na.api.daimlertruck.com/api/auth/providers
+[0m
+All five re-probes byte-stable: healthcheck 200/70B, /api/graphql 307/30B, /api/ready 200/18B, /api/proxy-http 405/30B, providers 200/573B (dual tst.na).
+
+STEP 1 — DELTA
+- NO_DELTA: re-probe set (tst.as healthcheck 200/70B, /api/graphql 307/30B, companion /api/ready 200/18B, proxy-http 405/30B, tst.na providers 200/573B dual) all byte-identical — 19th consecutive stable cycle; mS_4 unification day 6, no reversion.
+
+STEP 2 — PRIORITIZE
+- [PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.55,7-portal fleet-wide byte-identical GraphQL BOLA surface (a=8,b=9,t=9,g=1,c=6,f=2)
+- [PRIO] login-qa.ciam.daimlertruck.com (88f558f5),5.95,ROW/NOAM same-issuer cross-BU dealer-PII boundary (a=6,b=10,t=8,g=1,c=3,f=3)
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http,4.80,POST-only middleware-exempt SSRF-to-metadata candidate over istio-envoy/AKS (a=4,b=6,t=7,g=1,c=9,f=2)
+
+STEP 3 — HYPOTHESES
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: mS_4 buildManifest (200/2999B) byte-identical prod+test across all 7 portals; /api/graphql 307→B2C stable (30B this cycle); object-ID routes /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate in client bundle; one ownership gap replicates fleet-wide by construction; unchanged 19 cycles.
+evidence_needed: authenticated introspection; on-org vs foreign-org subscription query diff.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql {"query":"{__schema{types{name}}}"} → baseline subscription(teamId,appId,subscriptionId) → cross-tenant ID swap → diff status/body.
+impact: cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW+NOAM share identical issuer+aud per tenant; NA provider client c387a5ab resolves to same staging AS tenant — NOAM org separation rests solely on acr + org-shape claims; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); identity layer untouched by mS_4 unification.
+evidence_needed: two staging identities → decoded acr/org diff; NOAM bearer executes ROW-scoped op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql on developer.tst.na (mS_4==prod) with NOAM bearer → diff status/body vs acr/org.
+impact: cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-confirmed; POST-only first-class handler exempt from 401/307 blanket middleware; no Allow header; istio-envoy/AKS → 169.254.169.254 plausible; build unchanged since 09-12 roll (pVVz9XMK0MvBn72k4YswS).
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+
+STEP 4 — SELF-CRITIQUE
+- [PARKED] companion-dev-auth-drift / b2c-error-info-leak / broker-oidc-surface: informational misconfig only, no exploit path, prior acceptances stand.
+- [PARKED] fresh re-probe expansions (swagger, /docs, catalog variants): blanket middleware + SPA catch-all exhaust -- 19 rejections.
+- [FINAL] graphql-object-id-bola-cross-portal — conf 80, fleet-wide mS_4 code path, top IDOR candidate. Retained.
+- [FINAL] b2c-cross-bu-token-boundary-abuse — conf 75, Critical-impact AUTH candidate. Retained.
+- [FINAL] companion-proxy-http-metadata-ssrf — conf 55, first-class POST handler stands. Retained.
+
+STEP 5 — NEXT ACTION
+- [NEXT] HUMAN: Grant two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-...-d6ec0f) for developer.tst.na.api.daimlertruck.com — (1) b2c_1a_signin_oidc_row via broker e39fd9b6/client a43f98c7, (2) b2c_1a_signin_oidc_noam in a separate FTL org. tst.na verified byte-identical to unified prod (mS_4, providers 573B, graphql 307) again this cycle. One ROW+NOAM grant validates both top FINALs (BOLA 80, cross-BU 75) at exact production build/authz; companion proxy-http SSRF is a third AUTH_HELPED reprobe in the same session. Blocked since 09-04; no passive substitute exists.
+
+STEP 6 — LEARNING
+- [LEARN] ACCEPTED stability @ developer.tst.as+tst.na.api.daimlertruck.com + companion.app: re-probe set byte-identical (healthcheck 200/70B, graphql 307/30B, ready 200/18B, proxy-http 405/30B, providers 200/573B) — mS_4 unification day 6, no drift, no reversion.
+- [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 19th consecutive cycle; surface fully mapped; proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode — rejection stands.
+
+STEP 7 — RISK
+- [RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable day 6) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 16th day with anonymous surface fully closed — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
