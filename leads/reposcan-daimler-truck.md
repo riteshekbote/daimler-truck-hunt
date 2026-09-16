@@ -437,3 +437,5 @@ reasoning: `"AllowedHosts": "*"` permits requests from any hostname. Combined wi
 impact: LOW-MEDIUM — In practice, Azure Container Apps ingress filtering provides the primary host validation. However, if deployed behind a shared ingress or with direct IP access, the wildcard removes a defense layer.
 verify_steps: 1) Confirm deployment target uses Azure Container Apps ingress (which provides host filtering). 2) Check if `AllowedHosts` is overridden at deployment time via env vars or config.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-16 11:47:33 UTC
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
