@@ -1815,3 +1815,9 @@
 - LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
 - LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
 - LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 22nd consecutive cycle; all re-probes byte-stable — proxy-http POST body, GraphQL introspection, cross-BU
+
+## RANKED HYPOTHESES 2026-09-16 20:01:55 UTC
+- [80] developer.tst.na.api.daimlertruck.com/api/graphql: graphql-object-id-bola-cross-portal (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) — one ROW-
+- LEARN: ACCEPTED stability @ developer.* + companion tier: 24th consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, comp
+- LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 24th consecutive cycle; all re-probes byte-identical — proxy-http POST body, GraphQL introspection, and c
