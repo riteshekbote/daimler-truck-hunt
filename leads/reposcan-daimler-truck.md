@@ -411,3 +411,29 @@ TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
 ## REPOSCAN 2026-09-16 01:10:03 UTC
 TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
+## REPOSCAN 2026-09-16 06:13:38 UTC
+class: SECRET
+asset: daimlertruck/SRC-rag_api/docker-compose.yaml (line ~6-8), daimlertruck/SRC-rag_api/db-compose.yaml (line ~6-8)
+confidence: 40
+reasoning: `POSTGRES_PASSWORD=mypassword`, `POSTGRES_USER=myuser`, `POSTGRES_DB=mydatabase` are hardcoded as defaults in the compose files (and mirrored in `config.py` line ~54-56). These are clearly placeholder/development defaults, not production secrets. No evidence they match any live Daimler infrastructure. The `config.py` reads them from env with `os.getenv()` with these as fallback defaults.
+impact: LOW — These are generic development defaults. If a deployment ships without overriding them, a trivial brute-force login on PostgreSQL is possible. However, there is no indication these defaults are used in any production or staging asset.
+verify_steps: 1) Confirm the compose files are the only deployment manifests. 2) Check if any Daimler-hosted PostgreSQL instance accepts `myuser:mypassword` (passive — do not attempt login). 3) Review CI/CD pipelines for env overrides.
+class: SECRET
+asset: daimlertruck/SRC-LibreChat/packages/data-schemas/misc/ferretdb/docker-compose.ferretdb.yml (lines 7-8, 15)
+confidence: 35
+reasoning: `POSTGRES_USER=ferretdb`, `POSTGRES_PASSWORD=ferretdb`, and connection string `postgres://ferretdb:ferretdb@ferretdb-postgres:5432/postgres` are hardcoded. These are well-known FerretDB defaults, not Daimler-specific credentials. This file is under `misc/` and is not referenced by any production compose or CI workflow.
+impact: LOW — Generic FerretDB sample config. No evidence of use in any deployed infrastructure.
+verify_steps: 1) Confirm no production compose references this file. 2) Check CI pipelines for any deployment that uses it.
+class: MISCONFIG
+asset: daimlertruck/SRC-openai-aca-lb/azuredeploy.json (lines ~86-96)
+confidence: 65
+reasoning: The ARM template injects `BACKEND_1_APIKEY` and `BACKEND_2_APIKEY` as plaintext container environment variables. While the values are parameterized (not hardcoded secrets), this pattern means the API keys are: (a) visible in `az containerapp show` output, (b) logged in Azure Monitor if env-dump logging is enabled, (c) accessible to any process in the container. The source code at `YarpConfiguration.cs:83-86` reads `backend.Value.ApiKey` directly from env and injects it into the `api-key` header.
+impact: MEDIUM — API keys for Azure OpenAI endpoints exposed in container environment. An attacker with container exec or Azure CLI access at the right scope can extract them. The ARM template does not use Azure Key Vault or `secretRef` for secret injection.
+verify_steps: 1) Check if any deployed Azure Container App uses this template. 2) Inspect Azure subscription `az containerapp env list` for Daimler-owned environments. 3) Verify if Key Vault references are used elsewhere in the deployment chain.
+class: MISCONFIG
+asset: daimlertruck/SRC-openai-aca-lb/src/appsettings.json (line 4)
+confidence: 50
+reasoning: `"AllowedHosts": "*"` permits requests from any hostname. Combined with the YARP reverse proxy `{**catch-all}` route, this means the load balancer accepts traffic addressed to any DNS name pointing to it. In an Azure Container Apps environment with external ingress (confirmed in `azuredeploy.json`: `"external": true`), this could allow header-based routing abuse if the container app FQDN is discoverable.
+impact: LOW-MEDIUM — In practice, Azure Container Apps ingress filtering provides the primary host validation. However, if deployed behind a shared ingress or with direct IP access, the wildcard removes a defense layer.
+verify_steps: 1) Confirm deployment target uses Azure Container Apps ingress (which provides host filtering). 2) Check if `AllowedHosts` is overridden at deployment time via env vars or config.
+TARGET_ORG not configured for daimler-truck; skipping public-org deep scan.
