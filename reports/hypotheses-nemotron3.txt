@@ -1,4 +1,9 @@
-## 2026-09-16 06:11:26 UTC [target] (model nemotron3)
+## 2026-09-16 11:49:01 UTC [target] (model nemotron3)
+[CHANGED] Stability confirmed at 23rd consecutive byte-stable cycle across all 7 developer portals (build mS_4SiQmkiaGsx2vLoXkH) + companion tier (build pVVz9XMK0MvBn72k4YswS / AO7VvIOpKp-TqU5HF-ZTR)
+[CHANGED] Fresh passive probe value REJECTED 23rd consecutive cycle — all re-probes byte-identical; proxy-http POST body, GraphQL introspection, cross-BU token claims require AUTH_HELPED request shapes
+[CHANGED] Companion-dev.auth now fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); /api/proxy-http returns 401; /admin /chat 307→B2C via locale
+[CHANGED] All 7 developer portals unified on build mS_4SiQmkiaGsx2vLoXkH — identical GraphQL schema, dual B2C providers (azure-ad-b2c-dt ROW client 205f35f7 + azure-ad-b2c-dtna NA client c387a5ab)
+[CHANGED] B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only acr + org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, telephoneNumber_Org, street_Org, FTLOrgSapCode) differentiate BU
 [PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com,8.2,attack_surface=9,business_value=10,tech_exposure=8,gate_ease=5,cloud_surface=7,freshness=8
 [PRIO] developer.as.api.daimlertruck.com + developer.eu.api.daimlertruck.com + developer.na.api.daimlertruck.com + developer.tst.as.api.daimlertruck.com + developer.dev.na.api.daimlertruck.com + developer.tst.eu.api.daimlertruck.com + developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=5,cloud_surface=7,freshness=9
 [PRIO] companion.app.daimlertruck.com + companion-dev.app.daimlertruck.com,7.7,attack_surface=8,business_value=8,tech_exposure=8,gate_ease=5,cloud_surface=8,freshness=9

@@ -20493,3 +20493,173 @@ STEP 6 — LEARNING
 
 STEP 7 — RISK
 - [RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable 9+ days, 24 cycles) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps the cross-BU boundary Critical; companion proxy-http stands as POC-class SSRF. All three FINALs remain AUTH_HELPED and unverified for a 24th day with the anonymous surface fully closed — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
+===== ANALYST bigpickle 2026-09-16 11:49:41 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/
+README.md
+analyst-out.txt
+analyst-prompt.txt
+ctx.txt
+inventory
+knowledge
+leads
+probe-results.md
+recon-notes
+reports
+reposcan-raw
+scope.yml
+scripts
+state_bigpickle.json
+state_laguna.json
+state_ling3.json
+state_longcat.json
+state_mimo.json
+state_nemotron3.json
+triage
+[0m
+[0m→ [0mRead scope.yml
+[0m→ [0mRead state_bigpickle.json
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/ /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/analysis/ 2>/dev/null; ls /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/art/ 2>/dev/null
+/home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/:
+total 1588
+drwxr-xr-x  2 runner runner   4096 Sep 16 11:47 .
+drwxr-xr-x 12 runner runner   4096 Sep 16 11:48 ..
+-rw-r--r--  1 runner runner 703615 Sep 16 11:47 lead-bigpickle.md
+-rw-r--r--  1 runner runner   4437 Sep 16 11:47 lead-laguna.md
+-rw-r--r--  1 runner runner   4350 Sep 16 11:47 lead-ling3.md
+-rw-r--r--  1 runner runner   4524 Sep 16 11:47 lead-longcat.md
+-rw-r--r--  1 runner runner     18 Sep 16 11:47 lead-mimo.md
+-rw-r--r--  1 runner runner 845758 Sep 16 11:47 lead-nemotron3.md
+-rw-r--r--  1 runner runner  34707 Sep 16 11:47 reposcan-daimler-truck.md
+[0m
+[0m$ [0mls /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/knowledge /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/inventory /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/recon-notes 2>/dev/null
+/home/runner/work/daimler-truck-hunt/daimler-truck-hunt/inventory:
+daimler-truck.md
+
+/home/runner/work/daimler-truck-hunt/daimler-truck-hunt/knowledge:
+index.md
+
+/home/runner/work/daimler-truck-hunt/daimler-truck-hunt/recon-notes:
+CORPUS-DAIMLER.md
+DEDICATED-DEEP.md
+DEEPER-FINDINGS.md
+LOCKDOWN-ASSESSMENT.md
+SCOPE-CONFIRMATION.md
+[0m
+[0m$ [0mtail -c 4000 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads/lead-bigpickle.md
+admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, policies b2c_1a_signin_oidc_row + b2c_1a_signin_oidc_noam) via bugs.olivermaicher.eu — one ROW-scoped, one NOAM-scoped — unblocking all 3 FINALs (GraphQL introspection+BOLA, cross-BU token boundary with decoded acr/org, companion proxy-http POST SSRF) in one grant. Passive surface fully exhausted 23 consecutive byte-stable cycles; six read-only probes this cycle all identical.
+[LEARN] ACCEPTED stability @ developer.* + companion tier: 23rd consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, companion health 200/15B, proxy-http GET 405/30B — post-unification surface fully mapped.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 23rd consecutive cycle; all re-probes byte-identical — proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
+[RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable 8+ days, 23 cycles) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 23rd day with anonymous surface fully closed (sourcemaps/middleware-manifest already negative) — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
+## 2026-09-16 06:10:19 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: mS_4 buildManifest byte-identical prod+test across all 7 portals (200/2999B re-confirmed 24th cycle); /api/graphql 307→B2C stable (30B); object-ID routes /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate confirmed in client bundle; one ownership gap replicates fleet-wide by construction.
+evidence_needed: authenticated introspection; on-org vs foreign-org subscription query diff.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql {"query":"{__schema{types{name}}}"} → baseline subscription(teamId,appId,subscriptionId) → cross-tenant ID swap → diff status/body.
+impact: cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW+NOAM share identical issuer+aud per tenant (prod 3db550f0 / staging 88f558f5); NA client c387a5ab resolves to same staging tenant — BU separation rests solely on acr + org-shape claims; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); identity layer untouched by mS_4 unification.
+evidence_needed: two staging identities → decoded acr/org diff; NOAM bearer executes ROW-scoped op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql on developer.tst.na with NOAM bearer → diff status/body vs acr/org.
+impact: cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-confirmed (24th cycle); POST-only first-class handler exempt from 401/307 blanket middleware; no Allow header; istio-envoy/AKS → 169.254.169.254 plausible; build unchanged since 09-12 roll (pVVz9XMK0MvBn72k4YswS).
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+[0m
+[0m$ [0mtail -c 2000 /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/probe-results.md; echo "---DATE---"; date -u
+## 2026-09-13 16:39:00 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-13 19:03:09 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+https://developer.as.api.daimlertruck.com/ -> 200 len=196341
+https://developer.as.api.daimlertruck.com/graphql -> 200 len=196341
+
+## 2026-09-13 21:26:16 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-13 23:34:38 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-14 01:42:07 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-14 07:13:38 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-14 14:17:39 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-14 19:31:49 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-14 22:49:57 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-15 01:24:17 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-15 06:19:29 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-15 11:56:19 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-15 16:40:46 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-15 19:58:31 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-15 22:50:34 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-16 01:12:52 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+
+## 2026-09-16 06:11:38 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c -> HTTP 400
+---DATE---
+Wed Sep 16 11:48:40 UTC 2026
+[0m
+[0m$ [0mfor u in \
+ "https://developer.tst.as.api.daimlertruck.com/api/healthcheck" \
+ "https://developer.tst.as.api.daimlertruck.com/api/graphql" \
+ "https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js" \
+ "https://companion.app.daimlertruck.com/api/health" \
+ "https://companion.app.daimlertruck.com/api/ready" \
+ "https://companion.app.daimlertruck.com/api/proxy-http" \
+ "https://companion.app.daimlertruck.com/" ; do
+ curl -sk -o /dev/null -w "%{http_code} %{size_download}B %{redirect_url}\n" --max-time 15 "$u"; sleep 1.2; done
+200 68B 
+307 30B https://developer.tst.as.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fgraphql
+200 2999B 
+200 15B 
+200 18B 
+405 30B 
+200 3330B
+[0m
+[93m[1m! [0mpermission requested: external_directory (/tmp/*); auto-rejecting
+[0m✗ [0mfor u in \
+ "https://developer.tst.as.api.daimlertruck.com/api/healthcheck" \
+ "https://developer.as.api.daimlertruck.com/api/healthcheck" \
+ "https://developer.tst.na.api.daimlertruck.com/api/graphql" ; do
+ curl -sk -o /tmp/hc.out -w "%{http_code} %{size_download}B\n" --max-time 15 "$u"; echo "--- body ---"; cat -A /tmp/hc.out | head -c 200; echo; sleep 1.2; done failed
+[91m[1mError: [0mThe user rejected permission to use this specific tool call.
