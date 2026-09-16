@@ -5199,3 +5199,39 @@ testability: AUTH_HELPED
 [LEARN] REJECTED sourcemap/source-disclosure @ developer.* + companion: all probed chunk `*.js.map` → 404/9B both tiers (incl. Turbopack runtime); _middlewareManifest.js → 404/9B; _ssgManifest default empty — no client source disclosure, no middleware-matcher leak.
 [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 22nd consecutive cycle — proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
 [RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable 7+ days, 22 cycles) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 22nd day with anonymous surface fully closed (sourcemaps this cycle also negative) — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
+## 2026-09-16 01:11:17 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: mS_4 buildManifest byte-identical prod+test across all 7 portals (200/2999B this cycle); /api/graphql 307→B2C stable (30B); object-ID routes /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate confirmed in client bundle; one ownership gap replicates fleet-wide by construction; 23 cycles unchanged.
+evidence_needed: authenticated introspection; on-org vs foreign-org subscription query diff.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql {"query":"{__schema{types{name}}}"} → baseline subscription(teamId,appId,subscriptionId) → cross-tenant ID swap → diff status/body.
+impact: cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW+NOAM share identical issuer+aud per tenant (prod 3db550f0 / staging 88f558f5); NA client c387a5ab resolves to same staging tenant — BU separation rests solely on acr + org-shape claims; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode); identity layer untouched by mS_4 unification.
+evidence_needed: two staging identities → decoded acr/org diff; NOAM bearer executes ROW-scoped op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql on developer.tst.na with NOAM bearer → diff status/body vs acr/org.
+impact: cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-confirmed (23rd cycle); POST-only first-class handler exempt from 401/307 blanket middleware; no Allow header; istio-envoy/AKS → 169.254.169.254 plausible; build unchanged since 09-12 roll (pVVz9XMK0MvBn72k4YswS).
+evidence_needed: valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL diff.
+verify_steps: AUTH_HELPED: POST metadata IP → mesh-internal → external; diff status/body.
+impact: cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+[PARKED] None.
+[FINAL] 1. graphql-object-id-bola-cross-portal (80) — developer.tst.na.api.daimlertruck.com/api/graphql
+[FINAL] 2. b2c-cross-bu-token-boundary-abuse (75) — login-qa.ciam.daimlertruck.com
+[FINAL] 3. companion-proxy-http-metadata-ssrf (55) — companion.app.daimlertruck.com/api/proxy-http
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, policies b2c_1a_signin_oidc_row + b2c_1a_signin_oidc_noam) via bugs.olivermaicher.eu — one ROW-scoped, one NOAM-scoped — unblocking all 3 FINALs (GraphQL introspection+BOLA, cross-BU token boundary with decoded acr/org, companion proxy-http POST SSRF) in one grant. Passive surface fully exhausted 23 consecutive byte-stable cycles; six read-only probes this cycle all identical.
+[LEARN] ACCEPTED stability @ developer.* + companion tier: 23rd consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, companion health 200/15B, proxy-http GET 405/30B — post-unification surface fully mapped.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 23rd consecutive cycle; all re-probes byte-identical — proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
+[RISK] daimler-truck: 80 — fleet-wide byte-identical mS_4 code path (stable 8+ days, 23 cycles) maximizes blast radius if GraphQL BOLA holds across all 7 portals; NOAM dealer-PII superset keeps cross-BU Critical; companion proxy-http stands as POC-class SSRF. All three FINALs AUTH_HELPED and unverified for a 23rd day with anonymous surface fully closed (sourcemaps/middleware-manifest already negative) — elevated risk reflects attacker-agnostic exposure if the single staging grant reveals an ownership/authz gap, not a confirmed exploit.
