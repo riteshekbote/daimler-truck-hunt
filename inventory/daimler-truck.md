@@ -676,3 +676,10 @@ www.daimlertruck.com
 - CHANGED Companion-dev.auth now fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); /api/proxy-http returns 401; /admin /chat 30
 - CHANGED All 7 developer portals unified on build mS_4SiQmkiaGsx2vLoXkH — identical GraphQL schema, dual B2C providers (azure-ad-b2c-dt ROW client 205f35f7 + azure-ad-b2c-dtna NA client c387a5ab)
 - CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only acr + org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, teleph
+
+## 2026-09-16 16:32:51 UTC
+- CHANGED Stability confirmed at 23rd consecutive byte-stable cycle across all 7 developer portals (build mS_4SiQmkiaGsx2vLoXkH) + companion tier (build pVVz9XMK0MvBn72k4YswS / AO7VvIOpKp-TqU5HF-ZTR)
+- CHANGED Fresh passive probe value REJECTED 23rd consecutive cycle — all re-probes byte-identical; proxy-http POST body, GraphQL introspection, cross-BU token claims require AUTH_HELPED request shapes
+- CHANGED Companion-dev.auth now fully wired to PROD B2C (tenant 3db550f0, client cd34584a, policy b2c_1a_signin_oidc_row, PKCE S256+state+same-origin redirect_uri); /api/proxy-http returns 401; /admin /chat 30
+- CHANGED All 7 developer portals unified on build mS_4SiQmkiaGsx2vLoXkH — identical GraphQL schema, dual B2C providers (azure-ad-b2c-dt ROW client 205f35f7 + azure-ad-b2c-dtna NA client c387a5ab)
+- CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod 3db550f0, staging 88f558f5) share IDENTICAL issuer URI; only acr + org-scoped claims (FTLOrgPrimaryContactEmail, FTLOrgPrimaryContactName, teleph
