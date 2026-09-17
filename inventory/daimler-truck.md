@@ -700,3 +700,5 @@ www.daimlertruck.com
 - CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod `3db550f0`, staging `88f558f5`) share IDENTICAL issuer URI; only `acr` + org-scoped claims (`FTLOrgPrimaryContactEmail`, `FTLOrgPrimaryContactNam
 
 ## 2026-09-17 16:36:21 UTC
+
+## 2026-09-17 19:54:43 UTC
