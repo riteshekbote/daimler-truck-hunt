@@ -4499,3 +4499,4 @@ testability: AUTH_HELPED
 [RISK] daimler-truck: 78 — 7 developer portals with GraphQL + object-ID REST routes behind Azure AD B2C (dual providers ROW/NA); companion.app + companion-dev.app add parallel surface with proxy-http/[...slug] catch-all routes (middleware-exempt, SSRF/BOLA candidates); prod B2C tenant issues ROW+NOAM under same issuer — cross-BU token boundary relies solely on acr/org claim validation by downstream APIs; companion-dev callback registered in prod B2C client allowlist; identical build manifests across prod/dev companion and across all 7 developer portals (now unified on mS_4SiQmkiaGsx2vLoXkH) suggest same authz logic — any flaw replicates widely.
 ## 2026-09-16 20:01:44 UTC [target] (model nemotron3)
 ## 2026-09-16 22:46:37 UTC [target] (model nemotron3)
+## 2026-09-17 01:13:08 UTC [target] (model nemotron3)

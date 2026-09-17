@@ -1827,3 +1827,9 @@
 - NEXT(hypotheses-bigpickle.txt): HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) — one ROW-licensed, one 
 - LEARN: ACCEPTED stability @ developer.* + companion tier: 25th consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, comp
 - LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 25th consecutive cycle; all re-probes byte-identical — proxy-http POST body, GraphQL introspection, cross
+
+## RANKED HYPOTHESES 2026-09-17 01:13:17 UTC
+- [80] developer.tst.na.api.daimlertruck.com/api/graphql: graphql-object-id-bola-cross-portal (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-bigpickle.txt): HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f, staging tier) — one ROW-
+- LEARN: ACCEPTED stability @ developer.* + companion tier: 26th consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, comp
+- LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 26th consecutive cycle; all re-probes byte-identical — proxy-http POST body, GraphQL introspection, cross
