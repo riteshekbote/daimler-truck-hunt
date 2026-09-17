@@ -698,3 +698,5 @@ www.daimlertruck.com
 - NEW Companion-dev signin now redirects to PROD B2C authorize (tenant `3db550f0`, client `cd34584a`, policy `b2c_1a_signin_oidc_row`, PKCE S256 + state + same-origin redirect_uri); `/api/proxy-http` return
 - CHANGED All 7 developer portals unified on build `mS_4SiQmkiaGsx2vLoXkH` — identical GraphQL schema, dual B2C providers (`azure-ad-b2c-dt` ROW client `205f35f7` + `azure-ad-b2c-dtna` NA client `c387a5ab`)
 - CHANGED B2C Cross-BU Token Boundary: ROW+NOAM per tenant (prod `3db550f0`, staging `88f558f5`) share IDENTICAL issuer URI; only `acr` + org-scoped claims (`FTLOrgPrimaryContactEmail`, `FTLOrgPrimaryContactNam
+
+## 2026-09-17 16:36:21 UTC
