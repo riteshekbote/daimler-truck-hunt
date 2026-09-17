@@ -437,3 +437,5 @@
 - 2026-09-17 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08
 - 2026-09-17 REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated
 - 2026-09-17 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 26th consecutive cycle; all re-probes byte-stable — proxy-http POST body, GraphQL introspection, cross-BU token claims all require request shapes not permitted in passive mode
+- 2026-09-17 ACCEPTED stability @ developer.* + companion tier: 27th consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, companion health 200/15B, proxy-http GET 405/30B — post-unification surface fully mapped.
+- 2026-09-17 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 27th consecutive cycle; all re-probes byte-identical — proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
