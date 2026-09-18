@@ -1,4 +1,4 @@
-## 2026-09-18 21:20:10 UTC [target] (model nemotron3)
+## 2026-09-18 23:26:05 UTC [target] (model nemotron3)
 [NEW] Test-tier developer portals (tst.na, tst.eu, dev.na) rolled to 4th build ID `PGbCvrz8tulN328ughX4L` — prod/test/tst.as remain on `mS_4SiQmkiaGsx2vLoXkH`; buildManifest route surface identical (chunk-hash diff only), `/api/graphql` 307, `/api/healthcheck` 200 JSON, `/api/auth/providers` dual B2C providers confirmed
 [NEW] Staging B2C tenant (`login-qa.ciam.daimlertruck.com`, tenant `88f558f5`) confirms identical JWKS `kid` (`GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo`) for both ROW (`b2c_1a_signin_oidc_row`) and NOAM (`b2c_1a_signin_oidc_noam`) policies — same issuer URI, same signing keys
 [CHANGED] Companion-dev.app `/api/proxy-http` GET now returns 405 (was 401) — homogeneous with prod; `/api/auth/providers` single `azure-ad-b2c` provider on both companion apps (ROW only, client `cd34584a`)
@@ -11,8 +11,7 @@ class: AUTH
 asset: login.ciam.daimlertruck.com (prod tenant 3db550f0) + login-qa.ciam.daimlertruck.com (staging tenant 88f558f5)
 confidence: 85
 reasoning: Both prod and staging B2C tenants issue ROW (`b2c_1a_signin_oidc_row`) and NOAM (`b2c_1a_signin_oidc_noam`) policies under IDENTICAL issuer URI per tenant. Staging confirmed: both policies share same JWKS `kid` (`GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo`) and modulus. Downstream APIs validate issuer+aud+signature; `acr` claim and org-scoped claims (`FTLOrgPrimaryContactEmail`, `FTLOrgPrimaryContactName`, `telephoneNumber_Org`, `street_Org`, `FTLOrgSapCode`) are the only BU differentiators. If any downstream API fails to validate `acr`/org claims, ROW token could access NOAM resources (dealer PII) or vice versa.
-evidence_needed: Downstream API token validation logic showing missing `acr`/org claim enforcement; or authenticated test presenting ROW token to NOAM-scoped endpoint (e.g., `developer.na.api.daimlertruck.com/apis/<NA-apiId>`) observing 200 vs 403.
-verify_steps: PASSIVE: Compare JWKS across ROW/NOAM policies per tenant (same `kid` set confirmed on staging); AUTH_HELPED: Obtain valid ROW session via staging ROW employee identity (broker `e39fd9b6` → `login-qa.ciam`, policy `b2c_1a_signin_oidc_row`), present token to NOAM-scoped endpoint (`developer.na.api.daimlertruck.com/apis/<NA-apiId>`), observe 403 vs 200; test token introspection at userinfo endpoint for claim set.
+evidence_needed: Downstream API token validation logic showing missing `acr`/org claim enforcement; or authenticated test presenting ROW token [0m
 impact: Cross-business-unit token acceptance → ROW employee accesses NOAM dealer PII (contact details, SAP codes, org hierarchy) or NOAM partner accesses ROW internal APIs → High/Critical (PII + privilege escalation across BU).
 testability: AUTH_HELPED
 [HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
