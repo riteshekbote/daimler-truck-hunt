@@ -2017,3 +2017,13 @@
 - LEARN: ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build `mS_4SiQmkiaGsx2vLoXkH` (was JCvrnrykV_KYBk7pu0Npq) — third build ID n
 - LEARN: ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no 
 - LEARN: REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
+
+## RANKED HYPOTHESES 2026-09-18 21:20:20 UTC
+- [85] login.ciam.daimlertruck.com: B2C Cross-BU Token Boundary Abuse via Shared Issuer (from art/lead_nemotron3.txt)
+- [80] developer.tst.na.api.daimlertruck.com/api/graphql: graphql-object-id-bola-cross-portal (from art/lead_bigpickle.txt)
+- NEXT(hypotheses-nemotron3.txt): HUMAN: Request two admin-provisioned staging identities on `login-qa.ciam.daimlertruck.com` (tenant `88f558f5-a216-470b-b34a-3164f5d6ec0f`, staging tier) via bu
+- LEARN: ACCEPTED test-dev-portal-build-roll @ developer.{tst.na,tst.eu,dev.na}.api.daimlertruck.com: 4th build ID `PGbCvrz8tulN328ughX4L`; buildManifest diff vs mS_4 is
+- LEARN: ACCEPTED b2c-cross-bu-token-boundary @ login-qa.ciam.daimlertruck.com: ROW+NOAM policies share identical issuer URI (`https://login-qa.ciam.daimlertruck.com/88f
+- LEARN: ACCEPTED companion-dev-auth-wired-to-prod @ companion-dev.app.daimlertruck.com: single provider `azure-ad-b2c` now initiates PKCE-protected flow to prod B2C ten
+- LEARN: REJECTED fresh-passive-probe-value @ all-scoped-hosts: 32nd consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AU
+- LEARN: ACCEPTED stability @ developer.* + companion tier: 31st consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, PGbCvrz/mS_4 manifests 200/2999B, 

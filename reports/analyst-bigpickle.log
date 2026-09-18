@@ -21735,3 +21735,159 @@ testability: AUTH_HELPED
 
 **STEP 7 — RISK**
 [RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL object-ID BOLA, cross-BU token boundary, metadata SSRF) remain unverified for 31+ days with the anonymous surface fully mapped and closed; the single staging-identity grant is the only unlock. Internal process risk persists: contradictory open-redirect verdict in valid-bugs.md could trigger triage rejection on the strongest reportable item — reconcile before filing. Exposure is attacker-agnostic and pending the grant, not a confirmed exploit.
+===== ANALYST bigpickle 2026-09-18 21:20:20 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt
+total 528
+drwxr-xr-x 12 runner runner   4096 Sep 18 21:14 .
+drwxr-xr-x  3 runner runner   4096 Sep 18 21:14 ..
+drwxr-xr-x  7 runner runner   4096 Sep 18 21:14 .git
+drwxr-xr-x  3 runner runner   4096 Sep 18 21:14 .github
+-rw-r--r--  1 runner runner   1715 Sep 18 21:14 README.md
+-rw-r--r--  1 runner runner     32 Sep 18 21:14 analyst-out.txt
+-rw-r--r--  1 runner runner 214771 Sep 18 21:14 analyst-prompt.txt
+-rw-r--r--  1 runner runner 211002 Sep 18 21:14 ctx.txt
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 inventory
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 knowledge
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 leads
+-rw-r--r--  1 runner runner  23062 Sep 18 21:14 probe-results.md
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 recon-notes
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 reports
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 reposcan-raw
+-rw-r--r--  1 runner runner   3182 Sep 18 21:14 scope.yml
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 scripts
+-rw-r--r--  1 runner runner     33 Sep 18 21:14 state_bigpickle.json
+-rw-r--r--  1 runner runner     33 Sep 18 21:14 state_laguna.json
+-rw-r--r--  1 runner runner     33 Sep 18 21:14 state_ling3.json
+-rw-r--r--  1 runner runner     33 Sep 18 21:14 state_longcat.json
+-rw-r--r--  1 runner runner     33 Sep 18 21:14 state_mimo.json
+-rw-r--r--  1 runner runner     33 Sep 18 21:14 state_nemotron3.json
+drwxr-xr-x  2 runner runner   4096 Sep 18 21:14 triage
+[0m
+[0m✱ [0mGlob "**/lead_*.txt"[90m 0 matches[0m
+[0m✱ [0mGlob "**/*.md"[90m 100 matches[0m
+[0m
+[0m$ [0mls -la /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/leads /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/reports /home/runner/work/daimler-truck-hunt/daimler-truck-hunt/triage | tail -40
+-rw-r--r--  1 runner runner   147 Sep 18 21:14 run-2026-09-12-20-53.md
+-rw-r--r--  1 runner runner   201 Sep 18 21:14 run-2026-09-12-22-42.md
+-rw-r--r--  1 runner runner   208 Sep 18 21:14 run-2026-09-13-00-29.md
+-rw-r--r--  1 runner runner   226 Sep 18 21:14 run-2026-09-13-05-19.md
+-rw-r--r--  1 runner runner   217 Sep 18 21:14 run-2026-09-13-10-21.md
+-rw-r--r--  1 runner runner   229 Sep 18 21:14 run-2026-09-13-14-38.md
+-rw-r--r--  1 runner runner   514 Sep 18 21:14 run-2026-09-13-17-38.md
+-rw-r--r--  1 runner runner   135 Sep 18 21:14 run-2026-09-13-19-44.md
+-rw-r--r--  1 runner runner   175 Sep 18 21:14 run-2026-09-13-21-54.md
+-rw-r--r--  1 runner runner   278 Sep 18 21:14 run-2026-09-13-23-45.md
+-rw-r--r--  1 runner runner   212 Sep 18 21:14 run-2026-09-14-02-11.md
+-rw-r--r--  1 runner runner 11281 Sep 18 21:14 run-2026-09-14-07-56.md
+-rw-r--r--  1 runner runner   431 Sep 18 21:14 run-2026-09-14-14-32.md
+-rw-r--r--  1 runner runner   203 Sep 18 21:14 run-2026-09-14-19-34.md
+-rw-r--r--  1 runner runner   254 Sep 18 21:14 run-2026-09-14-22-43.md
+-rw-r--r--  1 runner runner   188 Sep 18 21:14 run-2026-09-15-01-03.md
+-rw-r--r--  1 runner runner   190 Sep 18 21:14 run-2026-09-15-06-10.md
+-rw-r--r--  1 runner runner   204 Sep 18 21:14 run-2026-09-15-11-46.md
+-rw-r--r--  1 runner runner   197 Sep 18 21:14 run-2026-09-15-15-51.md
+-rw-r--r--  1 runner runner   135 Sep 18 21:14 run-2026-09-15-19-20.md
+-rw-r--r--  1 runner runner   238 Sep 18 21:14 run-2026-09-15-22-25.md
+-rw-r--r--  1 runner runner   200 Sep 18 21:14 run-2026-09-16-00-45.md
+-rw-r--r--  1 runner runner   250 Sep 18 21:14 run-2026-09-16-05-26.md
+-rw-r--r--  1 runner runner   206 Sep 18 21:14 run-2026-09-16-10-15.md
+-rw-r--r--  1 runner runner   268 Sep 18 21:14 run-2026-09-16-14-59.md
+-rw-r--r--  1 runner runner   485 Sep 18 21:14 run-2026-09-16-18-44.md
+-rw-r--r--  1 runner runner   196 Sep 18 21:14 run-2026-09-16-21-47.md
+-rw-r--r--  1 runner runner   259 Sep 18 21:14 run-2026-09-16-23-57.md
+-rw-r--r--  1 runner runner   227 Sep 18 21:14 run-2026-09-17-03-08.md
+-rw-r--r--  1 runner runner   168 Sep 18 21:14 run-2026-09-17-08-41.md
+-rw-r--r--  1 runner runner   235 Sep 18 21:14 run-2026-09-17-13-54.md
+-rw-r--r--  1 runner runner   224 Sep 18 21:14 run-2026-09-17-17-49.md
+-rw-r--r--  1 runner runner   263 Sep 18 21:14 run-2026-09-17-20-42.md
+-rw-r--r--  1 runner runner  1133 Sep 18 21:14 run-2026-09-17-23-13.md
+-rw-r--r--  1 runner runner   170 Sep 18 21:14 run-2026-09-18-01-17.md
+-rw-r--r--  1 runner runner   197 Sep 18 21:14 run-2026-09-18-05-59.md
+-rw-r--r--  1 runner runner   272 Sep 18 21:14 run-2026-09-18-10-38.md
+-rw-r--r--  1 runner runner   143 Sep 18 21:14 run-2026-09-18-14-37.md
+-rw-r--r--  1 runner runner   147 Sep 18 21:14 run-2026-09-18-17-51.md
+-rw-r--r--  1 runner runner   174 Sep 18 21:14 run-2026-09-18-20-06.md
+[0m
+[0m→ [0mRead state_bigpickle.json
+[0m→ [0mRead analyst-out.txt
+[0m→ [0mRead triage/run-2026-09-18-20-06.md
+[0m→ [0mRead triage/run-2026-09-18-17-51.md
+[0m→ [0mRead reports/valid-bugs.md
+[0m→ [0mRead leads/lead-bigpickle.md
+[0m
+[0m$ [0mtimeout 12 curl -s -o /dev/null -w "%{http_code} %{size_download}\n" -H 'User-Agent: Mozilla/5.0' https://developer.tst.as.api.daimlertruck.com/api/healthcheck; echo "exit=$?"
+200 70
+exit=0
+[0m
+[0m$ [0mUA='Mozilla/5.0'; probe(){ for u in "$@"; do code=$(curl -s -o /dev/null -w "%{http_code}" -m 10 -H "User-Agent: $UA" "$u"); len=$(curl -s -m 10 -H "User-Agent: $UA" "$u" | wc -c); echo "$code $len $u"; sleep 1.2; done; }
+probe "https://developer.tst.as.api.daimlertruck.com/api/healthcheck" "https://developer.tst.as.api.daimlertruck.com/api/graphql" "https://developer.tst.as.api.daimlertruck.com/api/auth/providers" "https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js" "https://developer.tst.na.api.daimlertruck.com/_next/static/PGbCvrz8tulN328ughX4L/_buildManifest.js"
+200 70 https://developer.tst.as.api.daimlertruck.com/api/healthcheck
+307 30 https://developer.tst.as.api.daimlertruck.com/api/graphql
+200 573 https://developer.tst.as.api.daimlertruck.com/api/auth/providers
+200 2999 https://developer.tst.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js
+200 2999 https://developer.tst.na.api.daimlertruck.com/_next/static/PGbCvrz8tulN328ughX4L/_buildManifest.js
+[0m
+[0m$ [0mUA='Mozilla/5.0'; probe(){ for u in "$@"; do code=$(curl -s -o /dev/null -w "%{http_code}" -m 10 -H "User-Agent: $UA" "$u"); len=$(curl -s -m 10 -H "User-Agent: $UA" "$u" | wc -c); echo "$code $len $u"; sleep 1.2; done; }
+probe "https://companion.app.daimlertruck.com/api/health" "https://companion.app.daimlertruck.com/api/ready" "https://companion.app.daimlertruck.com/api/proxy-http" "https://companion.app.daimlertruck.com/"
+200 15 https://companion.app.daimlertruck.com/api/health
+200 18 https://companion.app.daimlertruck.com/api/ready
+405 30 https://companion.app.daimlertruck.com/api/proxy-http
+200 3330 https://companion.app.daimlertruck.com/
+[0m
+Verified via live read-only re-probe of the stability set before analysis. Output blocks:
+
+**STEP 1 — DELTA**
+- NO_DELTA: 33rd consecutive byte-stable cycle — tst.as /api/healthcheck 200/70B, /api/graphql 307/30B, /api/auth/providers 200/573B, mS_4 buildManifest 200/2999B, tst.na PGbCvrz buildManifest 200/2999B, companion root 200/3330B + /api/health 200/15B + /api/ready 200/18B + /api/proxy-http GET 405/30B, all byte-identical to prior cycle.
+
+**STEP 2 — PRIORITIZE**
+- [PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.4,attack_surface=8,business_value=9,tech_exposure=9(GRAPHQL+OIDC),gate_ease=2,cloud_surface=4,freshness=1
+- [PRIO] login-qa.ciam.daimlertruck.com,6.25,attack_surface=7,business_value=9,tech_exposure=8(OIDC+JWT),gate_ease=3,cloud_surface=5,freshness=1
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http,5.5,attack_surface=6,business_value=7,tech_exposure=7(POST-proxy),gate_ease=2,cloud_surface=8(metadata),freshness=1
+
+**STEP 3 — HYPOTHESES**
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: 7 portals; /api/graphql 307→B2C (30B, re-probed); object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) in buildManifest (2999B, mS_4+PGbCvrz identical route surface); PGbCvrz roll chunk-hash-only.
+evidence_needed: Authed introspection + foreign-org subscriptionId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW staging session → POST introspection on tst.na; swap subscription/apiId to second-org value; diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW (205f35f7) + NOAM (c387a5ab) share identical issuer+aud per tenant; only acr + org-shape claims differentiate BU; NOAM superset carries dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode).
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer accepted on ROW-scoped op.
+verify_steps: AUTH_HELPED: both tokens from login-qa → POST /api/graphql tst.na with NOAM bearer → diff vs ROW result set.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-probed identical — POST-only first-class handler exempt from blanket 401 middleware; istio-envoy/AKS backend; build static since 09-12 roll.
+evidence_needed: Valid B2C session → POST {"url":...} metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+
+**STEP 4 — SELF-CRITIQUE**
+- [FINAL] graphql-object-id-bola-cross-portal (80) — top IDOR; route surface proven on both build tiers; blocked only on auth.
+- [FINAL] b2c-cross-bu-token-boundary-abuse (75) — cross-BU token collision with dealer PII; blocked only on auth.
+- [FINAL] companion-proxy-http-metadata-ssrf (55) — handler confirmed POST-only + middleware-exempt; blocked only on auth.
+- [PARKED] (none new: 33rd cycle with zero delta yields no fresh hypotheses ≥40 that are not already tracked; all previously rejected classes remain rejected).
+
+**STEP 5 — NEXT ACTION**
+- [NEXT] HUMAN: Escalate to bugs.olivermaicher.eu for the minimal unlock on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) — one ROW identity (b2c_1a_signin_oidc_row, client 205f35f7) unblocks the 80/55 FINALs; a second NOAM identity (b2c_1a_signin_oidc_noam, client c387a5ab) unblocks the 75 — or a pre-authed session cookie for developer.tst.na (PGbCvrz). Same escalation as prior cycle; no productive passive probe exists (33rd consecutive byte-stable cycle). Before any filing, reconcile the contradictory "NextAuth.js Open Redirect VALID 6.1" verdict in reports/valid-bugs.md (marked VALID 09-04/09-11) against the KB's repeated REJECTED verdict (callbackUrl same-domain-enforced, subdomains rejected) or triage will bounce the report.
+
+**STEP 6 — LEARNING**
+- [LEARN] ACCEPTED stability @ developer.* + companion tier: 33rd consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, PGbCvrz/mS_4 manifests 200/2999B, providers 200/573B, companion health 200/15B + ready 200/18B + proxy-http GET 405/30B; blast radius unchanged.
+- [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 33rd consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
+
+**STEP 7 — RISK**
+- [RISK] daimler-truck: 82 — three critical/high candidates (GraphQL object-ID BOLA [80], cross-BU token boundary [75], metadata SSRF [55]) unverified 32+ days with anonymous surface fully mapped and closed; the single staging-identity grant remains the only unlock. Internal process risk persists: valid-bugs.md carries a contradiction (open-redirect VALID 6.1 vs KB REJECTED, same-domain enforced) that could trigger triage rejection on the strongest reportable item — reconcile before filing. Exposure is attacker-agnostic and pending the grant, not a confirmed exploit.
