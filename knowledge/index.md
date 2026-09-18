@@ -466,3 +466,5 @@
 - 2026-09-18 ACCEPTED developer.as.build-manifest-consolidation: prod developer.as portal now on build `mS_4SiQmkiaGsx2vLoXkH` (was JCvrnrykV_KYBk7pu0Npq) — third build ID now unified across prod+test+tst.as; full object-ID route surface confirmed in buildManifest.
 - 2026-09-18 ACCEPTED stability @ developer.tst.as.api.daimlertruck.com: re-verified 3rd build ID `mS_4SiQmkiaGsx2vLoXkH`, dual providers, `/apis` 307, healthcheck 200 — no env drift since 2026-09-08.
 - 2026-09-18 REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
+- 2026-09-18 ACCEPTED stability @ developer.* + companion tier: 30th consecutive byte-stable cycle; test tier PGbCvrz/mS_4 divergence persists but route surface and guards byte-equivalent, blast radius unchanged.
+- 2026-09-18 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 31st consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.

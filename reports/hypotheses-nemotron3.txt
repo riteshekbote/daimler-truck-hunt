@@ -1,6 +1,6 @@
-## 2026-09-18 11:33:15 UTC [target] (model nemotron3)
+## 2026-09-18 15:14:45 UTC [target] (model nemotron3)
 [NEW] Test-tier developer portals (tst.na, tst.eu, dev.na) rolled to 4th build ID `PGbCvrz8tulN328ughX4L` (prod/test/tst.as remain on `mS_4SiQmkiaGsx2vLoXkH`) — chunk-hash diff only, route surface identical, /api/graphql 307/30B + providers 200/573B + healthcheck JSON unchanged
-[NEW] Fresh passive probe value REJECTED 30th consecutive cycle — test tier rolled but no gated handler became public; proxy-http POST body, GraphQL introspection, cross-BU token claims all remain AUTH_HELPED-only
+[CHANGED] Fresh passive probe value REJECTED 30th consecutive cycle — test tier rolled but no gated handler became public; proxy-http POST body, GraphQL introspection, cross-BU token claims all remain AUTH_HELPED-only
 [CHANGED] Stability @ developer.* + companion tier: 29th consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, companion health 200/15B + ready 200/18B, proxy-http GET 405/30B; post-unification surface fully mapped
 [PRIO] login.ciam.daimlertruck.com + login-qa.ciam.daimlertruck.com,8.2,attack_surface=9,business_value=10,tech_exposure=8,gate_ease=5,cloud_surface=7,freshness=8
 [PRIO] developer.as.api.daimlertruck.com + developer.eu.api.daimlertruck.com + developer.na.api.daimlertruck.com + developer.tst.as.api.daimlertruck.com + developer.dev.na.api.daimlertruck.com + developer.tst.eu.api.daimlertruck.com + developer.tst.na.api.daimlertruck.com,8.2,attack_surface=9,business_value=9,tech_exposure=9,gate_ease=5,cloud_surface=7,freshness=9
