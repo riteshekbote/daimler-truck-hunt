@@ -706,3 +706,8 @@ www.daimlertruck.com
 ## 2026-09-17 22:45:44 UTC
 
 ## 2026-09-18 01:08:59 UTC
+
+## 2026-09-18 06:04:37 UTC
+- NEW Test-tier developer portals (tst.na, tst.eu, dev.na) rolled to 4th build ID `PGbCvrz8tulN328ughX4L` (prod/test/tst.as remain on `mS_4SiQmkiaGsx2vLoXkH`) — chunk-hash diff only, route surface identical
+- NEW Fresh passive probe value REJECTED 30th consecutive cycle — test tier rolled but no gated handler became public; proxy-http POST body, GraphQL introspection, cross-BU token claims all remain AUTH_HELP
+- CHANGED Stability @ developer.* + companion tier: 29th consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, companion health 200/15B + ready 200/18B, proxy-http 

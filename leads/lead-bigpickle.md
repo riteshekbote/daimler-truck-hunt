@@ -5652,3 +5652,31 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED test-dev-portal-build-roll @ developer.{tst.na,tst.eu,dev.na}.api.daimlertruck.com: 4th build ID `PGbCvrz8tulN328ughX4L`; buildManifest diff vs mS_4 is chunk-hashes-only (route surface identical), /api/graphql 307/30B + providers 200/573B + healthcheck JSON unchanged — first test-tier deploy since 09-13 unification, zero security-relevant drift.
 [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 30th consecutive cycle; test tier rolled but no gated handler became public — proxy-http POST body, GraphQL introspection, cross-BU token claims all remain AUTH_HELPED-only.
 [RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL BOLA, cross-BU token boundary, metadata SSRF) remain unverified for 30 days with anonymous surface closed; test-tier re-split to a distinct build reintroduces env divergence but route surface and guards are byte-equivalent, so blast radius unchanged. Risk reflects attacker-agnostic exposure pending the single staging grant, not a confirmed exploit.
+## 2026-09-18 06:02:41 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: PGbCvrz roll is chunk-hash-only (buildManifest diff), object-ID routes unchanged; /api/graphql 307/30B→B2C persists; tst.as mS_4 hold confirms two live builds but no behavioral split.
+evidence_needed: Authenticated introspection; foreign-org subscriptionId vs own status/body diff.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql introspection on tst.na; swap subscription/apiId to foreign org; diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW+NOAM share identical issuer+aud; only acr + org-shape claims differentiate BU; NOAM superset carries dealer PII.
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer on ROW-scoped op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql on tst.na; diff results.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B proves POST-only first-class handler exempt from blanket middleware; istio-envoy/AKS backend.
+evidence_needed: Valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external status/body diff.
+verify_steps: AUTH_HELPED: POST metadata IP vs mesh-internal vs external URL; diff status/body.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
