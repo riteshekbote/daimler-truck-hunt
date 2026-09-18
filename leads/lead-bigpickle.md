@@ -5620,3 +5620,35 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED stability @ developer.* + companion tier: 29th consecutive byte-stable cycle verified 2026-09-17 — healthcheck 200/70B, graphql 307/30B, buildManifest mS_4 200/2999B, providers 200/573B, companion health 200/15B + ready 200/18B, proxy-http GET 405/30B.
 [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 29th consecutive cycle; all seven re-probes byte-identical — proxy-http POST body, GraphQL introspection, cross-BU token claims require AUTH_HELPED request shapes not available in passive mode.
 [RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL BOLA, cross-BU token boundary, metadata SSRF) remain unverified with anonymous surface fully closed for 29 days; fleet-wide byte-identical mS_4 build maximizes blast radius if BOLA holds across all 7 portals. Risk reflects attacker-agnostic exposure pending the single staging grant, not a confirmed exploit. Unchanged from prior cycle.
+## 2026-09-18 01:08:48 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: tst.na now on 4th build `PGbCvrz8tulN328ughX4L`; route surface byte-identical to mS_4 (object-ID routes /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); /api/graphql 307/30B→B2C unchanged. Same code → same BOLA candidate.
+evidence_needed: Authenticated introspection; on-org vs foreign-org subscription ID status/body diff.
+verify_steps: AUTH_HELPED: ROW session on login-qa (88f558f5) → POST /api/graphql introspection; swap subscription/apiId foreign-org; diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW+NOAM share identical issuer+aud per tenant; only acr + org-shape claims differentiate BU; NOAM superset carries dealer PII. Unchanged this cycle.
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer executing ROW-scoped op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql on developer.tst.na with NOAM bearer → diff.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B proves POST-only first-class handler exempt from blanket middleware; istio-envoy/AKS backend; build unchanged since 09-12 roll.
+evidence_needed: Valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST metadata IP vs mesh-internal vs external URL; diff status/body.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) — one ROW-licensed (b2c_1a_signin_oidc_row → client 205f35f7), one NOAM-licensed (b2c_1a_signin_oidc_noam → client c387a5ab) — or a pre-authed session cookie for developer.tst.na.api.daimlertruck.com (now on build PGbCvrz8tulN328ughX4L); unlocks all three FINALs as a set. No productive passive probe exists.
+[LEARN] ACCEPTED test-dev-portal-build-roll @ developer.{tst.na,tst.eu,dev.na}.api.daimlertruck.com: 4th build ID `PGbCvrz8tulN328ughX4L`; buildManifest diff vs mS_4 is chunk-hashes-only (route surface identical), /api/graphql 307/30B + providers 200/573B + healthcheck JSON unchanged — first test-tier deploy since 09-13 unification, zero security-relevant drift.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 30th consecutive cycle; test tier rolled but no gated handler became public — proxy-http POST body, GraphQL introspection, cross-BU token claims all remain AUTH_HELPED-only.
+[RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL BOLA, cross-BU token boundary, metadata SSRF) remain unverified for 30 days with anonymous surface closed; test-tier re-split to a distinct build reintroduces env divergence but route surface and guards are byte-equivalent, so blast radius unchanged. Risk reflects attacker-agnostic exposure pending the single staging grant, not a confirmed exploit.

@@ -21281,3 +21281,181 @@ testability: AUTH_HELPED
 
 [STEP 7 — RISK]
 [RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL BOLA, cross-BU token boundary, metadata SSRF) remain unverified with anonymous surface fully closed for 29 days; fleet-wide byte-identical mS_4 build maximizes blast radius if BOLA holds across all 7 portals. Risk reflects attacker-agnostic exposure pending the single staging grant, not a confirmed exploit. Unchanged from prior cycle.
+===== ANALYST bigpickle 2026-09-18 01:08:59 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" https://developer.tst.as.api.daimlertruck.com/api/healthcheck
+200 70 0.322155s
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" https://developer.tst.as.api.daimlertruck.com/api/graphql
+307 30 0.307049s
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" https://companion.app.daimlertruck.com/api/health; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" https://companion.app.daimlertruck.com/api/proxy-http
+200 15 0.464898s
+405 30 0.443564s
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" "https://developer.tst.na.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js"; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" https://developer.tst.na.api.daimlertruck.com/api/auth/providers
+404 9 0.039140s
+200 573 0.041160s
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" "https://developer.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js"; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download} %{time_total}s\n" "https://developer.na.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js"
+200 2999 0.329282s
+200 2999 0.036709s
+[0m
+[0m$ [0mcurl -s https://developer.tst.na.api.daimlertruck.com/ | grep -o '"buildId":"[^"]*"' | head -1
+"buildId":"PGbCvrz8tulN328ughX4L"
+[0m
+[0m$ [0mfor h in eu.api dev.na.api tst.eu.api tst.as.api; do echo -n "$h: "; curl -s --max-time 8 https://developer.$h.daimlertruck.com/ | grep -o '"buildId":"[^"]*"' | head -1; sleep 1; done
+eu.api: "buildId":"mS_4SiQmkiaGsx2vLoXkH"
+dev.na.api: "buildId":"PGbCvrz8tulN328ughX4L"
+tst.eu.api: "buildId":"PGbCvrz8tulN328ughX4L"
+tst.as.api: "buildId":"mS_4SiQmkiaGsx2vLoXkH"
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "%{http_code} %{size_download}\n" "https://developer.tst.na.api.daimlertruck.com/_next/static/PGbCvrz8tulN328ughX4L/_buildManifest.js"; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" "https://developer.tst.na.api.daimlertruck.com/_next/static/PGbCvrz8tulN328ughX4L/_ssgManifest.js"; sleep 1; curl -s -o /dev/null -w "%{http_code} %{size_download}\n" https://developer.tst.na.api.daimlertruck.com/api/graphql
+200 2999
+200 76
+307 30
+[0m
+[0m$ [0mcurl -s "https://developer.tst.na.api.daimlertruck.com/_next/static/PGbCvrz8tulN328ughX4L/_buildManifest.js" > /tmp/opencode/bm_new.js; curl -s "https://developer.as.api.daimlertruck.com/_next/static/mS_4SiQmkiaGsx2vLoXkH/_buildManifest.js" > /tmp/opencode/bm_ms4.js; sha256sum /tmp/opencode/bm_new.js /tmp/opencode/bm_ms4.js; diff /tmp/opencode/bm_new.js /tmp/opencode/bm_ms4.js && echo "IDENTICAL"
+28bf1064f66cd9037093a48c89e5f7f396948ea72081d5eb5166dd5299887f35  /tmp/opencode/bm_new.js
+d4b822d4a74191bc5e35353b0139d27be76676667edc109edb98313338531d18  /tmp/opencode/bm_ms4.js
+12c12
+<     "static/chunks/17cnnd-jsg69s.js"
+---
+>     "static/chunks/2v489gknzu7q_.js"
+15c15
+<     "static/chunks/2egmt6efo7bpe.js"
+---
+>     "static/chunks/0ixhx25il_7u0.js"
+18c18
+<     "static/chunks/2y9yh0kq71ckl.js"
+---
+>     "static/chunks/3s6nhq0rp9mta.js"
+21c21
+<     "static/chunks/0ilk2rwpcctar.js"
+---
+>     "static/chunks/2001uamq9btvn.js"
+24c24
+<     "static/chunks/3-t1or-hkq7n8.js"
+---
+>     "static/chunks/3npk81ailenk1.js"
+27c27
+<     "static/chunks/0bkuiyel-yr-q.js"
+---
+>     "static/chunks/26-2lbpljvmrm.js"
+30c30
+<     "static/chunks/3a3vmbfw4pg9_.js"
+---
+>     "static/chunks/0tby_g5kcs_2z.js"
+33c33
+<     "static/chunks/38ncp5_mat4i9.js"
+---
+>     "static/chunks/2fj62qzh0gnnf.js"
+36c36
+<     "static/chunks/2hlvhcxiddy8g.js"
+---
+>     "static/chunks/3p9hhnbbu4u0y.js"
+54c54
+<     "static/chunks/2a0yqq77ch3vi.js"
+---
+>     "static/chunks/0v8o7bni3114f.js"
+57c57
+<     "static/chunks/2_71jawk0encg.js"
+---
+>     "static/chunks/2dq2zqk_zmqc8.js"
+60c60
+<     "static/chunks/2bqhasxja19j-.js"
+---
+>     "static/chunks/0p5zs2y3ly5xm.js"
+63c63
+<     "static/chunks/3fczsllel61ij.js"
+---
+>     "static/chunks/0ybgggiwbqssz.js"
+66c66
+<     "static/chunks/20vi3ihf94thy.js"
+---
+>     "static/chunks/00bypmifr0z5p.js"
+69c69
+<     "static/chunks/19lok82mvzddt.js"
+---
+>     "static/chunks/1ib7izy1n4k4a.js"
+72c72
+<     "static/chunks/25kg6bzp_5j5h.js"
+---
+>     "static/chunks/408isulu76z59.js"
+75c75
+<     "static/chunks/1691vv-b3c89r.js"
+---
+>     "static/chunks/2b1bhp7szm3c_.js"
+78c78
+<     "static/chunks/1lax96u7rtxyp.js"
+---
+>     "static/chunks/1wymi_qn7ur60.js"
+[0m
+[0m$ [0mcurl -s -o /dev/null -w "hc: %{http_code} %{size_download}\n" https://developer.tst.na.api.daimlertruck.com/api/healthcheck; sleep 1; curl -s -o /dev/null -w "prov: %{http_code} %{size_download}\n" https://developer.tst.na.api.daimlertruck.com/api/auth/providers; sleep 1; curl -s https://developer.tst.na.api.daimlertruck.com/ | grep -o 'img-src[^;]*' | head -1
+hc: 200 69
+prov: 200 573
+[0m
+[0m$ [0mecho "TST.NA:"; curl -s https://developer.tst.na.api.daimlertruck.com/api/healthcheck; echo; echo "TST.AS:"; curl -s https://developer.tst.as.api.daimlertruck.com/api/healthcheck; echo
+TST.NA:
+{"status":"ok","uptime":32423,"timestamp":"2026-09-18T01:08:34.468Z"}
+TST.AS:
+{"status":"ok","uptime":141654,"timestamp":"2026-09-18T01:08:34.745Z"}
+[0m
+NO new surface from the re-probes except one real signal: the test/dev tier rolled a new build. Full map below.
+
+## STEP 1 — DELTA
+- [NEW] `developer.tst.na` / `developer.tst.eu` / `developer.dev.na` on 4th build ID `PGbCvrz8tulN328ughX4L` — first test-tier deploy since the 09-13 mS_4 unification (verified via root `"buildId"` + buildManifest 200/2999B).
+- [CHANGED] Prod tier + `tst.as` remain `mS_4SiQmkiaGsx2vLoXkH` — two-tier build split re-emerged (echoes original JCvrnrykV/JVF_tXHl split).
+- [CHECKED] Route surface identical: `diff buildManifest` = chunk hashes only, zero route/page changes; `/api/graphql` 307/30B, `/api/auth/providers` 200/573B, healthcheck same JSON (69B vs 70B = uptime digit-length), companion /api/health 200/15B + proxy-http GET 405/30B all unchanged.
+
+## STEP 2 — PRIORITIZE
+- [PRIO] developer.tst.na.api.daimlertruck.com/api/graphql,6.50,attack_surface=8,business_value=9,tech_exposure=9(GraphQL+BOLA),gate_ease=2,cloud_surface=5,freshness=2(new build)
+- [PRIO] login-qa.ciam.daimlertruck.com,6.60,attack_surface=7,business_value=9,tech_exposure=9(OAuth/OIDC/JWKS),gate_ease=3,cloud_surface=6,freshness=2
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http,5.55,attack_surface=6,business_value=7,tech_exposure=8(SSRF proxy),gate_ease=2,cloud_surface=7(AKS metadata),freshness=1
+
+## STEP 3 — HYPOTHESES
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: tst.na now on 4th build `PGbCvrz8tulN328ughX4L`; route surface byte-identical to mS_4 (object-ID routes /apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate); /api/graphql 307/30B→B2C unchanged. Same code → same BOLA candidate.
+evidence_needed: Authenticated introspection; on-org vs foreign-org subscription ID status/body diff.
+verify_steps: AUTH_HELPED: ROW session on login-qa (88f558f5) → POST /api/graphql introspection; swap subscription/apiId foreign-org; diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW+NOAM share identical issuer+aud per tenant; only acr + org-shape claims differentiate BU; NOAM superset carries dealer PII. Unchanged this cycle.
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer executing ROW-scoped op.
+verify_steps: AUTH_HELPED: ROW+NOAM tokens from login-qa → POST /api/graphql on developer.tst.na with NOAM bearer → diff.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B proves POST-only first-class handler exempt from blanket middleware; istio-envoy/AKS backend; build unchanged since 09-12 roll.
+evidence_needed: Valid B2C session → POST {"url":"http://169.254.169.254/latest/meta-data/"} vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST metadata IP vs mesh-internal vs external URL; diff status/body.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+
+## STEP 4 — SELF-CRITIQUE
+- [PARKED] graphql-object-id-bola-cross-portal: 30 cycles without auth; new build ID on tst.na but zero route/guard change → no new passive evidence; blocked on HUMAN.
+- [PARKED] b2c-cross-bu-token-boundary-abuse: needs two provisioned staging identities; no change.
+- [PARKED] companion-proxy-http-metadata-ssrf: POST body needs authenticated session; blocked.
+- [FINAL] graphql-object-id-bola-cross-portal (80) > b2c-cross-bu-token-boundary-abuse (75) > companion-proxy-http-metadata-ssrf (55). No delta moves any score; test-tier build roll is config-drift (prior REJECTED class) with no security-relevant trait change.
+
+## STEP 5 — NEXT ACTION
+[NEXT] HUMAN: Request two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) — one ROW-licensed (b2c_1a_signin_oidc_row → client 205f35f7), one NOAM-licensed (b2c_1a_signin_oidc_noam → client c387a5ab) — or a pre-authed session cookie for developer.tst.na.api.daimlertruck.com (now on build PGbCvrz8tulN328ughX4L); unlocks all three FINALs as a set. No productive passive probe exists.
+
+## STEP 6 — LEARNING
+[LEARN] ACCEPTED test-dev-portal-build-roll @ developer.{tst.na,tst.eu,dev.na}.api.daimlertruck.com: 4th build ID `PGbCvrz8tulN328ughX4L`; buildManifest diff vs mS_4 is chunk-hashes-only (route surface identical), /api/graphql 307/30B + providers 200/573B + healthcheck JSON unchanged — first test-tier deploy since 09-13 unification, zero security-relevant drift.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 30th consecutive cycle; test tier rolled but no gated handler became public — proxy-http POST body, GraphQL introspection, cross-BU token claims all remain AUTH_HELPED-only.
+
+## STEP 7 — RISK
+[RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL BOLA, cross-BU token boundary, metadata SSRF) remain unverified for 30 days with anonymous surface closed; test-tier re-split to a distinct build reintroduces env divergence but route surface and guards are byte-equivalent, so blast radius unchanged. Risk reflects attacker-agnostic exposure pending the single staging grant, not a confirmed exploit.
