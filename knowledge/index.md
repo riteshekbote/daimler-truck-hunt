@@ -468,3 +468,5 @@
 - 2026-09-18 REJECTED re-probe value @ companion.app.daimlertruck.com: root+liveness unchanged; no new anonymous surface; proxy-http still auth-gated.
 - 2026-09-18 ACCEPTED stability @ developer.* + companion tier: 30th consecutive byte-stable cycle; test tier PGbCvrz/mS_4 divergence persists but route surface and guards byte-equivalent, blast radius unchanged.
 - 2026-09-18 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 31st consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
+- 2026-09-18 ACCEPTED stability @ developer.* + companion tier: 31st consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, PGbCvrz/mS_4 manifests 200/2999B, providers 200/573B, companion health 200/15B + ready 200/18B, proxy-http GET 405/30B; blast radius unchanged.
+- 2026-09-18 REJECTED fresh-passive-probe-value @ all-scoped-hosts: 32nd consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.

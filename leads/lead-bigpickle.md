@@ -5751,3 +5751,35 @@ testability: AUTH_HELPED
 [LEARN] ACCEPTED stability @ developer.* + companion tier: 30th consecutive byte-stable cycle; test tier PGbCvrz/mS_4 divergence persists but route surface and guards byte-equivalent, blast radius unchanged.
 [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 31st consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
 [RISK] daimler-truck: 82 — three Critical/High candidates remain unverified for 31 days with anonymous surface closed; internal process risk: contradictory open-redirect verdict in valid-bugs.md could trigger triage rejection on the strongest reportable item; reconcile before filing. Risk reflects attacker-agnostic exposure pending the single staging grant, not a confirmed exploit.
+## 2026-09-18 18:37:08 UTC [target] (model bigpickle)
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: 7 portals; /api/graphql 307→B2C; object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) in buildManifest; client bundle shows GraphQL ops keyed by these IDs; PGbCvrz roll is chunk-hash-only (route surface identical).
+evidence_needed: Authed introspection on tst.na; foreign-org subscriptionId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW session (login-qa 88f558f5) → POST /api/graphql introspection; then swap subscription/apiId to a second-org value; diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 75
+reasoning: ROW (client 205f35f7) + NOAM (client c387a5ab) policies share identical issuer+aud per tenant; only acr + org-shape claims differentiate BU; NOAM claim superset includes dealer PII (FTLOrgPrimaryContactEmail/Name, telephoneNumber_Org, street_Org, FTLOrgSapCode).
+evidence_needed: ROW vs NOAM staging tokens → claim diff; NOAM bearer accepted on ROW-scoped GraphQL op.
+verify_steps: AUTH_HELPED: obtain both tokens from login-qa → POST /api/graphql on tst.na with NOAM bearer → expect ROW-scoped data/denial to diff.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-probed identical — POST-only first-class handler exempt from blanket middleware; istio-envoy/AKS backend; build static since 09-12 roll.
+evidence_needed: Valid B2C session → POST {"url":...} metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff status/body; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+[NEXT] HUMAN: Escalate to bugs.olivermaicher.eu for two provisioning-free staging identities on login-qa.ciam.daimlertruck.com (tenant 88f558f5-a216-470b-b34a-3164f5d6ec0f) — one ROW (b2c_1a_signin_oidc_row, client 205f35f7), one NOAM (b2c_1a_signin_oidc_noam, client c387a5ab) — or a pre-authed session for developer.tst.na.api.daimlertruck.com. Unlocks all three FINALs in one pass; no productive passive probe exists (32nd consecutive byte-stable cycle).
+[LEARN] ACCEPTED stability @ developer.* + companion tier: 31st consecutive byte-stable cycle — healthcheck 200/70B, graphql 307/30B, PGbCvrz/mS_4 manifests 200/2999B, providers 200/573B, companion health 200/15B + ready 200/18B, proxy-http GET 405/30B; blast radius unchanged.
+[LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 32nd consecutive cycle; proxy-http POST body, GraphQL introspection, cross-BU token claims all require AUTH_HELPED request shapes not available in passive mode.
+[RISK] daimler-truck: 82 — three Critical/High candidates (GraphQL object-ID BOLA, cross-BU token boundary, metadata SSRF) remain unverified for 31+ days with the anonymous surface fully mapped and closed; the single staging-identity grant is the only unlock. Internal process risk persists: contradictory open-redirect verdict in valid-bugs.md could trigger triage rejection on the strongest reportable item — reconcile before filing. Exposure is attacker-agnostic and pending the grant, not a confirmed exploit.
