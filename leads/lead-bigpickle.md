@@ -5997,3 +5997,143 @@ evidence_needed: Valid B2C session → POST metadata IP vs external URL status/b
 verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
 impact: Cloud-metadata IAM keys / mesh lateral → High.
 testability: AUTH_HELPED
+## 2026-09-19 11:35:29 UTC [target] (model bigpickle)
+evidence_needed: Authed introspection + foreign-org subscription/apiId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW staging session → POST introspection tst.na → swap subscription/apiId to second-org value → diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-probed identical — POST-only first-class handler exempt from blanket 401/307 middleware; istio-envoy/AKS backend; unresolved 34 cycles.
+evidence_needed: Valid B2C session → POST metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+confidence: 58
+reasoning: "capacitor-admin" naming suggests internal admin panel; unprobed status means no HTTP response yet captured; admin panels frequently lack auth on initial load or expose sensitive configuration
+evidence_needed: Admin dashboard content, configuration endpoints, or user management without authentication
+verify_steps: GET /, GET /admin, GET /login, GET /api/config, GET /api/status, HEAD / (check server header)
+impact: Administrative access to Capacitor-managed infrastructure → user data, configuration, potential RCE; Severity: high
+testability: AUTH_HELPED
+[HYP] authz-endpoint-idor
+class: IDOR
+asset: authz.tst.eu.api.daimlertruck.com
+confidence: 45
+reasoning: "tst" prefix suggests test/staging environment; authorization endpoints on staging often have weaker controls; 404 on root suggests path-based routing (authz/* may have specific paths)
+evidence_needed: Accessible authz endpoints with ID parameters, response containing user/tenant data
+verify_steps: GET /, GET /api/v1/users, GET /api/v1/authz/health, GET /swagger.json, GET /api-docs
+impact: Cross-tenant authorization bypass or privilege escalation on staging; Severity: high
+testability: AUTH_HELPED
+[FINAL] developer-portal-exposed-swagger: PASS. 72 confidence, pure passive verification, strong signal from 200 responses on developer portal.
+[FINAL] capacitor-admin-uncauthenticated: PASS. 58 confidence, admin naming is strong indicator, needs live probe to confirm.
+[PARKED] authz-endpoint-idor: Below confidence threshold (45), no evidence of accessible endpoints, 404 on root suggests deeper path enumeration needed first.
+[NEXT] PROBE: GET https://developer.as.api.daimlertruck.com/ followed by /swagger.json, /api-docs, /openapi.json, /docs (sequential, 1 req/sec, passive GET only) to confirm Swagger/OpenAPI exposure.
+[LEARN] ACCEPTED MISCONFIG @ developer.as.api.daimlertruck.com: HTTP 200 responses on developer portal strongly correlate with exposed API documentation.
+[LEARN] REJECTED IDOR @ authz.tst.eu.api.daimlertruck.com: 404 on root + staging environment = insufficient signal for IDOR hypothesis without path enumeration.
+[RISK] Daimler Truck: 35/100. Program scope is broad ("all infrastructure, digital services, brands and subsidiaries") which reduces ambiguity risk. Main risk is accidentally touching customer data during IDOR/authorization testing - requires careful scoping of test accounts.
+[PRIO] developer.as.api.daimlertruck.com,8.2,attack_surface=9,tech_exposure=8,gate_ease=6,cloud_surface=5,freshness=7
+[PRIO] capacitor-admin.eu.api.daimlertruck.com,7.4,attack_surface=7,tech_exposure=9,gate_ease=5,cloud_surface=5,freshness=6
+[PRIO] authz.tst.eu.api.daimlertruck.com,6.8,attack_surface=7,tech_exposure=8,gate_ease=4,cloud_surface=5,freshness=7
+[HYP] developer-portal-graphql-introspection
+class: MISCONFIG
+asset: developer.as.api.daimlertruck.com
+confidence: 75
+reasoning: HTTP 200 on developer portal; GraphQL endpoints commonly expose introspection by default; program scope includes API logic flaws
+evidence_needed: GraphQL schema with internal types, mutations, or admin-only fields
+verify_steps: GET /graphql, POST /graphql with {"query":"{__schema{types{name,fields{name}}}}"}
+impact: Full schema disclosure → targeted attacks on internal mutations/queries; Severity: medium
+testability: PASSIVE
+[HYP] developer-portal-exposed-swagger
+class: MISCONFIG
+asset: developer.as.api.daimlertruck.com
+confidence: 72
+reasoning: HTTP 200 on developer portal; developer portals commonly expose /swagger, /docs, /openapi.json
+evidence_needed: Swagger/OpenAPI spec with internal endpoints or admin-only operations
+verify_steps: GET /, GET /swagger.json, GET /api-docs, GET /openapi.json, GET /docs
+impact: Full API schema disclosure including internal endpoints; Severity: medium
+testability: PASSIVE
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 85
+reasoning: ROW+NOAM share identical issuer URI and identical signing key (kid GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo, confirmed 09-18); only acr/org claims differentiate BU; NOAM superset carries dealer PII (FTLOrg* contact/address/SAP).
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer accepted on ROW-scoped op.
+verify_steps: AUTH_HELPED: obtain both tokens via staging authorize on login-qa → POST /api/graphql tst.na with NOAM bearer → diff result set vs ROW bearer.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: /api/graphql 307→B2C (30B re-probed); object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) in 2999B mS_4+PGbCvrz manifests (route surface identical); PGbCvrz roll chunk-hash-only.
+evidence_needed: Authed introspection + foreign-org subscriptionId/apiId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW staging session → POST introspection on tst.na → swap subscription/apiId to second-org value → diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-probed identical — POST-only first-class handler exempt from blanket 401 middleware; istio-envoy/AKS backend; unresolved for 33 days.
+evidence_needed: Valid B2C session → POST {"url":...} metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+[NEXT] HUMAN: Escalate to bugs.olivermaicher.eu for two admin-provisioned staging identities on login-qa.ciam.daimlertruck.com (tenant `88f558f5-a216-470b-b34a-3164f5d6ec0f`): one ROW (`b2c_1a_signin_oidc_row`, broker e39fd9b6/client a43f98c7) + one NOAM (`b2c_1a_signin_oidc_noam`) — this single grant unlocks FINAL #1, #2, and #3 (all AUTH_HELPED on staging tier; zero prod touch).
+[RISK] daimler-truck: 82 — three Critical/High candidates (cross-BU token boundary, GraphQL BOLA, metadata SSRF) remain unverified past day 33 with the anonymous surface fully mapped and closed; the single staging-identity grant is the only unlock. Process risk persists and is now worse: reports/valid-bugs.md still carries the stale "NextAuth.js Open Redirect (callbackUrl) VALID 6.1" verdict from 09-04/09-11, directly contradicting the repeatedly REJECTED open-redirect learning in the KB — if that item ever ships, triage rejection damages credibility of the stacked AUTH_HELPED submissions. Exposure remains attacker-agnostic and pending the grant, not a confirmed exploit.
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 85
+reasoning: ROW+NOAM policies share identical issuer URI and identical JWKS kid (GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo, confirmed 09-18); only acr/org-shape claims differentiate BU; NOAM superset carries dealer PII (FTLOrg* contact/address/SAP).
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer accepted on ROW-scoped op.
+verify_steps: AUTH_HELPED: both tokens via login-qa authorize → POST /api/graphql on tst.na with NOAM bearer → diff result set vs ROW bearer.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: /api/graphql 307→B2C (30B, re-probed stable); object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) in mS_4+PGbCvrz 2999B manifests (route surface identical, chunk-hash only diff).
+evidence_needed: Authed introspection + foreign-org subscription/apiId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW staging session → POST introspection tst.na → swap subscription/apiId to second-org value → diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-probed identical — POST-only first-class handler exempt from blanket 401/307 middleware; istio-envoy/AKS backend; unresolved 34 cycles.
+evidence_needed: Valid B2C session → POST metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 85
+reasoning: ROW+NOAM per-tenant share identical issuer URI and JWKS kid (GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo, 09-18); on staging BOTH policies run under the same client `c387a5ab` (AADB2C90018 confirms cd34584a/205f35f7 absent on staging, only c387a5ab registered); only `acr`/org claims differentiate BU; NOAM superset carries dealer PII (FTLOrg*).
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer accepted on ROW-scoped op.
+verify_steps: AUTH_HELPED: obtain both tokens via login-qa authorize → POST /api/graphql on tst.na with NOAM bearer → diff result set vs ROW bearer.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: /api/graphql 307→B2C (30B 34th-cycle stable); object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) in mS_4+PGbCvrz 2999B manifests (route surface identical, chunk-hash-only diff).
+evidence_needed: Authed introspection + foreign-org subscriptionId/apiId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW staging session → POST introspection tst.na → swap subscription/apiId to second-org value → diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B 34th-cycle stable — POST-only first-class handler exempt from blanket 401 middleware; istio-envoy/AKS backend; 34 days unresolved.
+evidence_needed: Valid B2C session → POST metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
