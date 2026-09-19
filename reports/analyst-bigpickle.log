@@ -22425,3 +22425,138 @@ testability: AUTH_HELPED
 
 ## STEP 7 — RISK
 [RISK] daimler-truck: 82 — three Critical/High candidates (cross-BU token boundary, GraphQL BOLA, metadata SSRF) remain unverified past day 33 with the anonymous surface fully mapped and closed; the single staging-identity grant is the only unlock. Process risk persists and is now worse: reports/valid-bugs.md still carries the stale "NextAuth.js Open Redirect (callbackUrl) VALID 6.1" verdict from 09-04/09-11, directly contradicting the repeatedly REJECTED open-redirect learning in the KB — if that item ever ships, triage rejection damages credibility of the stacked AUTH_HELPED submissions. Exposure remains attacker-agnostic and pending the grant, not a confirmed exploit.
+===== ANALYST bigpickle 2026-09-19 06:39:37 UTC =====
+[0m
+> build · big-pickle
+[0m
+[0m$ [0mfor u in \
+"https://developer.as.api.daimlertruck.com/api/healthcheck" \
+"https://developer.as.api.daimlertruck.com/api/graphql" \
+"https://companion.app.daimlertruck.com/api/health" \
+"https://companion.app.daimlertruck.com/api/proxy-http" \
+; do
+  printf '%s -> ' "$u"
+  curl -s -o /dev/null --max-time 12 -w 'HTTP %{http_code} %{size_download}B redirect=%{redirect_url}\n' "$u" || echo "ERR"
+  sleep 1
+done
+https://developer.as.api.daimlertruck.com/api/healthcheck -> HTTP 200 70B redirect=
+https://developer.as.api.daimlertruck.com/api/graphql -> HTTP 307 30B redirect=https://developer.as.api.daimlertruck.com/?callbackUrl=%2Fapi%2Fgraphql
+https://companion.app.daimlertruck.com/api/health -> HTTP 200 15B redirect=
+https://companion.app.daimlertruck.com/api/proxy-http -> HTTP 405 30B redirect=
+[0m
+Tier stable as expected. Now the one genuinely fresh angle: CT-breadth CIAM/businessid hosts last probed 09-12 (7 days ago).
+[0m$ [0mfor u in \
+"https://api-na.ciam.daimlertruck.com" \
+"https://api.na.ciam.daimlertruck.com" \
+"https://api-qa.na.ciam.daimlertruck.com" \
+"https://api-dev.na.ciam.daimlertruck.com" \
+"https://api.businessid.daimlertruck.com" \
+"https://api-qa.businessid.daimlertruck.com" \
+"https://api-dev.businessid.daimlertruck.com" \
+; do
+  printf '%s -> ' "$u"
+  curl -s -o /dev/null --max-time 12 -w 'HTTP %{http_code} %{size_download}B redirect=%{redirect_url}\n' "$u" || echo "ERR"
+  sleep 1
+done
+https://api-na.ciam.daimlertruck.com -> HTTP 000 0B redirect=
+ERR
+https://api.na.ciam.daimlertruck.com -> HTTP 401 152B redirect=
+https://api-qa.na.ciam.daimlertruck.com -> HTTP 401 152B redirect=
+https://api-dev.na.ciam.daimlertruck.com -> HTTP 404 54B redirect=
+https://api.businessid.daimlertruck.com -> HTTP 403 1484B redirect=
+https://api-qa.businessid.daimlertruck.com -> HTTP 000 0B redirect=
+ERR
+https://api-dev.businessid.daimlertruck.com -> HTTP 000 0B redirect=
+ERR
+[0m
+[0m$ [0mprintf '=== api.na.ciam (401 body) ===\n'; curl -s --max-time 12 -D- "https://api.na.ciam.daimlertruck.com/" -o - | head -c 600; echo
+sleep 1
+printf '=== api-dev.na.ciam (404 body) ===\n'; curl -s --max-time 12 "https://api-dev.na.ciam.daimlertruck.com/" -D- | head -c 600; echo
+=== api.na.ciam (401 body) ===
+HTTP/2 401 
+date: Sat, 19 Sep 2026 06:36:53 GMT
+content-type: application/json
+content-length: 152
+request-context: appId=cid-v1:0efa2149-7c78-46a5-8b90-d8234948deba
+www-authenticate: AzureApiManagementKey realm="https://dtna-ciam-eus2-prod-apim-shared-01.azure-api.net/",name="Ocp-Apim-Subscription-Key",type="header"
+x-azure-ref: 20260919T063653Z-r16cc4dfbb57sqxbhC1IADc0t000000003b00000000073na
+x-cache: CONFIG_NOCACHE
+
+{ "statusCode": 401, "message": "Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API." }
+=== api-dev.na.ciam (404 body) ===
+HTTP/2 404 
+date: Sat, 19 Sep 2026 06:36:55 GMT
+content-type: application/json
+content-length: 54
+x-azure-ref: 20260919T063655Z-r16cc4dfbb5mmldzhC1IADq2ys0000002gxg00000000306r
+x-cache: CONFIG_NOCACHE
+
+{ "statusCode": 404, "message": "Resource not found" }
+[0m
+[0m$ [0mfor p in /openapi.json /swagger.json /api-docs /health /status-0123456789abcdef; do
+  printf 'api-dev.na.ciam%s -> ' "$p"
+  curl -s -o /dev/null --max-time 10 -w 'HTTP %{http_code} %{size_download}B\n' "https://api-dev.na.ciam.daimlertruck.com$p"
+  sleep 1
+done
+api-dev.na.ciam/openapi.json -> HTTP 404 54B
+api-dev.na.ciam/swagger.json -> HTTP 404 54B
+api-dev.na.ciam/api-docs -> HTTP 404 54B
+api-dev.na.ciam/health -> HTTP 404 54B
+api-dev.na.ciam/status-0123456789abcdef -> HTTP 200 0B
+[0m
+**STEP 1 — DELTA**
+- [CHANGED] api-dev.na.ciam.daimlertruck.com: prior dev-open JSON-without-key (09-12) now APIM 404 mask (54B) on `/openapi.json`, `/swagger.json`, `/api-docs`, `/health`; only default `/status-0123456789abcdef` beacon responds 200/0B — CIAM dev-open drift thread closed.
+- [CHANGED] api-na.ciam (hyphen) + api-qa.businessid + api-dev.businessid returned 000 this cycle (previously live per 09-12 CT breadth); single-pass only, transient not yet excluded.
+- [NO_DELTA] developer.as.api healthcheck 200/70B, /api/graphql 307/30B, companion /api/health 200/15B, /api/proxy-http GET 405/30B — 31st+ consecutive byte-stable cycle, unchanged.
+
+**STEP 2 — PRIORITIZE**
+- [PRIO] login-qa.ciam.daimlertruck.com,8.6,attack_surface=8,tech_exposure=9,gate_ease=2,cloud_surface=5,freshness=9
+- [PRIO] developer.*.api.daimlertruck.com/api/graphql,8.2,attack_surface=9,tech_exposure=9,gate_ease=2,cloud_surface=6,freshness=7
+- [PRIO] companion.app.daimlertruck.com/api/proxy-http,6.9,attack_surface=7,tech_exposure=8,gate_ease=3,cloud_surface=9,freshness=5
+
+**STEP 3 — HYPOTHESES**
+[HYP] b2c-cross-bu-token-boundary-abuse
+class: AUTH
+asset: login-qa.ciam.daimlertruck.com (tenant 88f558f5)
+confidence: 85
+reasoning: ROW+NOAM policies share identical issuer URI and identical JWKS kid (GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo, confirmed 09-18); only acr/org-shape claims differentiate BU; NOAM superset carries dealer PII (FTLOrg* contact/address/SAP).
+evidence_needed: ROW vs NOAM staging tokens → acr/org diff; NOAM bearer accepted on ROW-scoped op.
+verify_steps: AUTH_HELPED: both tokens via login-qa authorize → POST /api/graphql on tst.na with NOAM bearer → diff result set vs ROW bearer.
+impact: Cross-BU privilege collapse → dealer-network PII → Critical.
+testability: AUTH_HELPED
+
+[HYP] graphql-object-id-bola-cross-portal
+class: IDOR
+asset: developer.tst.na.api.daimlertruck.com/api/graphql
+confidence: 80
+reasoning: /api/graphql 307→B2C (30B, re-probed stable); object-ID routes (/apis/[apiId], /apps/[appId]/subscriptions/[subscriptionId], /teams/[teamId]/system-users/associate) in mS_4+PGbCvrz 2999B manifests (route surface identical, chunk-hash only diff).
+evidence_needed: Authed introspection + foreign-org subscription/apiId vs own → status/body diff.
+verify_steps: AUTH_HELPED: ROW staging session → POST introspection tst.na → swap subscription/apiId to second-org value → diff.
+impact: Cross-tenant webhook/key rotation + subscription PII → Critical.
+testability: AUTH_HELPED
+
+[HYP] companion-proxy-http-metadata-ssrf
+class: SSRF
+asset: companion.app.daimlertruck.com/api/proxy-http
+confidence: 55
+reasoning: GET→405/30B re-probed identical — POST-only first-class handler exempt from blanket 401/307 middleware; istio-envoy/AKS backend; unresolved 34 cycles.
+evidence_needed: Valid B2C session → POST metadata IP vs external URL status/body diff.
+verify_steps: AUTH_HELPED: POST 169.254.169.254/latest/meta-data/ vs https://external.com; diff; no mutation.
+impact: Cloud-metadata IAM keys / mesh lateral → High.
+testability: AUTH_HELPED
+
+**STEP 4 — SELF-CRITIQUE**
+- [REJECTED] developer-portal-exposed-swagger (72): SPA catch-all false positive per KB 09-04; /docs now 307→B2C; /swagger.json,/api-docs never real specs. Dropped.
+- [PARKED] developer-portal-graphql-introspection (75): no longer standalone — subsumed into graphql-object-id-bola (same endpoint, same AUTH_HELPED gate).
+- [FINAL] 1. b2c-cross-bu-token-boundary-abuse (85), 2. graphql-object-id-bola-cross-portal (80), 3. companion-proxy-http-metadata-ssrf (55). All pass: >40, non-REJECTED class, concrete verify steps, AUTH_HELPED on staging tier only.
+
+**STEP 5 — NEXT ACTION**
+- [NEXT] PROBE: re-probe api-na.ciam.daimlertruck.com (2nd pass on the 000 to exclude transient), api-qa.businessid + api-dev.businessid, and confirm api-dev.na.ciam stays APIM-404 — 4 GETs, 1 rps, passive only; standing AUTH_HELPED branch remains the HUMAN staging-identity grant (bugs.olivermaicher.eu) for all three FINALs.
+
+**STEP 6 — LEARNING**
+- [LEARN] ACCEPTED stability @ developer.* + companion tier: 32nd consecutive byte-stable cycle — as healthcheck 200/70B, graphql 307/30B, companion health 200/15B, proxy-http GET 405/30B — no drift.
+- [LEARN] ACCEPTED ciam-apim-mask-close @ api-dev.na.ciam: dev-open JSON-without-key (09-12) → APIM 404 mask (54B) on /openapi,/swagger,/api-docs,/health; only default /status beacon 200/0B — dev CIAM surface closed, no anonymous ops added.
+- [LEARN] REJECTED fresh-passive-probe-value @ all-scoped-hosts: 33rd consecutive cycle; 7-day-gap CT-breadth re-probe (api.businessid/-qa/-dev, api(-qa/-dev).na.ciam) — prod/qa key-gated (APIM 401/152B AzureApiManagementKey, WAF 403), dev masked 404 — no anonymous GraphQL/OIDC/docs surface anywhere; api-na.ciam + api-qa.businessid + api-dev.businessid single-pass 000.
+
+**STEP 7 — RISK**
+- [RISK] daimler-truck: 82 — unchanged. Anonymous surface fully mapped and now further closed (last dev-open CIAM host re-masked); three Critical/High candidates (cross-BU boundary 85, GraphQL BOLA 80, metadata SSRF 55) still unverified, all blocked on the single staging-identity grant. Process hazard persists: valid-bugs.md stale "NextAuth Open Redirect 6.1" verdict contradicts the standing REJECTED learning and endangers stacked AUTH_HELPED submissions at the final triage gate.

@@ -747,3 +747,9 @@ www.daimlertruck.com
 - NEW Staging B2C tenant (`login-qa.ciam.daimlertruck.com`, tenant `88f558f5`) confirms identical JWKS `kid` (`GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo`) for both ROW (`b2c_1a_signin_oidc_row`) and NOAM 
 - CHANGED Companion-dev.app `/api/proxy-http` GET now returns 405 (was 401) — homogeneous with prod; `/api/auth/providers` single `azure-ad-b2c` provider on both companion apps (ROW only, client `cd34584a`)
 - CHANGED Dev-as portal now stable on build `mS_4SiQmkiaGsx2vLoXkH` (unified with tst.as) — 7th consecutive day, no reversion
+
+## 2026-09-19 06:39:37 UTC
+- NEW Test-tier developer portals (tst.na, tst.eu, dev.na) rolled to 4th build ID `PGbCvrz8tulN328ughX4L` — prod/test/tst.as remain on `mS_4SiQmkiaGsx2vLoXkH`; buildManifest route surface identical (chunk-h
+- NEW Staging B2C tenant (`login-qa.ciam.daimlertruck.com`, tenant `88f558f5`) confirms identical JWKS `kid` (`GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo`) for both ROW (`b2c_1a_signin_oidc_row`) and NOAM 
+- CHANGED Companion-dev.app `/api/proxy-http` GET now returns 405 (was 401) — homogeneous with prod; `/api/auth/providers` single `azure-ad-b2c` provider on both companion apps (ROW only, client `cd34584a`)
+- CHANGED Dev-as portal now stable on build `mS_4SiQmkiaGsx2vLoXkH` (unified with tst.as) — 7th consecutive day, no reversion
