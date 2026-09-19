@@ -1,4 +1,4 @@
-## 2026-09-18 23:26:05 UTC [target] (model nemotron3)
+## 2026-09-19 01:37:18 UTC [target] (model nemotron3)
 [NEW] Test-tier developer portals (tst.na, tst.eu, dev.na) rolled to 4th build ID `PGbCvrz8tulN328ughX4L` — prod/test/tst.as remain on `mS_4SiQmkiaGsx2vLoXkH`; buildManifest route surface identical (chunk-hash diff only), `/api/graphql` 307, `/api/healthcheck` 200 JSON, `/api/auth/providers` dual B2C providers confirmed
 [NEW] Staging B2C tenant (`login-qa.ciam.daimlertruck.com`, tenant `88f558f5`) confirms identical JWKS `kid` (`GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo`) for both ROW (`b2c_1a_signin_oidc_row`) and NOAM (`b2c_1a_signin_oidc_noam`) policies — same issuer URI, same signing keys
 [CHANGED] Companion-dev.app `/api/proxy-http` GET now returns 405 (was 401) — homogeneous with prod; `/api/auth/providers` single `azure-ad-b2c` provider on both companion apps (ROW only, client `cd34584a`)
@@ -11,7 +11,8 @@ class: AUTH
 asset: login.ciam.daimlertruck.com (prod tenant 3db550f0) + login-qa.ciam.daimlertruck.com (staging tenant 88f558f5)
 confidence: 85
 reasoning: Both prod and staging B2C tenants issue ROW (`b2c_1a_signin_oidc_row`) and NOAM (`b2c_1a_signin_oidc_noam`) policies under IDENTICAL issuer URI per tenant. Staging confirmed: both policies share same JWKS `kid` (`GeV_EzxUxlzdsOFIgXrNyZDAXIYZi4oHsJrTkSUkPAo`) and modulus. Downstream APIs validate issuer+aud+signature; `acr` claim and org-scoped claims (`FTLOrgPrimaryContactEmail`, `FTLOrgPrimaryContactName`, `telephoneNumber_Org`, `street_Org`, `FTLOrgSapCode`) are the only BU differentiators. If any downstream API fails to validate `acr`/org claims, ROW token could access NOAM resources (dealer PII) or vice versa.
-evidence_needed: Downstream API token validation logic showing missing `acr`/org claim enforcement; or authenticated test presenting ROW token [0m
+evidence_needed: Downstream API token validation logic showing missing `acr`/org claim enforcement; or authenticated test presenting ROW token to NOAM-scoped endpoint (or vice versa) and observing access granted.
+verify_steps: AUTH_HELPED: Obtain valid B2C session for ROW policy (`b2c_1a_signin_oidc_row`, client `205f35f7` prod / `a43f98c7` staging) and NOAM policy (`b2c_1a_signin_oidc_noam`, client `c387a5ab`); decode both JWTs — confirm identical `iss`/`aud`/`kid`, differing `acr` + org claims; present ROW token to developer portal GraphQL `/graphql` (or companion `/api/proxy-http`) targeting NOAM-scoped object IDs; repeat inverse.
 impact: Cross-business-unit token acceptance → ROW employee accesses NOAM dealer PII (contact details, SAP codes, org hierarchy) or NOAM partner accesses ROW internal APIs → High/Critical (PII + privilege escalation across BU).
 testability: AUTH_HELPED
 [HYP] GraphQL Mutation BOLA Across Tenant Boundaries (Developer Portals)
