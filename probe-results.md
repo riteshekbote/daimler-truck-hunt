@@ -490,3 +490,7 @@ https://developer.as.api.daimlertruck.com/ -> 200 len=196341
 ## 2026-09-19 14:50:56 UTC
 https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` -> HTTP 400
 https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/` -> HTTP 404
+
+## 2026-09-19 17:53:07 UTC
+https://companion.app.daimlertruck.com/api/auth/callback/azure-ad-b2c` -> HTTP 400
+https://login-qa.ciam.daimlertruck.com/88f558f5-a216-470b-b34a-3164f5d6ec0f/v2.0/` -> HTTP 404
